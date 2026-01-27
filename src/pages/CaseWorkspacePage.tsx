@@ -1,0 +1,292 @@
+import { useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { 
+  ArrowLeft, 
+  FileText, 
+  MessageSquare, 
+  Network, 
+  PlusCircle, 
+  Upload, 
+  XCircle,
+  Clock,
+  AlertTriangle
+} from 'lucide-react';
+import { AppLayout } from '@/components/layout/AppLayout';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
+import { Textarea } from '@/components/ui/textarea';
+import { StatusBadge } from '@/components/shared/StatusBadge';
+import { SLATimer } from '@/components/shared/SLATimer';
+import { mockCases, mockTransactions, mockCustomerKYC } from '@/data/mockData';
+import { format } from 'date-fns';
+import { toast } from 'sonner';
+
+export default function CaseWorkspacePage() {
+  const { caseId } = useParams();
+  const navigate = useNavigate();
+  const [newNote, setNewNote] = useState('');
+
+  const caseData = mockCases.find((c) => c.id === caseId) || mockCases[0];
+  const transactions = mockTransactions;
+  const customer = mockCustomerKYC;
+
+  const handleAddNote = () => {
+    if (!newNote.trim()) return;
+    toast.success('Note added successfully');
+    setNewNote('');
+  };
+
+  const handleProceedToSTR = () => {
+    navigate(`/str/draft/${caseData.id}`);
+  };
+
+  return (
+    <AppLayout>
+      <div className="space-y-6 animate-fade-in">
+        {/* Header */}
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+            <div>
+              <div className="flex items-center gap-3">
+                <h1 className="text-2xl font-bold font-mono">{caseData.id}</h1>
+                <StatusBadge status={caseData.status} />
+              </div>
+              <p className="text-muted-foreground">{caseData.customerName}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <SLATimer deadline={caseData.slaDeadline} />
+            <Button variant="outline">
+              <XCircle className="mr-2 h-4 w-4" />
+              Close as False Positive
+            </Button>
+            <Button onClick={handleProceedToSTR}>
+              <FileText className="mr-2 h-4 w-4" />
+              Proceed to STR
+            </Button>
+          </div>
+        </div>
+
+        {/* Case Info Bar */}
+        <Card>
+          <CardContent className="py-4">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+              <div>
+                <p className="text-xs text-muted-foreground">Investigator</p>
+                <p className="font-medium">{caseData.investigatorName}</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Linked Alerts</p>
+                <p className="font-medium">{caseData.linkedAlerts.length} alerts</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Total Amount</p>
+                <p className="font-mono font-medium">
+                  ${caseData.totalAmount.toLocaleString()}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Created</p>
+                <p className="font-medium">{format(caseData.createdAt, 'MMM dd, yyyy')}</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">Customer ID</p>
+                <p className="font-mono text-sm">{caseData.customerId}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Tabbed Content */}
+        <Tabs defaultValue="transactions" className="space-y-4">
+          <TabsList>
+            <TabsTrigger value="transactions">Transactions</TabsTrigger>
+            <TabsTrigger value="network">Network Graph</TabsTrigger>
+            <TabsTrigger value="documents">Documents</TabsTrigger>
+            <TabsTrigger value="findings">System Findings</TabsTrigger>
+            <TabsTrigger value="notes">Notes</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="transactions" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Transaction History</CardTitle>
+                <CardDescription>All transactions linked to this case</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {transactions.map((txn) => (
+                    <div
+                      key={txn.id}
+                      className="flex items-center justify-between rounded-lg border border-border p-4"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className={`rounded-full p-2 ${txn.type === 'credit' ? 'bg-risk-low/20' : 'bg-risk-high/20'}`}>
+                          <AlertTriangle className={`h-4 w-4 ${txn.type === 'credit' ? 'text-risk-low' : 'text-risk-high'}`} />
+                        </div>
+                        <div>
+                          <p className="font-medium">{txn.counterparty}</p>
+                          <p className="text-sm text-muted-foreground">{txn.description}</p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <Badge variant="outline" className="text-xs">{txn.channel}</Badge>
+                            <Badge variant="outline" className="text-xs">{txn.country}</Badge>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className={`font-mono text-lg font-bold ${txn.type === 'credit' ? 'text-risk-low' : 'text-risk-high'}`}>
+                          {txn.type === 'credit' ? '+' : '-'}${txn.amount.toLocaleString()}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {format(txn.date, 'MMM dd, yyyy')}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="network">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Network / Relationship Graph</CardTitle>
+                <CardDescription>Entity connections and relationships</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center justify-center h-[400px] rounded-lg border border-dashed border-border bg-muted/30">
+                  <div className="text-center">
+                    <Network className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                    <p className="text-muted-foreground">
+                      Network visualization would be displayed here
+                    </p>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Showing connections between entities, accounts, and counterparties
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="documents">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle className="text-lg">Documents & Evidence</CardTitle>
+                  <CardDescription>Uploaded supporting documentation</CardDescription>
+                </div>
+                <Button variant="outline" size="sm">
+                  <Upload className="mr-2 h-4 w-4" />
+                  Upload Document
+                </Button>
+              </CardHeader>
+              <CardContent>
+                {caseData.documents.length === 0 ? (
+                  <div className="flex items-center justify-center h-[200px] rounded-lg border border-dashed border-border bg-muted/30">
+                    <div className="text-center">
+                      <FileText className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
+                      <p className="text-muted-foreground">No documents uploaded yet</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {caseData.documents.map((doc) => (
+                      <div key={doc.id} className="flex items-center justify-between p-3 rounded-lg border">
+                        <div className="flex items-center gap-3">
+                          <FileText className="h-5 w-5 text-primary" />
+                          <div>
+                            <p className="font-medium">{doc.name}</p>
+                            <p className="text-xs text-muted-foreground">
+                              Uploaded by {doc.uploadedBy} • {format(doc.uploadedAt, 'MMM dd, yyyy')}
+                            </p>
+                          </div>
+                        </div>
+                        <Button variant="ghost" size="sm">View</Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="findings">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">System Findings</CardTitle>
+                <CardDescription>AI-generated analysis and recommendations</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="ai-generated rounded-lg p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Badge className="badge-risk-high">High Confidence</Badge>
+                    <span className="text-sm font-medium">Trade-Based Money Laundering Pattern</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Analysis indicates systematic over-invoicing of goods through shell companies 
+                    in high-risk jurisdictions. Transaction velocity and amounts are inconsistent 
+                    with declared business operations.
+                  </p>
+                </div>
+                <div className="ai-generated rounded-lg p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Badge className="badge-risk-medium">Medium Confidence</Badge>
+                    <span className="text-sm font-medium">Layering Through Multiple Accounts</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Funds appear to be moved rapidly through multiple intermediary accounts 
+                    before settling in offshore entities. Pattern consistent with layering phase.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="notes">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Investigation Notes</CardTitle>
+                <CardDescription>Add and view case notes</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-4">
+                  {caseData.notes.map((note) => (
+                    <div key={note.id} className="rounded-lg border border-border p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="font-medium">{note.authorName}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {format(note.timestamp, 'MMM dd, yyyy HH:mm')}
+                        </span>
+                      </div>
+                      <p className="text-sm">{note.content}</p>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="space-y-2">
+                  <Textarea
+                    placeholder="Add a note..."
+                    value={newNote}
+                    onChange={(e) => setNewNote(e.target.value)}
+                    className="min-h-[100px]"
+                  />
+                  <Button onClick={handleAddNote}>
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Add Note
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </AppLayout>
+  );
+}
