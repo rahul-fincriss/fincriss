@@ -44,59 +44,65 @@ const navItems: NavItem[] = [
     title: 'Dashboard',
     url: '/dashboard',
     icon: LayoutDashboard,
-    roles: ['analyst', 'investigator', 'principal_officer', 'compliance', 'admin'],
+    roles: ['analyst', 'investigator', 'principal_officer', 'compliance', 'super_admin'],
   },
   {
     title: 'Raw Alerts',
     url: '/alerts/raw',
     icon: AlertTriangle,
-    roles: ['analyst', 'admin'],
+    roles: ['analyst', 'super_admin'],
     badge: '24',
   },
   {
     title: 'Alert Workbench',
     url: '/alerts/workbench',
     icon: Zap,
-    roles: ['analyst', 'investigator', 'admin'],
+    roles: ['analyst', 'investigator', 'super_admin'],
     badge: '12',
   },
   {
     title: 'Cases',
     url: '/cases',
     icon: FolderOpen,
-    roles: ['investigator', 'principal_officer', 'compliance', 'admin'],
+    roles: ['investigator', 'principal_officer', 'compliance', 'super_admin'],
     badge: '8',
   },
   {
     title: 'STR Queue',
     url: '/str',
     icon: FileText,
-    roles: ['investigator', 'principal_officer', 'compliance', 'admin'],
+    roles: ['investigator', 'principal_officer', 'compliance', 'super_admin'],
     badge: '3',
   },
   {
     title: 'Audit Trail',
     url: '/audit',
     icon: History,
-    roles: ['compliance', 'admin'],
+    roles: ['compliance', 'super_admin'],
   },
   {
     title: 'ML Ops',
     url: '/mlops',
     icon: BarChart3,
-    roles: ['admin'],
+    roles: ['super_admin'],
+  },
+  {
+    title: 'Model Tuning',
+    url: '/model-tuning',
+    icon: Settings,
+    roles: ['super_admin'],
   },
   {
     title: 'User Management',
     url: '/users',
     icon: Users,
-    roles: ['admin'],
+    roles: ['super_admin'],
   },
   {
     title: 'Settings',
     url: '/settings',
     icon: Settings,
-    roles: ['analyst', 'investigator', 'principal_officer', 'compliance', 'admin'],
+    roles: ['analyst', 'investigator', 'principal_officer', 'compliance', 'super_admin'],
   },
 ];
 
@@ -117,7 +123,7 @@ export function AppSidebar() {
       investigator: 'Case Investigator',
       principal_officer: 'Principal Officer',
       compliance: 'Compliance',
-      admin: 'ML Ops Admin',
+      super_admin: 'Super Admin',
     };
     return labels[role];
   };

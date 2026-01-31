@@ -1,5 +1,5 @@
 // User roles for the AML platform
-export type UserRole = 'analyst' | 'investigator' | 'principal_officer' | 'compliance' | 'admin';
+export type UserRole = 'analyst' | 'investigator' | 'principal_officer' | 'compliance' | 'super_admin';
 
 export interface User {
   id: string;
