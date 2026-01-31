@@ -79,6 +79,10 @@ export default {
           "in-progress": "hsl(var(--status-in-progress))",
           completed: "hsl(var(--status-completed))",
           dropped: "hsl(var(--status-dropped))",
+          success: "hsl(var(--status-success))",
+          warning: "hsl(var(--status-warning))",
+          error: "hsl(var(--status-error))",
+          info: "hsl(var(--status-info))",
         },
         chart: {
           "1": "hsl(var(--chart-1))",

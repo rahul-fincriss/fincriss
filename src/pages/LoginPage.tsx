@@ -179,9 +179,9 @@ export default function LoginPage() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => handleDemoLogin('admin')}
+                onClick={() => handleDemoLogin('super_admin')}
               >
-                ML Ops Admin
+                Super Admin
               </Button>
             </div>
           </div>

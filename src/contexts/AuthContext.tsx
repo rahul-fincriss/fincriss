@@ -37,11 +37,11 @@ const demoUsers: Record<UserRole, User> = {
     email: 'robert.kim@bank.com',
     role: 'compliance',
   },
-  admin: {
+  super_admin: {
     id: 'usr-005',
     name: 'James Patterson',
     email: 'james.patterson@bank.com',
-    role: 'admin',
+    role: 'super_admin',
   },
 };
 
