@@ -64,8 +64,9 @@ export const mockRawAlerts: RawAlert[] = [
   },
 ];
 
-// Generate mock prioritized alerts
+// Generate mock prioritized alerts - with multiple alerts per customer for grouping demo
 export const mockPrioritizedAlerts: PrioritizedAlert[] = [
+  // Eastern Import Export - 2 alerts (High priority customer)
   {
     ...mockRawAlerts[4],
     mapsScore: 92,
@@ -74,12 +75,62 @@ export const mockPrioritizedAlerts: PrioritizedAlert[] = [
     slaDeadline: new Date(Date.now() + 2 * 60 * 60 * 1000), // 2 hours
   },
   {
+    id: 'ALT-2024-001245',
+    sourceSystem: 'Trade Finance',
+    alertType: 'rapid_movement',
+    customerId: 'CUS-67890',
+    customerName: 'Eastern Import Export',
+    amount: 780000,
+    currency: 'USD',
+    timestamp: new Date('2024-01-16T09:00:00'),
+    status: 'sent_to_maps',
+    rawPayload: { velocity: 'critical', period: '12h' },
+    mapsScore: 88,
+    riskLevel: 'high',
+    riskDrivers: ['Rapid fund movement', 'High-risk jurisdiction', 'Trade mispricing signals'],
+    slaDeadline: new Date(Date.now() + 3 * 60 * 60 * 1000), // 3 hours
+  },
+  // Tech Innovations Inc - 3 alerts (High priority customer)
+  {
     ...mockRawAlerts[3],
     mapsScore: 85,
     riskLevel: 'high',
     riskDrivers: ['Rapid fund movement', 'New account activity spike', 'Cross-border layering'],
     slaDeadline: new Date(Date.now() + 4 * 60 * 60 * 1000), // 4 hours
   },
+  {
+    id: 'ALT-2024-001246',
+    sourceSystem: 'Wire Transfer',
+    alertType: 'structuring',
+    customerId: 'CUS-23456',
+    customerName: 'Tech Innovations Inc',
+    amount: 48000,
+    currency: 'USD',
+    timestamp: new Date('2024-01-16T11:30:00'),
+    status: 'sent_to_maps',
+    rawPayload: { pattern: 'round_amounts' },
+    mapsScore: 68,
+    riskLevel: 'medium',
+    riskDrivers: ['Structuring pattern detected', 'Round amount transactions'],
+    slaDeadline: new Date(Date.now() + 18 * 60 * 60 * 1000), // 18 hours
+  },
+  {
+    id: 'ALT-2024-001250',
+    sourceSystem: 'Core Banking',
+    alertType: 'behavior_deviation',
+    customerId: 'CUS-23456',
+    customerName: 'Tech Innovations Inc',
+    amount: 125000,
+    currency: 'USD',
+    timestamp: new Date('2024-01-17T08:00:00'),
+    status: 'sent_to_maps',
+    rawPayload: { deviation_score: 0.72 },
+    mapsScore: 58,
+    riskLevel: 'low',
+    riskDrivers: ['Behavior deviation', 'Profile mismatch'],
+    slaDeadline: new Date(Date.now() + 36 * 60 * 60 * 1000), // 36 hours
+  },
+  // Ahmed Hassan - 2 alerts (Medium priority customer)
   {
     ...mockRawAlerts[1],
     mapsScore: 72,
@@ -88,12 +139,30 @@ export const mockPrioritizedAlerts: PrioritizedAlert[] = [
     slaDeadline: new Date(Date.now() + 12 * 60 * 60 * 1000), // 12 hours
   },
   {
+    id: 'ALT-2024-001247',
+    sourceSystem: 'Card Monitoring',
+    alertType: 'geo_anomaly',
+    customerId: 'CUS-45123',
+    customerName: 'Ahmed Hassan',
+    amount: 8500,
+    currency: 'USD',
+    timestamp: new Date('2024-01-16T14:00:00'),
+    status: 'sent_to_maps',
+    rawPayload: { locations: ['AE', 'TR', 'EG'] },
+    mapsScore: 55,
+    riskLevel: 'low',
+    riskDrivers: ['Geo-location anomaly', 'Travel pattern'],
+    slaDeadline: new Date(Date.now() + 40 * 60 * 60 * 1000), // 40 hours
+  },
+  // Global Trade Solutions Ltd - 1 alert (Medium priority customer)
+  {
     ...mockRawAlerts[0],
     mapsScore: 65,
     riskLevel: 'medium',
     riskDrivers: ['Large cash transaction', 'Business profile mismatch'],
     slaDeadline: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
   },
+  // Maria Santos - 1 alert (Low priority customer)
   {
     ...mockRawAlerts[2],
     mapsScore: 45,
