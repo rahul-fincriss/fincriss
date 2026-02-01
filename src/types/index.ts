@@ -56,7 +56,7 @@ export interface CustomerGroupOverrides {
 export interface WorkbenchAuditEntry {
   id: string;
   customerId: string;
-  action: 'priority_change' | 'analyst_assignment' | 'analyst_reassignment';
+  action: 'priority_change' | 'analyst_assignment' | 'analyst_reassignment' | 'raw_payload_viewed';
   performedBy: string;
   performedAt: Date;
   previousValue?: string;

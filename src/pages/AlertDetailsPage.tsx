@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft, 
@@ -7,7 +8,8 @@ import {
   Globe, 
   TrendingUp, 
   User, 
-  XCircle 
+  XCircle,
+  FileCode
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
@@ -15,13 +17,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { RiskBadge } from '@/components/shared/RiskBadge';
 import { SLATimer } from '@/components/shared/SLATimer';
+import { RawAlertDrawer } from '@/components/workbench/RawAlertDrawer';
 import { mockPrioritizedAlerts, mockCustomerKYC, mockTransactions } from '@/data/mockData';
+import { useAuth } from '@/contexts/AuthContext';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 
 export default function AlertDetailsPage() {
   const { alertId } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const [rawAlertDrawerOpen, setRawAlertDrawerOpen] = useState(false);
 
   const alert = mockPrioritizedAlerts.find((a) => a.id === alertId) || mockPrioritizedAlerts[0];
   const customer = mockCustomerKYC;
@@ -35,6 +41,12 @@ export default function AlertDetailsPage() {
   const handleDropAlert = () => {
     toast.success('Alert dropped');
     navigate('/alerts/workbench');
+  };
+
+  const handleRawPayloadAuditLog = (alertId: string, userId: string, userName: string) => {
+    // In a real app, this would log to the audit system
+    toast.info(`Raw payload view logged for ${alertId}`);
+    console.log(`[AUDIT] User ${userName} (${userId}) viewed raw payload for alert ${alertId} at ${new Date().toISOString()}`);
   };
 
   return (
@@ -56,6 +68,10 @@ export default function AlertDetailsPage() {
           </div>
           <div className="flex items-center gap-2">
             <SLATimer deadline={alert.slaDeadline} />
+            <Button variant="outline" onClick={() => setRawAlertDrawerOpen(true)}>
+              <FileCode className="mr-2 h-4 w-4" />
+              View Raw Payload
+            </Button>
             <Button variant="outline" onClick={handleDropAlert}>
               <XCircle className="mr-2 h-4 w-4" />
               Drop as False Positive
@@ -254,6 +270,14 @@ export default function AlertDetailsPage() {
           </Card>
         </div>
       </div>
+
+      {/* Raw Alert Drawer */}
+      <RawAlertDrawer
+        open={rawAlertDrawerOpen}
+        onOpenChange={setRawAlertDrawerOpen}
+        alert={alert}
+        onAuditLog={handleRawPayloadAuditLog}
+      />
     </AppLayout>
   );
 }
