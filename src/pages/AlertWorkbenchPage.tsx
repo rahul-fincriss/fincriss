@@ -526,19 +526,19 @@ export default function AlertWorkbenchPage() {
                             </Badge>
                           </TableCell>
                           <TableCell>
-                            <div className="flex items-center gap-1.5">
+                            <div className="flex flex-col gap-0.5">
                               {group.priorityBreakdown.high > 0 && (
-                                <Badge className="badge-risk-high text-xs px-1.5 py-0.5">
+                                <Badge className="badge-risk-high text-[10px] leading-tight px-2 py-0 h-5 w-fit rounded-sm font-medium">
                                   {group.priorityBreakdown.high} High
                                 </Badge>
                               )}
                               {group.priorityBreakdown.medium > 0 && (
-                                <Badge className="badge-risk-medium text-xs px-1.5 py-0.5">
+                                <Badge className="badge-risk-medium text-[10px] leading-tight px-2 py-0 h-5 w-fit rounded-sm font-medium">
                                   {group.priorityBreakdown.medium} Med
                                 </Badge>
                               )}
                               {group.priorityBreakdown.low > 0 && (
-                                <Badge className="badge-risk-low text-xs px-1.5 py-0.5">
+                                <Badge className="badge-risk-low text-[10px] leading-tight px-2 py-0 h-5 w-fit rounded-sm font-medium">
                                   {group.priorityBreakdown.low} Low
                                 </Badge>
                               )}
