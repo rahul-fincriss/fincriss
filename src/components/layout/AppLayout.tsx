@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { LogOut, User } from 'lucide-react';
 import fincrissLogo from '@/assets/fincriss-logo.jpg';
+import { FinCrissAgent } from '@/components/agent/FinCrissAgent';
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -97,6 +98,7 @@ export function AppLayout({ children }: AppLayoutProps) {
             {children}
           </main>
         </SidebarInset>
+        <FinCrissAgent />
       </div>
     </SidebarProvider>
   );
