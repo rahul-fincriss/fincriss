@@ -3,12 +3,99 @@
 @tailwind utilities;
 
 /* Enterprise AML Platform Design System
-   Dark theme optimized for long investigation workflows
+   Light and Dark theme optimized for long investigation workflows
    All colors in HSL format
 */
 
 @layer base {
+  /* Light Theme (Default) */
   :root {
+    /* Core surfaces - Clean light palette */
+    --background: 210 20% 98%;
+    --foreground: 222 47% 11%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    /* Primary - Professional blue */
+    --primary: 217 91% 50%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Secondary - Muted slate */
+    --secondary: 217 19% 94%;
+    --secondary-foreground: 222 47% 20%;
+
+    /* Muted surfaces */
+    --muted: 217 19% 94%;
+    --muted-foreground: 215 16% 47%;
+
+    /* Accent */
+    --accent: 217 33% 92%;
+    --accent-foreground: 222 47% 11%;
+
+    /* Risk indicators */
+    --risk-high: 0 72% 51%;
+    --risk-high-foreground: 0 0% 100%;
+    --risk-medium: 38 92% 50%;
+    --risk-medium-foreground: 38 92% 10%;
+    --risk-low: 142 71% 45%;
+    --risk-low-foreground: 142 71% 10%;
+
+    /* Status colors */
+    --status-pending: 217 91% 50%;
+    --status-in-progress: 262 83% 58%;
+    --status-completed: 142 71% 45%;
+    --status-dropped: 215 16% 47%;
+    --status-success: 142 71% 45%;
+    --status-warning: 38 92% 50%;
+    --status-error: 0 72% 51%;
+    --status-info: 199 89% 48%;
+
+    /* Destructive */
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Borders and inputs */
+    --border: 217 19% 88%;
+    --input: 217 19% 88%;
+    --ring: 217 91% 50%;
+
+    --radius: 0.5rem;
+
+    /* Sidebar - Light variant */
+    --sidebar-background: 222 47% 98%;
+    --sidebar-foreground: 222 47% 30%;
+    --sidebar-primary: 217 91% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 217 19% 94%;
+    --sidebar-accent-foreground: 222 47% 11%;
+    --sidebar-border: 217 19% 90%;
+    --sidebar-ring: 217 91% 50%;
+
+    /* Chart colors for analytics */
+    --chart-1: 217 91% 50%;
+    --chart-2: 142 71% 45%;
+    --chart-3: 38 92% 50%;
+    --chart-4: 0 72% 51%;
+    --chart-5: 262 83% 58%;
+
+    /* Gradient definitions */
+    --gradient-primary: linear-gradient(135deg, hsl(217 91% 50%), hsl(217 91% 40%));
+    --gradient-risk-high: linear-gradient(135deg, hsl(0 72% 51%), hsl(0 72% 40%));
+    --gradient-surface: linear-gradient(180deg, hsl(210 20% 99%), hsl(210 20% 96%));
+
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 hsl(222 47% 11% / 0.05);
+    --shadow-md: 0 4px 6px -1px hsl(222 47% 11% / 0.08), 0 2px 4px -2px hsl(222 47% 11% / 0.05);
+    --shadow-lg: 0 10px 15px -3px hsl(222 47% 11% / 0.1), 0 4px 6px -4px hsl(222 47% 11% / 0.08);
+    --shadow-glow: 0 0 20px hsl(217 91% 50% / 0.1);
+  }
+
+  /* Dark Theme */
+  .dark {
     /* Core surfaces - Dark slate palette */
     --background: 222 47% 6%;
     --foreground: 210 20% 95%;
@@ -62,8 +149,6 @@
     --input: 217 19% 20%;
     --ring: 217 91% 60%;
 
-    --radius: 0.5rem;
-
     /* Sidebar - Darker variant */
     --sidebar-background: 222 47% 5%;
     --sidebar-foreground: 210 20% 75%;
@@ -104,7 +189,7 @@
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
 
-  /* Custom scrollbar for dark theme */
+  /* Custom scrollbar */
   ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
@@ -202,7 +287,7 @@
 
   /* Glow effects */
   .glow-primary {
-    box-shadow: 0 0 20px hsl(217 91% 60% / 0.25);
+    box-shadow: 0 0 20px hsl(217 91% 50% / 0.25);
   }
 
   .glow-risk-high {
