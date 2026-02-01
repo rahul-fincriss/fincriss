@@ -9,9 +9,7 @@ import {
   XCircle, 
   Users, 
   History,
-  AlertTriangle,
-  Filter,
-  ArrowUpDown
+  FileCode
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
@@ -44,6 +42,7 @@ import { AuditPanel } from '@/components/workbench/AuditPanel';
 import { PriorityOverrideDialog } from '@/components/workbench/PriorityOverrideDialog';
 import { AnalystAssignmentDropdown } from '@/components/workbench/AnalystAssignmentDropdown';
 import { UserPriorityBadge } from '@/components/workbench/UserPriorityBadge';
+import { RawAlertDrawer } from '@/components/workbench/RawAlertDrawer';
 
 const alertTypeLabels: Record<string, string> = {
   large_cash: 'Large Cash',
@@ -147,6 +146,10 @@ export default function AlertWorkbenchPage() {
   const [selectedCustomerForPriority, setSelectedCustomerForPriority] = useState<CustomerGroup | null>(null);
   const [auditPanelOpen, setAuditPanelOpen] = useState(false);
   const [selectedCustomerForAudit, setSelectedCustomerForAudit] = useState<CustomerGroup | null>(null);
+  
+  // Raw alert drawer state
+  const [rawAlertDrawerOpen, setRawAlertDrawerOpen] = useState(false);
+  const [selectedAlertForRawView, setSelectedAlertForRawView] = useState<PrioritizedAlert | null>(null);
 
   const canEdit = user?.role === 'analyst' || user?.role === 'super_admin';
 
@@ -347,6 +350,25 @@ export default function AlertWorkbenchPage() {
     setSelectedCustomerForAudit(group);
     setAuditPanelOpen(true);
   };
+
+  const openRawAlertDrawer = (alert: PrioritizedAlert) => {
+    setSelectedAlertForRawView(alert);
+    setRawAlertDrawerOpen(true);
+  };
+
+  const handleRawAlertAuditLog = useCallback((alertId: string, userId: string, userName: string) => {
+    // Find the alert's customer to log to the right audit trail
+    const alert = alerts.find(a => a.id === alertId);
+    if (alert) {
+      addAuditEntry(alert.customerId, {
+        customerId: alert.customerId,
+        action: 'raw_payload_viewed',
+        performedBy: userName,
+        newValue: alertId,
+      });
+    }
+    toast.info(`Raw payload view logged for audit trail`);
+  }, [alerts, addAuditEntry]);
 
   const getEffectiveAlertPriority = (alert: PrioritizedAlert, customerOverride?: CustomerGroupOverrides): UserPriority => {
     const alertOverride = alertOverrides.get(alert.id);
@@ -701,6 +723,15 @@ export default function AlertWorkbenchPage() {
                                       variant="ghost"
                                       size="icon"
                                       className="h-7 w-7"
+                                      onClick={() => openRawAlertDrawer(alert)}
+                                      title="View raw alert"
+                                    >
+                                      <FileCode className="h-3.5 w-3.5" />
+                                    </Button>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-7 w-7"
                                       onClick={() => handleViewAlertDetails(alert)}
                                       title="View details"
                                     >
@@ -770,6 +801,14 @@ export default function AlertWorkbenchPage() {
           auditEntries={auditLog.get(selectedCustomerForAudit.customerId) || []}
         />
       )}
+
+      {/* Raw Alert Drawer */}
+      <RawAlertDrawer
+        open={rawAlertDrawerOpen}
+        onOpenChange={setRawAlertDrawerOpen}
+        alert={selectedAlertForRawView}
+        onAuditLog={handleRawAlertAuditLog}
+      />
     </AppLayout>
   );
 }

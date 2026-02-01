@@ -47,13 +47,6 @@ const navItems: NavItem[] = [
     roles: ['analyst', 'investigator', 'principal_officer', 'compliance', 'super_admin'],
   },
   {
-    title: 'Raw Alerts',
-    url: '/alerts/raw',
-    icon: AlertTriangle,
-    roles: ['analyst', 'super_admin'],
-    badge: '24',
-  },
-  {
     title: 'Alert Workbench',
     url: '/alerts/workbench',
     icon: Zap,

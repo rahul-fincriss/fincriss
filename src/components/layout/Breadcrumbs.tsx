@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 const routeLabels: Record<string, string> = {
   dashboard: 'Dashboard',
   alerts: 'Alerts',
-  raw: 'Raw Alerts',
+  
   workbench: 'Alert Workbench',
   cases: 'Cases',
   str: 'STR Queue',
