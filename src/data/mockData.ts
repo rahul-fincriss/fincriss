@@ -1,4 +1,24 @@
-import { RawAlert, PrioritizedAlert, Case, STRDraft, CustomerKYC, Transaction, AuditEntry } from '@/types';
+import { RawAlert, PrioritizedAlert, Case, STRDraft, CustomerKYC, Transaction, AuditEntry, User } from '@/types';
+
+// Mock analysts for assignment
+export const mockAnalysts: User[] = [
+  { id: 'usr-001', name: 'Sarah Chen', email: 'sarah.chen@bank.com', role: 'analyst' },
+  { id: 'usr-006', name: 'David Park', email: 'david.park@bank.com', role: 'analyst' },
+  { id: 'usr-007', name: 'Lisa Wong', email: 'lisa.wong@bank.com', role: 'analyst' },
+  { id: 'usr-008', name: 'James Miller', email: 'james.miller@bank.com', role: 'analyst' },
+];
+
+// Priority override reason categories
+export const priorityReasonCategories = [
+  'Customer escalation',
+  'Regulatory inquiry',
+  'Management directive',
+  'Pattern similarity to filed STR',
+  'Time-sensitive information',
+  'External intelligence',
+  'Risk appetite adjustment',
+  'Other',
+];
 
 // Generate mock raw alerts
 export const mockRawAlerts: RawAlert[] = [
