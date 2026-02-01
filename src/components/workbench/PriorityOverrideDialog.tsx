@@ -35,7 +35,7 @@ const priorityOptions: { value: UserPriority; label: string; description: string
   { value: 'high', label: 'High', description: 'Priority escalation' },
   { value: 'medium', label: 'Medium', description: 'Standard priority' },
   { value: 'low', label: 'Low', description: 'Deprioritize' },
-  { value: 'none', label: 'None (Clear Override)', description: 'Revert to MAPS priority' },
+  { value: 'none', label: 'None (Clear Override)', description: 'Revert to FinCrisS priority' },
 ];
 
 const priorityColors: Record<UserPriority, string> = {
@@ -77,7 +77,7 @@ export function PriorityOverrideDialog({
             Set User Priority Override
           </DialogTitle>
           <DialogDescription>
-            Override MAPS priority for <span className="font-medium text-foreground">{customerName}</span>.
+            Override FinCrisS priority for <span className="font-medium text-foreground">{customerName}</span>.
             This affects sorting and filtering for all alerts under this customer.
           </DialogDescription>
         </DialogHeader>

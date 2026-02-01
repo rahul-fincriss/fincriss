@@ -41,9 +41,9 @@ export default function LoginPage() {
             <Shield className="h-7 w-7 text-primary-foreground" />
           </div>
           <div>
-            <h1 className="text-xl font-bold">MAPS</h1>
+            <h1 className="text-xl font-bold">FinCrisS</h1>
             <p className="text-sm text-muted-foreground">
-              Money Laundering Alert Processing System
+              Financial Crime Intelligence & STR System
             </p>
           </div>
         </div>
@@ -75,7 +75,7 @@ export default function LoginPage() {
         </div>
 
         <p className="text-xs text-muted-foreground">
-          © 2024 MAPS Platform. Enterprise AML Solution.
+          © 2024 FinCrisS Platform. Enterprise AML Solution.
         </p>
       </div>
 
@@ -87,7 +87,7 @@ export default function LoginPage() {
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
               <Shield className="h-6 w-6 text-primary-foreground" />
             </div>
-            <span className="text-lg font-bold">MAPS</span>
+            <span className="text-lg font-bold">FinCrisS</span>
           </div>
 
           <div className="text-center lg:text-left">
