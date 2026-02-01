@@ -17,6 +17,7 @@ import STRConfirmationPage from "./pages/STRConfirmationPage";
 import AuditTrailPage from "./pages/AuditTrailPage";
 import MLOpsPage from "./pages/MLOpsPage";
 import ModelTuningPage from "./pages/ModelTuningPage";
+import UserManagementPage from "./pages/UserManagementPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -49,6 +50,7 @@ function AppRoutes() {
       <Route path="/audit" element={<ProtectedRoute><AuditTrailPage /></ProtectedRoute>} />
       <Route path="/mlops" element={<ProtectedRoute><MLOpsPage /></ProtectedRoute>} />
       <Route path="/model-tuning" element={<ProtectedRoute><ModelTuningPage /></ProtectedRoute>} />
+      <Route path="/users" element={<ProtectedRoute><UserManagementPage /></ProtectedRoute>} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
