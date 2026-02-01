@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Shield, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
 import { UserRole } from '@/types';
+import { ThemeToggle } from '@/components/theme/ThemeToggle';
+import fincrissLogo from '@/assets/fincriss-logo.jpg';
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -33,12 +35,21 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen relative">
+      {/* Theme toggle in top-right */}
+      <div className="absolute top-4 right-4 z-10">
+        <ThemeToggle />
+      </div>
+
       {/* Left panel - Branding */}
-      <div className="hidden lg:flex lg:w-1/2 flex-col justify-between bg-gradient-to-br from-primary/20 via-background to-background p-12">
+      <div className="hidden lg:flex lg:w-1/2 flex-col justify-between bg-gradient-to-br from-primary/10 via-background to-background p-12">
         <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary shadow-glow">
-            <Shield className="h-7 w-7 text-primary-foreground" />
+          <div className="flex h-14 w-14 items-center justify-center rounded-xl overflow-hidden bg-background shadow-md">
+            <img
+              src={fincrissLogo}
+              alt="FinCrisS"
+              className="h-14 w-14 object-cover"
+            />
           </div>
           <div>
             <h1 className="text-xl font-bold">FinCrisS</h1>
@@ -84,8 +95,12 @@ export default function LoginPage() {
         <div className="w-full max-w-md space-y-8">
           {/* Mobile branding */}
           <div className="flex lg:hidden items-center justify-center gap-3 mb-8">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
-              <Shield className="h-6 w-6 text-primary-foreground" />
+            <div className="flex h-12 w-12 items-center justify-center rounded-lg overflow-hidden bg-background shadow-md">
+              <img
+                src={fincrissLogo}
+                alt="FinCrisS"
+                className="h-12 w-12 object-cover"
+              />
             </div>
             <span className="text-lg font-bold">FinCrisS</span>
           </div>

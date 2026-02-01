@@ -6,9 +6,7 @@ import {
   FolderOpen,
   History,
   LayoutDashboard,
-  LogOut,
   Settings,
-  Shield,
   Users,
   Zap,
 } from 'lucide-react';
@@ -18,7 +16,6 @@ import { UserRole } from '@/types';
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -28,8 +25,8 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/sidebar';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import fincrissLogo from '@/assets/fincriss-logo.jpg';
 
 interface NavItem {
   title: string;
@@ -102,7 +99,7 @@ const navItems: NavItem[] = [
 export function AppSidebar() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const { state } = useSidebar();
   const isCollapsed = state === 'collapsed';
 
@@ -110,28 +107,23 @@ export function AppSidebar() {
     (item) => user && item.roles.includes(user.role)
   );
 
-  const getRoleLabel = (role: UserRole): string => {
-    const labels: Record<UserRole, string> = {
-      analyst: 'AML Analyst',
-      investigator: 'Case Investigator',
-      principal_officer: 'Principal Officer',
-      compliance: 'Compliance',
-      super_admin: 'Super Admin',
-    };
-    return labels[role];
-  };
-
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
+  const handleLogoClick = () => {
+    navigate('/dashboard');
   };
 
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader className="border-b border-sidebar-border">
-        <div className="flex items-center gap-3 px-2 py-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-            <Shield className="h-5 w-5 text-primary-foreground" />
+        <button
+          onClick={handleLogoClick}
+          className="flex items-center gap-3 px-2 py-3 hover:opacity-80 transition-opacity"
+        >
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg overflow-hidden bg-background">
+            <img
+              src={fincrissLogo}
+              alt="FinCrisS"
+              className="h-9 w-9 object-cover"
+            />
           </div>
           {!isCollapsed && (
             <div className="flex flex-col">
@@ -143,7 +135,7 @@ export function AppSidebar() {
               </span>
             </div>
           )}
-        </div>
+        </button>
       </SidebarHeader>
 
       <SidebarContent>
@@ -190,39 +182,6 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-
-      <SidebarFooter className="border-t border-sidebar-border">
-        {user && (
-          <div className="flex items-center gap-3 px-2 py-3">
-            <Avatar className="h-8 w-8">
-              <AvatarFallback className="bg-primary/20 text-primary text-xs">
-                {user.name
-                  .split(' ')
-                  .map((n) => n[0])
-                  .join('')}
-              </AvatarFallback>
-            </Avatar>
-            {!isCollapsed && (
-              <div className="flex flex-1 flex-col overflow-hidden">
-                <span className="truncate text-sm font-medium text-sidebar-foreground">
-                  {user.name}
-                </span>
-                <span className="truncate text-xs text-muted-foreground">
-                  {getRoleLabel(user.role)}
-                </span>
-              </div>
-            )}
-            {!isCollapsed && (
-              <button
-                onClick={handleLogout}
-                className="rounded-md p-1.5 text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground"
-              >
-                <LogOut className="h-4 w-4" />
-              </button>
-            )}
-          </div>
-        )}
-      </SidebarFooter>
     </Sidebar>
   );
 }
