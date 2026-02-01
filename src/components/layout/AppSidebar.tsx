@@ -118,11 +118,11 @@ export function AppSidebar() {
           onClick={handleLogoClick}
           className="flex items-center gap-3 px-2 py-3 hover:opacity-80 transition-opacity"
         >
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg overflow-hidden bg-background">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg overflow-hidden bg-background">
             <img
               src={fincrissLogo}
               alt="FinCrisS"
-              className="h-9 w-9 object-cover"
+              className="h-10 w-10 object-cover"
             />
           </div>
           {!isCollapsed && (

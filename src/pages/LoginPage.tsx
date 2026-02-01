@@ -44,11 +44,11 @@ export default function LoginPage() {
       {/* Left panel - Branding */}
       <div className="hidden lg:flex lg:w-1/2 flex-col justify-between bg-gradient-to-br from-primary/10 via-background to-background p-12">
         <div className="flex items-center gap-3">
-          <div className="flex h-14 w-14 items-center justify-center rounded-xl overflow-hidden bg-background shadow-md">
+          <div className="flex h-16 w-16 items-center justify-center rounded-xl overflow-hidden bg-background shadow-md">
             <img
               src={fincrissLogo}
               alt="FinCrisS"
-              className="h-14 w-14 object-cover"
+              className="h-16 w-16 object-cover"
             />
           </div>
           <div>
@@ -95,11 +95,11 @@ export default function LoginPage() {
         <div className="w-full max-w-md space-y-8">
           {/* Mobile branding */}
           <div className="flex lg:hidden items-center justify-center gap-3 mb-8">
-            <div className="flex h-12 w-12 items-center justify-center rounded-lg overflow-hidden bg-background shadow-md">
+            <div className="flex h-14 w-14 items-center justify-center rounded-lg overflow-hidden bg-background shadow-md">
               <img
                 src={fincrissLogo}
                 alt="FinCrisS"
-                className="h-12 w-12 object-cover"
+                className="h-14 w-14 object-cover"
               />
             </div>
             <span className="text-lg font-bold">FinCrisS</span>
