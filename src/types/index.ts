@@ -13,6 +13,7 @@ export interface User {
 export type AlertType = 'large_cash' | 'structuring' | 'rapid_movement' | 'geo_anomaly' | 'behavior_deviation' | 'smurfing';
 export type AlertStatus = 'new' | 'in_review' | 'sent_to_maps' | 'dropped' | 'case_created';
 export type RiskLevel = 'high' | 'medium' | 'low';
+export type UserPriority = 'urgent' | 'high' | 'medium' | 'low' | 'none';
 
 export interface RawAlert {
   id: string;
@@ -33,6 +34,35 @@ export interface PrioritizedAlert extends RawAlert {
   riskDrivers: string[];
   slaDeadline: Date;
   assignedTo?: string;
+  userPriority?: UserPriority;
+  userPriorityReason?: string;
+}
+
+// Customer group with overrides
+export interface CustomerGroupOverrides {
+  customerId: string;
+  userPriority: UserPriority;
+  userPriorityReason?: string;
+  userPriorityCategory?: string;
+  userPriorityChangedBy?: string;
+  userPriorityChangedAt?: Date;
+  assignedAnalystId?: string;
+  assignedAnalystName?: string;
+  assignedAt?: Date;
+  assignedBy?: string;
+}
+
+// Audit log entry for workbench actions
+export interface WorkbenchAuditEntry {
+  id: string;
+  customerId: string;
+  action: 'priority_change' | 'analyst_assignment' | 'analyst_reassignment';
+  performedBy: string;
+  performedAt: Date;
+  previousValue?: string;
+  newValue?: string;
+  reason?: string;
+  category?: string;
 }
 
 // Case types
