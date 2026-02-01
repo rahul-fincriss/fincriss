@@ -136,10 +136,10 @@ export function AppSidebar() {
           {!isCollapsed && (
             <div className="flex flex-col">
               <span className="text-sm font-semibold text-sidebar-foreground">
-                MAPS
+                FinCrisS
               </span>
               <span className="text-xs text-muted-foreground">
-                AML Platform
+                AML Intelligence
               </span>
             </div>
           )}

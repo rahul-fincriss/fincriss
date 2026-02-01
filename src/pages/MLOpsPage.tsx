@@ -16,7 +16,7 @@ import { MetricCard } from '@/components/shared/MetricCard';
 
 export default function MLOpsPage() {
   const modelMetrics = {
-    version: 'MAPS-v2.3.1',
+    version: 'FinCrisS-v2.3.1',
     lastTrained: '2024-01-10',
     accuracy: 94.2,
     precision: 91.8,

@@ -43,8 +43,8 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 // Mock data for models
 const availableModels = [
   { 
-    id: 'maps-v3.2.1', 
-    name: 'MAPS v3.2.1', 
+    id: 'fincriss-v3.2.1', 
+    name: 'FinCrisS v3.2.1', 
     status: 'active', 
     accuracy: 94.2, 
     fpRate: 8.5, 
@@ -52,8 +52,8 @@ const availableModels = [
     description: 'Production model with enhanced structuring detection'
   },
   { 
-    id: 'maps-v3.1.0', 
-    name: 'MAPS v3.1.0', 
+    id: 'fincriss-v3.1.0', 
+    name: 'FinCrisS v3.1.0', 
     status: 'available', 
     accuracy: 92.8, 
     fpRate: 10.2, 
@@ -61,8 +61,8 @@ const availableModels = [
     description: 'Previous stable release'
   },
   { 
-    id: 'maps-v3.3.0-beta', 
-    name: 'MAPS v3.3.0 (Beta)', 
+    id: 'fincriss-v3.3.0-beta', 
+    name: 'FinCrisS v3.3.0 (Beta)', 
     status: 'testing', 
     accuracy: 95.1, 
     fpRate: 7.8, 
@@ -88,7 +88,7 @@ const driftIndicators = [
 ];
 
 export default function ModelTuningPage() {
-  const [activeModel, setActiveModel] = useState('maps-v3.2.1');
+  const [activeModel, setActiveModel] = useState('fincriss-v3.2.1');
   const [sensitivityThreshold, setSensitivityThreshold] = useState([65]);
   const [highRiskWeight, setHighRiskWeight] = useState([80]);
   const [geoAnomalyEnabled, setGeoAnomalyEnabled] = useState(true);
@@ -138,7 +138,7 @@ export default function ModelTuningPage() {
           <div>
             <h1 className="text-2xl font-bold">Model Tuning & Oversight</h1>
             <p className="text-muted-foreground">
-              Internal administrative controls for MAPS model configuration
+              Internal administrative controls for FinCrisS model configuration
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -154,7 +154,7 @@ export default function ModelTuningPage() {
           <AlertTriangle className="h-4 w-4 text-status-warning" />
           <AlertTitle className="text-status-warning">Administrative Control Panel</AlertTitle>
           <AlertDescription className="text-muted-foreground">
-            Changes made here directly affect the MAPS alert prioritization system. All modifications are logged 
+            Changes made here directly affect the FinCrisS alert prioritization system. All modifications are logged 
             and require governance review before production deployment. Proceed with caution.
           </AlertDescription>
         </Alert>
@@ -186,7 +186,7 @@ export default function ModelTuningPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Shield className="h-5 w-5 text-primary" />
-                Available MAPS Models
+                Available FinCrisS Models
               </CardTitle>
               <CardDescription>
                 Select the active model for alert prioritization. Changes require governance approval.

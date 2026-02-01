@@ -291,9 +291,9 @@ export default function AlertWorkbenchPage() {
         const bOverride = customerOverrides.get(b.customerId)?.userPriority || 'none';
         const priorityDiff = userPriorityOrder[bOverride] - userPriorityOrder[aOverride];
         if (priorityDiff !== 0) return priorityDiff;
-        // Fall back to MAPS priority, then SLA
-        const mapsDiff = priorityOrder[b.maxPriority] - priorityOrder[a.maxPriority];
-        if (mapsDiff !== 0) return mapsDiff;
+        // Fall back to FinCrisS priority, then SLA
+        const scoreDiff = priorityOrder[b.maxPriority] - priorityOrder[a.maxPriority];
+        if (scoreDiff !== 0) return scoreDiff;
         return a.earliestSLA.getTime() - b.earliestSLA.getTime();
       });
     } else {
@@ -443,7 +443,7 @@ export default function AlertWorkbenchPage() {
                 value="maps"
                 className="text-xs px-3 data-[state=on]:bg-background"
               >
-                MAPS Priority
+                FinCrisS Priority
               </ToggleGroupItem>
               <ToggleGroupItem
                 value="user"
@@ -478,7 +478,7 @@ export default function AlertWorkbenchPage() {
                 <TableHead>Customer</TableHead>
                 <TableHead className="w-[80px]">Alerts</TableHead>
                 <TableHead className="w-[180px]">Priority Breakdown</TableHead>
-                <TableHead>MAPS Score</TableHead>
+                <TableHead>FinCrisS Score</TableHead>
                 <TableHead className="w-[140px]">User Priority</TableHead>
                 <TableHead className="w-[160px]">Assigned Analyst</TableHead>
                 <TableHead>SLA</TableHead>

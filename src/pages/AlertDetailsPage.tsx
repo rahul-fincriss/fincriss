@@ -92,11 +92,11 @@ export default function AlertDetailsPage() {
                 <Brain className="h-5 w-5 text-primary" />
                 <CardTitle className="text-lg">Alert Summary & Trigger</CardTitle>
               </div>
-              <CardDescription>Why MAPS flagged this alert</CardDescription>
+              <CardDescription>Why FinCrisS flagged this alert</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">MAPS Score</span>
+                <span className="text-sm text-muted-foreground">FinCrisS Score</span>
                 <span className="text-2xl font-bold text-primary">{alert.mapsScore}</span>
               </div>
               <div className="space-y-2">
@@ -264,7 +264,7 @@ export default function AlertDetailsPage() {
 
               <div className="rounded-lg bg-primary/10 border border-primary/20 p-3">
                 <p className="text-xs font-medium text-primary mb-1">Model Version</p>
-                <p className="text-sm font-mono">MAPS-v2.3.1</p>
+                <p className="text-sm font-mono">FinCrisS-v2.3.1</p>
               </div>
             </CardContent>
           </Card>
