@@ -35,23 +35,24 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen relative">
+    <div className="flex min-h-screen items-center justify-center bg-background relative">
       {/* Theme toggle in top-right */}
       <div className="absolute top-4 right-4 z-10">
         <ThemeToggle />
       </div>
 
-      {/* Left panel - Branding */}
-      <div className="hidden lg:flex lg:w-1/2 flex-col justify-between bg-gradient-to-br from-primary/10 via-background to-background p-12">
-        <div className="flex items-center gap-3">
-          <div className="flex h-16 w-16 items-center justify-center rounded-xl overflow-hidden bg-background shadow-md">
+      {/* Centered login panel */}
+      <div className="w-full max-w-md space-y-8 px-8 py-12">
+        {/* Branding */}
+        <div className="flex flex-col items-center gap-3 mb-8">
+          <div className="flex h-16 w-16 items-center justify-center rounded-xl overflow-hidden bg-background shadow-md border border-border">
             <img
               src={fincrissLogo}
               alt="FinCrisS"
               className="h-16 w-16 object-cover"
             />
           </div>
-          <div>
+          <div className="text-center">
             <h1 className="text-xl font-bold">FinCrisS</h1>
             <p className="text-sm text-muted-foreground">
               Financial Crime Intelligence & STR System
@@ -59,148 +60,106 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <div className="space-y-6">
-          <h2 className="text-4xl font-bold leading-tight">
-            Enterprise-Grade
-            <br />
-            <span className="text-gradient-primary">AML Compliance</span>
-          </h2>
-          <p className="max-w-md text-lg text-muted-foreground">
-            AI-driven suspicious transaction detection with full audit trail,
-            regulatory compliance, and explainable decisions.
+        <div className="text-center">
+          <h2 className="text-2xl font-bold">Sign in to your account</h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Use your enterprise credentials to access the platform
           </p>
-          <div className="flex gap-8 pt-4">
-            <div>
-              <p className="text-3xl font-bold text-primary">99.2%</p>
-              <p className="text-sm text-muted-foreground">Detection Rate</p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="space-y-2">
+            <Label htmlFor="email">Email address</Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="name@company.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="h-11"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="password">Password</Label>
+            <div className="relative">
+              <Input
+                id="password"
+                type={showPassword ? 'text' : 'password'}
+                placeholder="Enter your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="h-11 pr-10"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              >
+                {showPassword ? (
+                  <EyeOff className="h-4 w-4" />
+                ) : (
+                  <Eye className="h-4 w-4" />
+                )}
+              </button>
             </div>
-            <div>
-              <p className="text-3xl font-bold text-primary">-45%</p>
-              <p className="text-sm text-muted-foreground">False Positives</p>
+          </div>
+
+          <Button type="submit" className="w-full h-11" disabled={isLoading}>
+            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Sign in with SSO
+          </Button>
+        </form>
+
+        {/* Demo logins */}
+        <div className="space-y-4">
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t border-border" />
             </div>
-            <div>
-              <p className="text-3xl font-bold text-primary">2.5h</p>
-              <p className="text-sm text-muted-foreground">Avg. Resolution</p>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">
+                Demo Access
+              </span>
             </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleDemoLogin('analyst')}
+            >
+              AML Analyst
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleDemoLogin('investigator')}
+            >
+              Investigator
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleDemoLogin('principal_officer')}
+            >
+              Principal Officer
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleDemoLogin('super_admin')}
+            >
+              Super Admin
+            </Button>
           </div>
         </div>
 
-        <p className="text-xs text-muted-foreground">
+        {/* Footer */}
+        <p className="text-center text-xs text-muted-foreground pt-4">
           © 2024 FinCrisS Platform. Enterprise AML Solution.
         </p>
-      </div>
-
-      {/* Right panel - Login form */}
-      <div className="flex w-full lg:w-1/2 flex-col items-center justify-center px-8 py-12">
-        <div className="w-full max-w-md space-y-8">
-          {/* Mobile branding */}
-          <div className="flex lg:hidden items-center justify-center gap-3 mb-8">
-            <div className="flex h-14 w-14 items-center justify-center rounded-lg overflow-hidden bg-background shadow-md">
-              <img
-                src={fincrissLogo}
-                alt="FinCrisS"
-                className="h-14 w-14 object-cover"
-              />
-            </div>
-            <span className="text-lg font-bold">FinCrisS</span>
-          </div>
-
-          <div className="text-center lg:text-left">
-            <h2 className="text-2xl font-bold">Sign in to your account</h2>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Use your enterprise credentials to access the platform
-            </p>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email address</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="name@company.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="h-11"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <div className="relative">
-                <Input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="Enter your password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="h-11 pr-10"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
-                </button>
-              </div>
-            </div>
-
-            <Button type="submit" className="w-full h-11" disabled={isLoading}>
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Sign in with SSO
-            </Button>
-          </form>
-
-          {/* Demo logins */}
-          <div className="space-y-4">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-border" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">
-                  Demo Access
-                </span>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleDemoLogin('analyst')}
-              >
-                AML Analyst
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleDemoLogin('investigator')}
-              >
-                Investigator
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleDemoLogin('principal_officer')}
-              >
-                Principal Officer
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleDemoLogin('super_admin')}
-              >
-                Super Admin
-              </Button>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );
