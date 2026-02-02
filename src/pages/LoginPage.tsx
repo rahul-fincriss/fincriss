@@ -55,7 +55,7 @@ export default function LoginPage() {
           <div className="text-center">
             <h1 className="text-xl font-bold">FinCrisS</h1>
             <p className="text-sm text-muted-foreground">
-              Financial Crime Intelligence & STR System
+              Financial Crime Intelligence
             </p>
           </div>
         </div>
