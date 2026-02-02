@@ -1,4 +1,4 @@
-import { X, History, UserCheck, AlertTriangle, ArrowRight } from 'lucide-react';
+import { X, History, UserCheck, AlertTriangle, ArrowRight, Layers } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
@@ -37,6 +37,8 @@ function ActionIcon({ action }: { action: WorkbenchAuditEntry['action'] }) {
     case 'analyst_assignment':
     case 'analyst_reassignment':
       return <UserCheck className="h-4 w-4 text-primary" />;
+    case 'queue_change':
+      return <Layers className="h-4 w-4 text-cyan-600 dark:text-cyan-400" />;
     default:
       return <History className="h-4 w-4 text-muted-foreground" />;
   }
@@ -50,6 +52,10 @@ function ActionLabel({ action }: { action: WorkbenchAuditEntry['action'] }) {
       return 'Analyst Assigned';
     case 'analyst_reassignment':
       return 'Analyst Reassigned';
+    case 'queue_change':
+      return 'Queue Changed';
+    case 'raw_payload_viewed':
+      return 'Raw Payload Viewed';
     default:
       return action;
   }
@@ -119,6 +125,18 @@ export function AuditPanel({ open, onOpenChange, customerName, customerId, audit
                     </div>
                   )}
 
+                  {entry.action === 'queue_change' && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <Badge variant="outline" className="bg-muted text-muted-foreground border-border">
+                        {entry.previousValue || 'Default AML'}
+                      </Badge>
+                      <ArrowRight className="h-3 w-3 text-muted-foreground" />
+                      <Badge variant="outline" className="bg-cyan-500/15 text-cyan-700 dark:text-cyan-400 border-cyan-500/30">
+                        {entry.newValue}
+                      </Badge>
+                    </div>
+                  )}
+
                   {(entry.action === 'analyst_assignment' || entry.action === 'analyst_reassignment') && (
                     <div className="flex items-center gap-2 text-sm">
                       {entry.previousValue && (
@@ -128,6 +146,12 @@ export function AuditPanel({ open, onOpenChange, customerName, customerId, audit
                         </>
                       )}
                       <span className="font-medium">{entry.newValue}</span>
+                    </div>
+                  )}
+
+                  {entry.action === 'raw_payload_viewed' && (
+                    <div className="text-sm text-muted-foreground">
+                      Alert: <span className="font-mono text-foreground">{entry.newValue}</span>
                     </div>
                   )}
 
