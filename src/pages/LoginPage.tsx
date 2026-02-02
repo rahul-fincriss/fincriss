@@ -45,8 +45,8 @@ export default function LoginPage() {
       <div className="w-full max-w-md space-y-8 px-8 py-12">
         {/* Branding */}
         <div className="flex flex-col items-center gap-3 mb-8">
-          <div className="flex h-16 w-16 items-center justify-center rounded-xl overflow-hidden bg-background shadow-md border border-border">
-            <ThemedLogo className="h-16 w-16 object-cover" />
+          <div className="flex h-20 w-20 items-center justify-center">
+            <ThemedLogo className="h-20 w-20 object-contain" />
           </div>
           <div className="text-center">
             <h1 className="text-xl font-bold">FinCrisS</h1>
