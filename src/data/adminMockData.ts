@@ -1,4 +1,13 @@
-import { ManagedUser, RoleDefinition, RolePermissions, AdminAuditEntry, WorkforceQueue, QueueCategory } from '@/types/admin';
+import { 
+  ManagedUser, 
+  RoleDefinition, 
+  RolePermissions, 
+  AdminAuditEntry, 
+  WorkforceQueue, 
+  QueueCategory,
+  PlatformSettings,
+  SettingsAuditEntry
+} from '@/types/admin';
 import { UserRole } from '@/types';
 
 // Workforce Queues
@@ -458,5 +467,76 @@ export const mockAdminAuditLog: AdminAuditEntry[] = [
     performedBy: 'James Patterson',
     performedAt: new Date('2023-01-01T10:00:00'),
     details: 'New queue created for AI-detected behavioral anomalies',
+  },
+];
+
+// Platform Settings
+export const mockPlatformSettings: PlatformSettings = {
+  general: {
+    theme: 'light',
+    timeZone: 'Asia/Kolkata',
+    dateFormat: 'DD/MM/YYYY',
+    currency: 'INR',
+    platformName: 'FinCrisS',
+  },
+  queueRouting: {
+    defaultQueueId: 'queue-001',
+    inactiveQueueFallback: 'default_aml',
+    noActiveUsersBehavior: 'escalate_to_supervisor',
+    requireQueueBeforeCaseCreation: true,
+  },
+  sla: {
+    thresholds: [
+      { priority: 'high', resolutionHours: 4, warningPercent: 50, breachPercent: 100 },
+      { priority: 'medium', resolutionHours: 24, warningPercent: 60, breachPercent: 100 },
+      { priority: 'low', resolutionHours: 72, warningPercent: 70, breachPercent: 100 },
+    ],
+    queueOverrides: [
+      { queueId: 'queue-002', queueName: 'PEP / Sanctions Queue', resolutionHours: 2, warningPercent: 40, breachPercent: 100, enabled: true },
+      { queueId: 'queue-003', queueName: 'High-Value Transactions Queue', resolutionHours: 8, warningPercent: 50, breachPercent: 100, enabled: true },
+    ],
+    escalationNotifyRoles: ['principal_officer', 'super_admin'],
+  },
+  notifications: {
+    slaWarning: { enabled: true, channels: ['in_app'] },
+    slaBreach: { enabled: true, channels: ['in_app', 'email'] },
+    queueAssignment: { enabled: true, channels: ['in_app'] },
+    caseEscalation: { enabled: true, channels: ['in_app', 'email'] },
+  },
+  retention: {
+    auditLogDays: 2555, // ~7 years
+    alertRetentionDays: 1825, // 5 years
+    caseRetentionDays: 2555, // ~7 years
+    strRetentionDays: 3650, // 10 years
+  },
+};
+
+export const mockSettingsAuditLog: SettingsAuditEntry[] = [
+  {
+    id: 'set-aud-001',
+    section: 'sla',
+    field: 'High Priority SLA Hours',
+    previousValue: '6 hours',
+    newValue: '4 hours',
+    performedBy: 'James Patterson',
+    performedAt: new Date('2024-01-05T10:00:00'),
+  },
+  {
+    id: 'set-aud-002',
+    section: 'notifications',
+    field: 'SLA Breach Email',
+    previousValue: 'Disabled',
+    newValue: 'Enabled',
+    performedBy: 'James Patterson',
+    performedAt: new Date('2024-01-03T14:30:00'),
+  },
+  {
+    id: 'set-aud-003',
+    section: 'queue_routing',
+    field: 'Require Queue Before Case',
+    previousValue: 'No',
+    newValue: 'Yes',
+    performedBy: 'James Patterson',
+    performedAt: new Date('2023-12-20T09:15:00'),
   },
 ];

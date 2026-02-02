@@ -92,7 +92,7 @@ const navItems: NavItem[] = [
     title: 'Settings',
     url: '/settings',
     icon: Settings,
-    roles: ['analyst', 'investigator', 'principal_officer', 'compliance', 'super_admin'],
+    roles: ['super_admin', 'compliance'],
   },
 ];
 

@@ -5,13 +5,12 @@ import { cn } from '@/lib/utils';
 const routeLabels: Record<string, string> = {
   dashboard: 'Dashboard',
   alerts: 'Alerts',
-  
   workbench: 'Alert Workbench',
   cases: 'Cases',
   str: 'STR Queue',
   audit: 'Audit Trail',
   mlops: 'ML Ops',
-  users: 'User Management',
+  workforce: 'Workforce Management',
   settings: 'Settings',
 };
 
