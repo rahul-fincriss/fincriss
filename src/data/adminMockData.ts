@@ -1,5 +1,84 @@
-import { ManagedUser, RoleDefinition, RolePermissions, AdminAuditEntry } from '@/types/admin';
+import { ManagedUser, RoleDefinition, RolePermissions, AdminAuditEntry, WorkforceQueue, QueueCategory } from '@/types/admin';
 import { UserRole } from '@/types';
+
+// Workforce Queues
+export const mockWorkforceQueues: WorkforceQueue[] = [
+  {
+    id: 'queue-001',
+    name: 'Default AML Queue',
+    description: 'Standard anti-money laundering alert triage and investigation queue',
+    category: 'aml',
+    allowedRoles: ['analyst', 'investigator', 'super_admin'],
+    assignedUserIds: ['usr-001', 'usr-006', 'usr-007'],
+    status: 'active',
+    hasHistoricalActivity: true,
+    createdAt: new Date('2022-01-01'),
+  },
+  {
+    id: 'queue-002',
+    name: 'PEP / Sanctions Queue',
+    description: 'Politically Exposed Persons and sanctions-related alerts requiring specialized review',
+    category: 'pep',
+    allowedRoles: ['analyst', 'investigator', 'principal_officer', 'super_admin'],
+    assignedUserIds: ['usr-002', 'usr-003', 'usr-007'],
+    status: 'active',
+    hasHistoricalActivity: true,
+    createdAt: new Date('2022-01-15'),
+  },
+  {
+    id: 'queue-003',
+    name: 'High-Value Transactions Queue',
+    description: 'High-value transaction monitoring and enhanced due diligence',
+    category: 'aml',
+    allowedRoles: ['investigator', 'principal_officer', 'super_admin'],
+    assignedUserIds: ['usr-002', 'usr-009'],
+    status: 'active',
+    hasHistoricalActivity: true,
+    createdAt: new Date('2022-03-01'),
+  },
+  {
+    id: 'queue-004',
+    name: 'Cash / Structuring Queue',
+    description: 'Cash transaction patterns and potential structuring activity',
+    category: 'cash',
+    allowedRoles: ['analyst', 'investigator', 'super_admin'],
+    assignedUserIds: ['usr-001', 'usr-006'],
+    status: 'active',
+    hasHistoricalActivity: false,
+    createdAt: new Date('2022-06-01'),
+  },
+  {
+    id: 'queue-005',
+    name: 'Trade-Based AML Queue',
+    description: 'Trade-based money laundering and international transaction review',
+    category: 'trade',
+    allowedRoles: ['investigator', 'super_admin'],
+    assignedUserIds: ['usr-002'],
+    status: 'active',
+    hasHistoricalActivity: true,
+    createdAt: new Date('2022-09-01'),
+  },
+  {
+    id: 'queue-006',
+    name: 'Behavioral Anomaly Queue',
+    description: 'AI-detected behavioral anomalies requiring human review',
+    category: 'behavioral',
+    allowedRoles: ['analyst', 'investigator', 'super_admin'],
+    assignedUserIds: ['usr-007', 'usr-009'],
+    status: 'active',
+    hasHistoricalActivity: false,
+    createdAt: new Date('2023-01-01'),
+  },
+];
+
+export const queueCategoryLabels: Record<QueueCategory, string> = {
+  aml: 'AML',
+  pep: 'PEP / Sanctions',
+  trade: 'Trade-Based',
+  cash: 'Cash / Structuring',
+  behavioral: 'Behavioral',
+  general: 'General',
+};
 
 export const mockManagedUsers: ManagedUser[] = [
   {
@@ -11,8 +90,10 @@ export const mockManagedUsers: ManagedUser[] = [
     status: 'active',
     department: 'AML Operations',
     team: 'Alert Triage',
+    assignedQueueIds: ['queue-001', 'queue-004'],
     lastLogin: new Date(Date.now() - 2 * 60 * 60 * 1000),
     createdAt: new Date('2023-06-15'),
+    hasHistoricalActivity: true,
   },
   {
     id: 'usr-002',
@@ -23,8 +104,10 @@ export const mockManagedUsers: ManagedUser[] = [
     status: 'active',
     department: 'Financial Crime',
     team: 'Case Investigation',
+    assignedQueueIds: ['queue-002', 'queue-003', 'queue-005'],
     lastLogin: new Date(Date.now() - 1 * 60 * 60 * 1000),
     createdAt: new Date('2023-03-20'),
+    hasHistoricalActivity: true,
   },
   {
     id: 'usr-003',
@@ -35,8 +118,10 @@ export const mockManagedUsers: ManagedUser[] = [
     status: 'active',
     department: 'Compliance',
     team: 'STR Review',
+    assignedQueueIds: ['queue-002'],
     lastLogin: new Date(Date.now() - 4 * 60 * 60 * 1000),
     createdAt: new Date('2022-11-10'),
+    hasHistoricalActivity: true,
   },
   {
     id: 'usr-004',
@@ -47,8 +132,10 @@ export const mockManagedUsers: ManagedUser[] = [
     status: 'active',
     department: 'Internal Audit',
     team: 'Compliance Review',
+    assignedQueueIds: [],
     lastLogin: new Date(Date.now() - 24 * 60 * 60 * 1000),
     createdAt: new Date('2023-01-05'),
+    hasHistoricalActivity: false,
   },
   {
     id: 'usr-005',
@@ -59,8 +146,10 @@ export const mockManagedUsers: ManagedUser[] = [
     status: 'active',
     department: 'IT Security',
     team: 'System Administration',
+    assignedQueueIds: [],
     lastLogin: new Date(Date.now() - 30 * 60 * 1000),
     createdAt: new Date('2022-01-15'),
+    hasHistoricalActivity: true,
   },
   {
     id: 'usr-006',
@@ -71,8 +160,10 @@ export const mockManagedUsers: ManagedUser[] = [
     status: 'active',
     department: 'AML Operations',
     team: 'Alert Triage',
+    assignedQueueIds: ['queue-001', 'queue-004'],
     lastLogin: new Date(Date.now() - 8 * 60 * 60 * 1000),
     createdAt: new Date('2023-08-22'),
+    hasHistoricalActivity: true,
   },
   {
     id: 'usr-007',
@@ -83,8 +174,10 @@ export const mockManagedUsers: ManagedUser[] = [
     status: 'active',
     department: 'AML Operations',
     team: 'Senior Analysts',
+    assignedQueueIds: ['queue-001', 'queue-002', 'queue-006'],
     lastLogin: new Date(Date.now() - 3 * 60 * 60 * 1000),
     createdAt: new Date('2023-04-10'),
+    hasHistoricalActivity: true,
   },
   {
     id: 'usr-008',
@@ -95,8 +188,10 @@ export const mockManagedUsers: ManagedUser[] = [
     status: 'inactive',
     department: 'AML Operations',
     team: 'Alert Triage',
+    assignedQueueIds: [],
     lastLogin: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
     createdAt: new Date('2023-02-28'),
+    hasHistoricalActivity: true,
   },
   {
     id: 'usr-009',
@@ -107,8 +202,10 @@ export const mockManagedUsers: ManagedUser[] = [
     status: 'active',
     department: 'Financial Crime',
     team: 'Case Investigation',
+    assignedQueueIds: ['queue-003', 'queue-006'],
     lastLogin: new Date(Date.now() - 5 * 60 * 60 * 1000),
     createdAt: new Date('2023-09-01'),
+    hasHistoricalActivity: false,
   },
   {
     id: 'usr-010',
@@ -118,8 +215,10 @@ export const mockManagedUsers: ManagedUser[] = [
     roles: ['compliance'],
     status: 'inactive',
     department: 'Internal Audit',
+    assignedQueueIds: [],
     lastLogin: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000),
     createdAt: new Date('2022-08-15'),
+    hasHistoricalActivity: false,
   },
 ];
 
@@ -169,7 +268,7 @@ const screensList = [
   { id: 'audit_trail', name: 'Audit Trail' },
   { id: 'mlops', name: 'ML Ops' },
   { id: 'model_tuning', name: 'Model Tuning' },
-  { id: 'user_management', name: 'User Management' },
+  { id: 'workforce_management', name: 'Workforce Management' },
 ];
 
 const actionsList = [
@@ -337,5 +436,27 @@ export const mockAdminAuditLog: AdminAuditEntry[] = [
     performedBy: 'James Patterson',
     performedAt: new Date('2024-01-05T08:00:00'),
     details: 'Account reactivated after leave',
+  },
+  {
+    id: 'admin-aud-006',
+    actionType: 'queue_membership_changed',
+    entityType: 'queue',
+    entityId: 'queue-002',
+    entityName: 'PEP / Sanctions Queue',
+    performedBy: 'James Patterson',
+    performedAt: new Date('2024-01-12T09:15:00'),
+    previousValue: 'Users: Michael Torres',
+    newValue: 'Users: Michael Torres, Lisa Wong',
+    details: 'Added Lisa Wong to queue for cross-training',
+  },
+  {
+    id: 'admin-aud-007',
+    actionType: 'queue_created',
+    entityType: 'queue',
+    entityId: 'queue-006',
+    entityName: 'Behavioral Anomaly Queue',
+    performedBy: 'James Patterson',
+    performedAt: new Date('2023-01-01T10:00:00'),
+    details: 'New queue created for AI-detected behavioral anomalies',
   },
 ];
