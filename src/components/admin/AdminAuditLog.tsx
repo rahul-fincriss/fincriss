@@ -36,6 +36,7 @@ const actionTypeLabels: Record<AdminAuditActionType, string> = {
   queue_updated: 'Queue Updated',
   queue_deactivated: 'Queue Deactivated',
   queue_membership_changed: 'Queue Membership Changed',
+  settings_changed: 'Settings Changed',
 };
 
 const actionTypeColors: Record<AdminAuditActionType, string> = {
@@ -52,6 +53,7 @@ const actionTypeColors: Record<AdminAuditActionType, string> = {
   queue_updated: 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/30 dark:text-cyan-400',
   queue_deactivated: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400',
   queue_membership_changed: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-400',
+  settings_changed: 'bg-slate-100 text-slate-800 dark:bg-slate-900/30 dark:text-slate-400',
 };
 
 export function AdminAuditLog() {

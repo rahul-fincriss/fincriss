@@ -73,7 +73,83 @@ export type AdminAuditActionType =
   | 'queue_created'
   | 'queue_updated'
   | 'queue_deactivated'
-  | 'queue_membership_changed';
+  | 'queue_membership_changed'
+  | 'settings_changed';
+
+// Settings Types
+export type TimeZoneOption = 'Asia/Kolkata' | 'UTC' | 'America/New_York' | 'Europe/London';
+export type DateFormatOption = 'DD/MM/YYYY' | 'MM/DD/YYYY' | 'YYYY-MM-DD';
+export type CurrencyOption = 'INR' | 'USD' | 'EUR' | 'GBP';
+export type NotificationChannel = 'in_app' | 'email';
+
+export interface GeneralSettings {
+  theme: 'light'; // Read-only
+  timeZone: TimeZoneOption;
+  dateFormat: DateFormatOption;
+  currency: CurrencyOption;
+  platformName: 'FinCrisS'; // Read-only
+}
+
+export interface QueueRoutingSettings {
+  defaultQueueId: string;
+  inactiveQueueFallback: 'default_aml' | 'hold' | 'escalate';
+  noActiveUsersBehavior: 'queue_default' | 'escalate_to_supervisor' | 'hold';
+  requireQueueBeforeCaseCreation: boolean;
+}
+
+export interface SLAThreshold {
+  priority: 'high' | 'medium' | 'low';
+  resolutionHours: number;
+  warningPercent: number;
+  breachPercent: number;
+}
+
+export interface QueueSLAOverride {
+  queueId: string;
+  queueName: string;
+  resolutionHours: number;
+  warningPercent: number;
+  breachPercent: number;
+  enabled: boolean;
+}
+
+export interface SLASettings {
+  thresholds: SLAThreshold[];
+  queueOverrides: QueueSLAOverride[];
+  escalationNotifyRoles: UserRole[];
+}
+
+export interface NotificationSettings {
+  slaWarning: { enabled: boolean; channels: NotificationChannel[] };
+  slaBreach: { enabled: boolean; channels: NotificationChannel[] };
+  queueAssignment: { enabled: boolean; channels: NotificationChannel[] };
+  caseEscalation: { enabled: boolean; channels: NotificationChannel[] };
+}
+
+export interface RetentionSettings {
+  auditLogDays: number;
+  alertRetentionDays: number;
+  caseRetentionDays: number;
+  strRetentionDays: number;
+}
+
+export interface PlatformSettings {
+  general: GeneralSettings;
+  queueRouting: QueueRoutingSettings;
+  sla: SLASettings;
+  notifications: NotificationSettings;
+  retention: RetentionSettings;
+}
+
+export interface SettingsAuditEntry {
+  id: string;
+  section: 'general' | 'queue_routing' | 'sla' | 'notifications' | 'retention';
+  field: string;
+  previousValue: string;
+  newValue: string;
+  performedBy: string;
+  performedAt: Date;
+}
 
 export interface AdminAuditEntry {
   id: string;
