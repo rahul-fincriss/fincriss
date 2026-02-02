@@ -1,6 +1,20 @@
-import { UserRole } from './index';
+import { UserRole, QueueType } from './index';
 
 export type UserStatus = 'active' | 'inactive';
+
+export type QueueCategory = 'aml' | 'pep' | 'trade' | 'cash' | 'behavioral' | 'general';
+
+export interface WorkforceQueue {
+  id: string;
+  name: string;
+  description: string;
+  category: QueueCategory;
+  allowedRoles: UserRole[];
+  assignedUserIds: string[];
+  status: 'active' | 'inactive';
+  hasHistoricalActivity: boolean;
+  createdAt: Date;
+}
 
 export interface ManagedUser {
   id: string;
@@ -11,15 +25,17 @@ export interface ManagedUser {
   status: UserStatus;
   department?: string;
   team?: string;
+  assignedQueueIds: string[];
   lastLogin?: Date;
   createdAt: Date;
+  hasHistoricalActivity?: boolean;
 }
 
 export interface RoleDefinition {
   id: UserRole;
   name: string;
   description: string;
-  isSystemRole: boolean; // Cannot be deleted or renamed if true
+  isSystemRole: boolean;
   userCount: number;
 }
 
@@ -53,12 +69,16 @@ export type AdminAuditActionType =
   | 'role_created'
   | 'role_updated'
   | 'role_renamed'
-  | 'permission_changed';
+  | 'permission_changed'
+  | 'queue_created'
+  | 'queue_updated'
+  | 'queue_deactivated'
+  | 'queue_membership_changed';
 
 export interface AdminAuditEntry {
   id: string;
   actionType: AdminAuditActionType;
-  entityType: 'user' | 'role' | 'permission';
+  entityType: 'user' | 'role' | 'permission' | 'queue';
   entityId: string;
   entityName: string;
   performedBy: string;

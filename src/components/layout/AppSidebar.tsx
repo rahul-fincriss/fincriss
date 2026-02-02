@@ -7,7 +7,7 @@ import {
   History,
   LayoutDashboard,
   Settings,
-  Users,
+  UsersRound,
   Zap,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -83,10 +83,10 @@ const navItems: NavItem[] = [
     roles: ['super_admin'],
   },
   {
-    title: 'User Management',
-    url: '/users',
-    icon: Users,
-    roles: ['super_admin'],
+    title: 'Workforce Management',
+    url: '/workforce',
+    icon: UsersRound,
+    roles: ['super_admin', 'compliance'],
   },
   {
     title: 'Settings',

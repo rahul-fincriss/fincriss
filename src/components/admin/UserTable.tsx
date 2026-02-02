@@ -9,8 +9,9 @@ import {
   UserCheck,
   UserX,
   Filter,
+  Layers,
 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -36,10 +37,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { UserFormDialog } from './UserFormDialog';
 import { DeleteUserDialog } from './DeleteUserDialog';
-import { mockManagedUsers } from '@/data/adminMockData';
-import { ManagedUser, UserStatus } from '@/types/admin';
+import { mockManagedUsers, mockWorkforceQueues } from '@/data/adminMockData';
+import { ManagedUser, UserStatus, WorkforceQueue } from '@/types/admin';
 import { UserRole } from '@/types';
 import { toast } from 'sonner';
 
@@ -53,12 +59,19 @@ const roleLabels: Record<UserRole, string> = {
 
 export function UserTable() {
   const [users, setUsers] = useState<ManagedUser[]>(mockManagedUsers);
+  const [queues] = useState<WorkforceQueue[]>(mockWorkforceQueues);
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<ManagedUser | null>(null);
   const [deletingUser, setDeletingUser] = useState<ManagedUser | null>(null);
+
+  const getQueueNames = (queueIds: string[]): string[] => {
+    return queueIds
+      .map((id) => queues.find((q) => q.id === id)?.name)
+      .filter(Boolean) as string[];
+  };
 
   const filteredUsers = useMemo(() => {
     return users.filter((user) => {
@@ -104,6 +117,7 @@ export function UserTable() {
         status: userData.status || 'active',
         department: userData.department,
         team: userData.team,
+        assignedQueueIds: userData.assignedQueueIds || [],
         createdAt: new Date(),
       };
       setUsers([...users, newUser]);
@@ -134,7 +148,12 @@ export function UserTable() {
     <>
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-          <CardTitle className="text-lg font-semibold">Users</CardTitle>
+          <div>
+            <CardTitle className="text-lg font-semibold">Users</CardTitle>
+            <CardDescription>
+              Manage user accounts, roles, and queue assignments
+            </CardDescription>
+          </div>
           <Button onClick={handleAddUser} className="gap-2">
             <Plus className="h-4 w-4" />
             Add User
@@ -189,16 +208,15 @@ export function UserTable() {
                   <TableHead>Email / Username</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Role(s)</TableHead>
-                  <TableHead>Department</TableHead>
+                  <TableHead>Assigned Queues</TableHead>
                   <TableHead>Last Login</TableHead>
-                  <TableHead>Created</TableHead>
                   <TableHead className="w-[60px]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredUsers.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                    <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                       No users found matching your criteria
                     </TableCell>
                   </TableRow>
@@ -240,12 +258,23 @@ export function UserTable() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div className="flex flex-col">
-                          <span className="text-sm">{user.department || '-'}</span>
-                          {user.team && (
-                            <span className="text-xs text-muted-foreground">
-                              {user.team}
-                            </span>
+                        <div className="flex items-center gap-2">
+                          <Layers className="h-4 w-4 text-muted-foreground" />
+                          {user.assignedQueueIds.length === 0 ? (
+                            <span className="text-sm text-muted-foreground">None</span>
+                          ) : (
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <span className="text-sm cursor-help">
+                                  {user.assignedQueueIds.length} queue{user.assignedQueueIds.length !== 1 ? 's' : ''}
+                                </span>
+                              </TooltipTrigger>
+                              <TooltipContent className="max-w-[200px]">
+                                <p className="text-xs">
+                                  {getQueueNames(user.assignedQueueIds).join(', ')}
+                                </p>
+                              </TooltipContent>
+                            </Tooltip>
                           )}
                         </div>
                       </TableCell>
@@ -253,9 +282,6 @@ export function UserTable() {
                         {user.lastLogin
                           ? formatDistanceToNow(user.lastLogin, { addSuffix: true })
                           : 'Never'}
-                      </TableCell>
-                      <TableCell className="text-sm text-muted-foreground">
-                        {format(user.createdAt, 'MMM d, yyyy')}
                       </TableCell>
                       <TableCell>
                         <DropdownMenu>
