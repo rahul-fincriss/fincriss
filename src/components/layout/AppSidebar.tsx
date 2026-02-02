@@ -131,7 +131,7 @@ export function AppSidebar() {
                 FinCrisS
               </span>
               <span className="text-xs text-muted-foreground">
-                AML Intelligence
+                Financial Crime Intelligence
               </span>
             </div>
           )}
