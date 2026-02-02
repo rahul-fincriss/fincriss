@@ -26,7 +26,7 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 import { Badge } from '@/components/ui/badge';
-import fincrissLogo from '@/assets/fincriss-logo.jpg';
+import { ThemedLogo } from '@/components/shared/ThemedLogo';
 
 interface NavItem {
   title: string;
@@ -119,11 +119,7 @@ export function AppSidebar() {
           className="flex items-center gap-3 px-2 py-3 hover:opacity-80 transition-opacity"
         >
           <div className="flex h-10 w-10 items-center justify-center rounded-lg overflow-hidden bg-background">
-            <img
-              src={fincrissLogo}
-              alt="FinCrisS"
-              className="h-10 w-10 object-cover"
-            />
+            <ThemedLogo className="h-10 w-10 object-cover" />
           </div>
           {!isCollapsed && (
             <div className="flex flex-col">

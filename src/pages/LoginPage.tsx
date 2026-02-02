@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
 import { UserRole } from '@/types';
 import { ThemeToggle } from '@/components/theme/ThemeToggle';
-import fincrissLogo from '@/assets/fincriss-logo.jpg';
+import { ThemedLogo } from '@/components/shared/ThemedLogo';
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -46,11 +46,7 @@ export default function LoginPage() {
         {/* Branding */}
         <div className="flex flex-col items-center gap-3 mb-8">
           <div className="flex h-16 w-16 items-center justify-center rounded-xl overflow-hidden bg-background shadow-md border border-border">
-            <img
-              src={fincrissLogo}
-              alt="FinCrisS"
-              className="h-16 w-16 object-cover"
-            />
+            <ThemedLogo className="h-16 w-16 object-cover" />
           </div>
           <div className="text-center">
             <h1 className="text-xl font-bold">FinCrisS</h1>
