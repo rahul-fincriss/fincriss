@@ -15,6 +15,15 @@ export type AlertStatus = 'new' | 'in_review' | 'sent_to_maps' | 'dropped' | 'ca
 export type RiskLevel = 'high' | 'medium' | 'low';
 export type UserPriority = 'urgent' | 'high' | 'medium' | 'low' | 'none';
 
+// Queue types for operational routing (not risk-based)
+export type QueueType = 
+  | 'default_aml' 
+  | 'pep_sanctions' 
+  | 'high_value' 
+  | 'cash_structuring' 
+  | 'trade_based' 
+  | 'behavioral_anomaly';
+
 export interface RawAlert {
   id: string;
   sourceSystem: string;
@@ -50,13 +59,17 @@ export interface CustomerGroupOverrides {
   assignedAnalystName?: string;
   assignedAt?: Date;
   assignedBy?: string;
+  // Queue Type for operational routing
+  queueType?: QueueType;
+  queueTypeChangedBy?: string;
+  queueTypeChangedAt?: Date;
 }
 
 // Audit log entry for workbench actions
 export interface WorkbenchAuditEntry {
   id: string;
   customerId: string;
-  action: 'priority_change' | 'analyst_assignment' | 'analyst_reassignment' | 'raw_payload_viewed';
+  action: 'priority_change' | 'analyst_assignment' | 'analyst_reassignment' | 'raw_payload_viewed' | 'queue_change';
   performedBy: string;
   performedAt: Date;
   previousValue?: string;

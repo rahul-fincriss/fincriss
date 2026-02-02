@@ -33,16 +33,14 @@ import { Badge } from '@/components/ui/badge';
 import { RiskBadge } from '@/components/shared/RiskBadge';
 import { SLATimer } from '@/components/shared/SLATimer';
 import { mockPrioritizedAlerts, mockAnalysts } from '@/data/mockData';
-import { PrioritizedAlert, RiskLevel, UserPriority, CustomerGroupOverrides, WorkbenchAuditEntry, User } from '@/types';
+import { PrioritizedAlert, RiskLevel, UserPriority, CustomerGroupOverrides, WorkbenchAuditEntry, User, QueueType } from '@/types';
 import { toast } from 'sonner';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { useAuth } from '@/contexts/AuthContext';
 import { AuditPanel } from '@/components/workbench/AuditPanel';
-import { PriorityOverrideDialog } from '@/components/workbench/PriorityOverrideDialog';
 import { AnalystAssignmentDropdown } from '@/components/workbench/AnalystAssignmentDropdown';
-import { UserPriorityBadge } from '@/components/workbench/UserPriorityBadge';
 import { RawAlertDrawer } from '@/components/workbench/RawAlertDrawer';
+import { QueueTypeDropdown, queueTypeShortLabels } from '@/components/workbench/QueueTypeDropdown';
 
 const alertTypeLabels: Record<string, string> = {
   large_cash: 'Large Cash',
@@ -67,7 +65,6 @@ interface CustomerGroup {
 }
 
 const priorityOrder: Record<RiskLevel, number> = { high: 3, medium: 2, low: 1 };
-const userPriorityOrder: Record<UserPriority, number> = { urgent: 4, high: 3, medium: 2, low: 1, none: 0 };
 
 function groupAlertsByCustomer(alerts: PrioritizedAlert[]): CustomerGroup[] {
   const groupMap = new Map<string, PrioritizedAlert[]>();
@@ -129,7 +126,6 @@ export default function AlertWorkbenchPage() {
   const [alerts] = useState<PrioritizedAlert[]>(mockPrioritizedAlerts);
   const [searchQuery, setSearchQuery] = useState('');
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
-  const [priorityMode, setPriorityMode] = useState<'maps' | 'user'>('maps');
   const [expandedCustomers, setExpandedCustomers] = useState<Set<string>>(new Set());
   
   // Customer-level overrides
@@ -142,8 +138,6 @@ export default function AlertWorkbenchPage() {
   const [auditLog, setAuditLog] = useState<Map<string, WorkbenchAuditEntry[]>>(new Map());
   
   // Dialog states
-  const [priorityDialogOpen, setPriorityDialogOpen] = useState(false);
-  const [selectedCustomerForPriority, setSelectedCustomerForPriority] = useState<CustomerGroup | null>(null);
   const [auditPanelOpen, setAuditPanelOpen] = useState(false);
   const [selectedCustomerForAudit, setSelectedCustomerForAudit] = useState<CustomerGroup | null>(null);
   
@@ -169,40 +163,32 @@ export default function AlertWorkbenchPage() {
     });
   }, []);
 
-  const handleSetUserPriority = useCallback((
-    customerId: string,
-    priority: UserPriority,
-    category: string,
-    reason: string
-  ) => {
+  const handleQueueChange = useCallback((customerId: string, queue: QueueType) => {
     const existing = customerOverrides.get(customerId);
-    const previousPriority = existing?.userPriority || 'none';
+    const previousQueue = existing?.queueType || 'default_aml';
     
     setCustomerOverrides((prev) => {
       const newOverrides = new Map(prev);
       newOverrides.set(customerId, {
         ...existing,
         customerId,
-        userPriority: priority,
-        userPriorityReason: reason,
-        userPriorityCategory: category,
-        userPriorityChangedBy: user?.name,
-        userPriorityChangedAt: new Date(),
+        userPriority: existing?.userPriority || 'none',
+        queueType: queue,
+        queueTypeChangedBy: user?.name,
+        queueTypeChangedAt: new Date(),
       });
       return newOverrides;
     });
 
     addAuditEntry(customerId, {
       customerId,
-      action: 'priority_change',
+      action: 'queue_change',
       performedBy: user?.name || 'Unknown',
-      previousValue: previousPriority,
-      newValue: priority,
-      reason,
-      category,
+      previousValue: queueTypeShortLabels[previousQueue],
+      newValue: queueTypeShortLabels[queue],
     });
 
-    toast.success(`Priority override set to ${priority === 'none' ? 'cleared' : priority}`);
+    toast.success(`Queue changed to ${queueTypeShortLabels[queue]}`);
   }, [customerOverrides, user?.name, addAuditEntry]);
 
   const handleAssignAnalyst = useCallback((customerId: string, analyst: User, isReassignment: boolean = false) => {
@@ -272,40 +258,20 @@ export default function AlertWorkbenchPage() {
 
     let groups = groupAlertsByCustomer(filtered);
 
-    // Filter by priority
+    // Filter by FinCrisS priority
     if (priorityFilter !== 'all') {
-      if (priorityMode === 'maps') {
-        groups = groups.filter((group) => group.maxPriority === priorityFilter);
-      } else {
-        groups = groups.filter((group) => {
-          const override = customerOverrides.get(group.customerId);
-          return override?.userPriority === priorityFilter;
-        });
-      }
+      groups = groups.filter((group) => group.maxPriority === priorityFilter);
     }
 
-    // Sort based on priority mode
-    if (priorityMode === 'user') {
-      groups.sort((a, b) => {
-        const aOverride = customerOverrides.get(a.customerId)?.userPriority || 'none';
-        const bOverride = customerOverrides.get(b.customerId)?.userPriority || 'none';
-        const priorityDiff = userPriorityOrder[bOverride] - userPriorityOrder[aOverride];
-        if (priorityDiff !== 0) return priorityDiff;
-        // Fall back to FinCrisS priority, then SLA
-        const scoreDiff = priorityOrder[b.maxPriority] - priorityOrder[a.maxPriority];
-        if (scoreDiff !== 0) return scoreDiff;
-        return a.earliestSLA.getTime() - b.earliestSLA.getTime();
-      });
-    } else {
-      groups.sort((a, b) => {
-        const priorityDiff = priorityOrder[b.maxPriority] - priorityOrder[a.maxPriority];
-        if (priorityDiff !== 0) return priorityDiff;
-        return a.earliestSLA.getTime() - b.earliestSLA.getTime();
-      });
-    }
+    // Sort by FinCrisS priority, then SLA
+    groups.sort((a, b) => {
+      const priorityDiff = priorityOrder[b.maxPriority] - priorityOrder[a.maxPriority];
+      if (priorityDiff !== 0) return priorityDiff;
+      return a.earliestSLA.getTime() - b.earliestSLA.getTime();
+    });
 
     return groups;
-  }, [alerts, searchQuery, priorityFilter, priorityMode, customerOverrides]);
+  }, [alerts, searchQuery, priorityFilter]);
 
   const totalAlerts = alerts.length;
   const totalCustomers = customerGroups.length;
@@ -341,11 +307,6 @@ export default function AlertWorkbenchPage() {
     toast.success(`Alert ${alertId} added to case`);
   };
 
-  const openPriorityDialog = (group: CustomerGroup) => {
-    setSelectedCustomerForPriority(group);
-    setPriorityDialogOpen(true);
-  };
-
   const openAuditPanel = (group: CustomerGroup) => {
     setSelectedCustomerForAudit(group);
     setAuditPanelOpen(true);
@@ -369,14 +330,6 @@ export default function AlertWorkbenchPage() {
     }
     toast.info(`Raw payload view logged for audit trail`);
   }, [alerts, addAuditEntry]);
-
-  const getEffectiveAlertPriority = (alert: PrioritizedAlert, customerOverride?: CustomerGroupOverrides): UserPriority => {
-    const alertOverride = alertOverrides.get(alert.id);
-    if (alertOverride?.userPriority && alertOverride.userPriority !== 'none') {
-      return alertOverride.userPriority;
-    }
-    return customerOverride?.userPriority || 'none';
-  };
 
   const getEffectiveAlertAssignee = (alert: PrioritizedAlert, customerOverride?: CustomerGroupOverrides): { id: string; name: string } | undefined => {
     const alertOverride = alertOverrides.get(alert.id);
@@ -430,41 +383,15 @@ export default function AlertWorkbenchPage() {
             />
           </div>
           
-          {/* Priority Mode Toggle */}
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">Sort/Filter by:</span>
-            <ToggleGroup
-              type="single"
-              value={priorityMode}
-              onValueChange={(value) => value && setPriorityMode(value as 'maps' | 'user')}
-              className="bg-muted/50 rounded-lg p-1"
-            >
-              <ToggleGroupItem
-                value="maps"
-                className="text-xs px-3 data-[state=on]:bg-background"
-              >
-                FinCrisS Priority
-              </ToggleGroupItem>
-              <ToggleGroupItem
-                value="user"
-                className="text-xs px-3 data-[state=on]:bg-background"
-              >
-                User Priority
-              </ToggleGroupItem>
-            </ToggleGroup>
-          </div>
-
           <Select value={priorityFilter} onValueChange={setPriorityFilter}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Filter by priority" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Priorities</SelectItem>
-              {priorityMode === 'user' && <SelectItem value="urgent">Urgent</SelectItem>}
               <SelectItem value="high">High</SelectItem>
               <SelectItem value="medium">Medium</SelectItem>
               <SelectItem value="low">Low</SelectItem>
-              {priorityMode === 'user' && <SelectItem value="none">No Override</SelectItem>}
             </SelectContent>
           </Select>
         </div>
@@ -478,8 +405,8 @@ export default function AlertWorkbenchPage() {
                 <TableHead>Customer</TableHead>
                 <TableHead className="w-[80px]">Alerts</TableHead>
                 <TableHead className="w-[180px]">Priority Breakdown</TableHead>
-                <TableHead>FinCrisS Score</TableHead>
-                <TableHead className="w-[140px]">User Priority</TableHead>
+                <TableHead>FinCrisS Priority</TableHead>
+                <TableHead className="w-[180px]">Queue Type</TableHead>
                 <TableHead className="w-[160px]">Assigned Analyst</TableHead>
                 <TableHead>SLA</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
@@ -545,30 +472,18 @@ export default function AlertWorkbenchPage() {
                             </div>
                           </TableCell>
                           <TableCell>
-                            <div className="flex items-center gap-2">
-                              <RiskBadge level={group.maxPriority} size="sm" />
-                              <span className="text-xs text-muted-foreground font-mono">
-                                {group.minScore === group.maxScore
-                                  ? group.maxScore
-                                  : `${group.minScore}–${group.maxScore}`}
-                              </span>
-                            </div>
+                            <RiskBadge level={group.maxPriority} size="sm" />
                           </TableCell>
                           <TableCell onClick={(e) => e.stopPropagation()}>
                             {canEdit ? (
-                              <UserPriorityBadge
-                                priority={override?.userPriority || 'none'}
-                                isOverride={hasOverride}
-                                showEditButton
-                                onClick={() => openPriorityDialog(group)}
-                                size="sm"
+                              <QueueTypeDropdown
+                                currentQueue={override?.queueType}
+                                onQueueChange={(queue) => handleQueueChange(group.customerId, queue)}
                               />
                             ) : (
-                              <UserPriorityBadge
-                                priority={override?.userPriority || 'none'}
-                                isOverride={hasOverride}
-                                size="sm"
-                              />
+                              <Badge variant="outline" className="text-xs">
+                                {queueTypeShortLabels[override?.queueType || 'default_aml']}
+                              </Badge>
                             )}
                           </TableCell>
                           <TableCell onClick={(e) => e.stopPropagation()}>
@@ -635,9 +550,7 @@ export default function AlertWorkbenchPage() {
                       <CollapsibleContent asChild>
                         <>
                           {group.alerts.map((alert) => {
-                            const effectivePriority = getEffectiveAlertPriority(alert, override);
                             const effectiveAssignee = getEffectiveAlertAssignee(alert, override);
-                            const alertHasOwnOverride = alertOverrides.has(alert.id);
 
                             return (
                               <TableRow
@@ -675,24 +588,13 @@ export default function AlertWorkbenchPage() {
                                   </div>
                                 </TableCell>
                                 <TableCell>
-                                  <div className="flex items-center gap-2">
-                                    <RiskBadge level={alert.riskLevel} size="sm" />
-                                    <span className="text-xs text-muted-foreground font-mono">
-                                      {alert.mapsScore}
-                                    </span>
-                                  </div>
+                                  <RiskBadge level={alert.riskLevel} size="sm" />
                                 </TableCell>
-                                <TableCell onClick={(e) => e.stopPropagation()}>
-                                  <div className="flex items-center gap-1">
-                                    <UserPriorityBadge
-                                      priority={effectivePriority}
-                                      isOverride={effectivePriority !== 'none'}
-                                      size="sm"
-                                    />
-                                    {!alertHasOwnOverride && effectivePriority !== 'none' && (
-                                      <span className="text-[10px] text-muted-foreground">(inherited)</span>
-                                    )}
-                                  </div>
+                                <TableCell>
+                                  {/* Queue inherited from customer level */}
+                                  <span className="text-xs text-muted-foreground italic">
+                                    (inherited)
+                                  </span>
                                 </TableCell>
                                 <TableCell onClick={(e) => e.stopPropagation()}>
                                   {canEdit ? (
@@ -778,18 +680,6 @@ export default function AlertWorkbenchPage() {
         )}
       </div>
 
-      {/* Priority Override Dialog */}
-      {selectedCustomerForPriority && (
-        <PriorityOverrideDialog
-          open={priorityDialogOpen}
-          onOpenChange={setPriorityDialogOpen}
-          customerName={selectedCustomerForPriority.customerName}
-          currentPriority={customerOverrides.get(selectedCustomerForPriority.customerId)?.userPriority || 'none'}
-          onConfirm={(priority, category, reason) => {
-            handleSetUserPriority(selectedCustomerForPriority.customerId, priority, category, reason);
-          }}
-        />
-      )}
 
       {/* Audit Panel */}
       {selectedCustomerForAudit && (
