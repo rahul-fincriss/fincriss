@@ -158,7 +158,7 @@ export default function LoginPage() {
 
         {/* Footer */}
         <p className="text-center text-xs text-muted-foreground pt-4">
-          © 2024 FinCrisS Platform. Enterprise AML Solution.
+          © 2026 FinCrisS Platform
         </p>
       </div>
     </div>
