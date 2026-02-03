@@ -58,13 +58,6 @@ const navItems: NavItem[] = [
     badge: '8',
   },
   {
-    title: 'STR Queue',
-    url: '/str',
-    icon: FileText,
-    roles: ['investigator', 'principal_officer', 'compliance', 'super_admin'],
-    badge: '3',
-  },
-  {
     title: 'Audit Trail',
     url: '/audit',
     icon: History,

@@ -12,9 +12,6 @@ import AlertWorkbenchPage from "./pages/AlertWorkbenchPage";
 import AlertDetailsPage from "./pages/AlertDetailsPage";
 import CasesPage from "./pages/CasesPage";
 import CaseWorkspacePage from "./pages/CaseWorkspacePage";
-import STRDraftPage from "./pages/STRDraftPage";
-import POReviewPage from "./pages/POReviewPage";
-import STRConfirmationPage from "./pages/STRConfirmationPage";
 import AuditTrailPage from "./pages/AuditTrailPage";
 import MLOpsPage from "./pages/MLOpsPage";
 import ModelTuningPage from "./pages/ModelTuningPage";
@@ -45,10 +42,9 @@ function AppRoutes() {
       <Route path="/alerts/:alertId" element={<ProtectedRoute><AlertDetailsPage /></ProtectedRoute>} />
       <Route path="/cases" element={<ProtectedRoute><CasesPage /></ProtectedRoute>} />
       <Route path="/cases/:caseId" element={<ProtectedRoute><CaseWorkspacePage /></ProtectedRoute>} />
-      <Route path="/str" element={<ProtectedRoute><CasesPage /></ProtectedRoute>} />
-      <Route path="/str/draft/:caseId" element={<ProtectedRoute><STRDraftPage /></ProtectedRoute>} />
-      <Route path="/str/review" element={<ProtectedRoute><POReviewPage /></ProtectedRoute>} />
-      <Route path="/str/confirmed" element={<ProtectedRoute><STRConfirmationPage /></ProtectedRoute>} />
+      {/* Redirect legacy STR routes to Cases */}
+      <Route path="/str" element={<Navigate to="/cases" replace />} />
+      <Route path="/str/*" element={<Navigate to="/cases" replace />} />
       <Route path="/audit" element={<ProtectedRoute><AuditTrailPage /></ProtectedRoute>} />
       <Route path="/mlops" element={<ProtectedRoute><MLOpsPage /></ProtectedRoute>} />
       <Route path="/model-tuning" element={<ProtectedRoute><ModelTuningPage /></ProtectedRoute>} />
