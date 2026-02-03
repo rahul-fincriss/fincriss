@@ -9,7 +9,8 @@ import {
   Upload, 
   XCircle,
   Clock,
-  AlertTriangle
+  AlertTriangle,
+  ScrollText
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
@@ -19,6 +20,7 @@ import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { StatusBadge } from '@/components/shared/StatusBadge';
 import { SLATimer } from '@/components/shared/SLATimer';
+import { STRDraftTab } from '@/components/str/STRDraftTab';
 import { mockCases, mockTransactions, mockCustomerKYC } from '@/data/mockData';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
@@ -38,8 +40,9 @@ export default function CaseWorkspacePage() {
     setNewNote('');
   };
 
-  const handleProceedToSTR = () => {
-    navigate(`/str/draft/${caseData.id}`);
+  const handleSubmitSTRToPO = () => {
+    toast.success('STR submitted to Principal Officer for review');
+    navigate('/str');
   };
 
   return (
@@ -64,10 +67,6 @@ export default function CaseWorkspacePage() {
             <Button variant="outline">
               <XCircle className="mr-2 h-4 w-4" />
               Close as False Positive
-            </Button>
-            <Button onClick={handleProceedToSTR}>
-              <FileText className="mr-2 h-4 w-4" />
-              Proceed to STR
             </Button>
           </div>
         </div>
@@ -104,12 +103,16 @@ export default function CaseWorkspacePage() {
 
         {/* Tabbed Content */}
         <Tabs defaultValue="transactions" className="space-y-4">
-          <TabsList>
+          <TabsList className="flex-wrap">
             <TabsTrigger value="transactions">Transactions</TabsTrigger>
             <TabsTrigger value="network">Network Graph</TabsTrigger>
             <TabsTrigger value="documents">Documents</TabsTrigger>
             <TabsTrigger value="findings">System Findings</TabsTrigger>
             <TabsTrigger value="notes">Notes</TabsTrigger>
+            <TabsTrigger value="str-draft" className="gap-1.5">
+              <ScrollText className="h-4 w-4" />
+              STR Draft
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="transactions" className="space-y-4">
@@ -281,9 +284,17 @@ export default function CaseWorkspacePage() {
                     <PlusCircle className="mr-2 h-4 w-4" />
                     Add Note
                   </Button>
-                </div>
-              </CardContent>
-            </Card>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+          {/* STR Draft Tab */}
+          <TabsContent value="str-draft">
+            <STRDraftTab 
+              caseData={caseData} 
+              onSubmitToPO={handleSubmitSTRToPO}
+            />
           </TabsContent>
         </Tabs>
       </div>
