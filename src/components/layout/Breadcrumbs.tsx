@@ -7,7 +7,6 @@ const routeLabels: Record<string, string> = {
   alerts: 'Alerts',
   workbench: 'Alert Workbench',
   cases: 'Cases',
-  str: 'STR Queue',
   audit: 'Audit Trail',
   mlops: 'ML Ops',
   workforce: 'Workforce Management',

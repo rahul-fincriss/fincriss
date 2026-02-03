@@ -42,7 +42,7 @@ export default function CaseWorkspacePage() {
 
   const handleSubmitSTRToPO = () => {
     toast.success('STR submitted to Principal Officer for review');
-    navigate('/str');
+    navigate('/cases');
   };
 
   return (

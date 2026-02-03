@@ -81,6 +81,9 @@ export interface WorkbenchAuditEntry {
 // Case types
 export type CaseStatus = 'open' | 'investigation' | 'str_draft' | 'pending_review' | 'submitted' | 'closed';
 
+// STR Status for visibility in Cases list
+export type STRStatusType = 'no_str' | 'draft_in_progress' | 'str_ready' | 'str_downloaded' | 'discarded';
+
 export interface Case {
   id: string;
   linkedAlerts: string[];
@@ -89,6 +92,7 @@ export interface Case {
   investigatorId: string;
   investigatorName: string;
   status: CaseStatus;
+  strStatus: STRStatusType;
   createdAt: Date;
   slaDeadline: Date;
   totalAmount: number;
