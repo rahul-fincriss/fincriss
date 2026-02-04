@@ -486,7 +486,7 @@ export default function ModelTuningPage() {
                     <TableRow>
                       <TableCell>2024-01-28</TableCell>
                       <TableCell>Sensitivity threshold: 60% → 65%</TableCell>
-                      <TableCell>James Patterson</TableCell>
+                      <TableCell>Rahul Arora</TableCell>
                       <TableCell>
                         <Badge className="bg-status-success/20 text-status-success">Deployed</Badge>
                       </TableCell>
@@ -495,7 +495,7 @@ export default function ModelTuningPage() {
                     <TableRow>
                       <TableCell>2024-01-20</TableCell>
                       <TableCell>Enabled enhanced structuring module</TableCell>
-                      <TableCell>James Patterson</TableCell>
+                      <TableCell>Rahul Arora</TableCell>
                       <TableCell>
                         <Badge className="bg-status-success/20 text-status-success">Deployed</Badge>
                       </TableCell>
@@ -504,7 +504,7 @@ export default function ModelTuningPage() {
                     <TableRow>
                       <TableCell>2024-01-15</TableCell>
                       <TableCell>Model upgrade: v3.1.0 → v3.2.1</TableCell>
-                      <TableCell>James Patterson</TableCell>
+                      <TableCell>Rahul Arora</TableCell>
                       <TableCell>
                         <Badge className="bg-status-success/20 text-status-success">Deployed</Badge>
                       </TableCell>
