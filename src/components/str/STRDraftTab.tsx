@@ -169,21 +169,21 @@ export function STRDraftTab({ caseData, readOnly = false, onSubmitToPO }: STRDra
           prev.map((s) =>
             s.type === section.type
               ? {
-                  ...s,
-                  paragraphs: s.paragraphs.map((p) =>
-                    p.id === paragraphId
-                      ? {
-                          ...p,
-                          content: generatedContent,
-                          isAiGenerated: true,
-                          isEdited: false,
-                          generatedAt: new Date(),
-                          generatedBy: 'fincriss_agent',
-                          version: p.version + 1,
-                        }
-                      : p
-                  ),
-                }
+                ...s,
+                paragraphs: s.paragraphs.map((p) =>
+                  p.id === paragraphId
+                    ? {
+                      ...p,
+                      content: generatedContent,
+                      isAiGenerated: true,
+                      isEdited: false,
+                      generatedAt: new Date(),
+                      generatedBy: 'fincriss_agent',
+                      version: p.version + 1,
+                    }
+                    : p
+                ),
+              }
               : s
           )
         );
@@ -217,19 +217,19 @@ export function STRDraftTab({ caseData, readOnly = false, onSubmitToPO }: STRDra
         prev.map((s) =>
           s.type === sectionType
             ? {
-                ...s,
-                paragraphs: s.paragraphs.map((p) =>
-                  p.id === paragraphId
-                    ? {
-                        ...p,
-                        content,
-                        isEdited,
-                        editedAt: isEdited ? new Date() : p.editedAt,
-                        editedBy: isEdited ? 'Michael Torres' : p.editedBy,
-                      }
-                    : p
-                ),
-              }
+              ...s,
+              paragraphs: s.paragraphs.map((p) =>
+                p.id === paragraphId
+                  ? {
+                    ...p,
+                    content,
+                    isEdited,
+                    editedAt: isEdited ? new Date() : p.editedAt,
+                    editedBy: isEdited ? 'Michael Torres' : p.editedBy,
+                  }
+                  : p
+              ),
+            }
             : s
         )
       );
@@ -250,19 +250,19 @@ export function STRDraftTab({ caseData, readOnly = false, onSubmitToPO }: STRDra
       prev.map((s) =>
         s.type === sectionType
           ? {
-              ...s,
-              paragraphs: [
-                ...s.paragraphs,
-                {
-                  id: newParagraphId,
-                  sectionType,
-                  content: '',
-                  isAiGenerated: false,
-                  isEdited: false,
-                  version: 1,
-                },
-              ],
-            }
+            ...s,
+            paragraphs: [
+              ...s.paragraphs,
+              {
+                id: newParagraphId,
+                sectionType,
+                content: '',
+                isAiGenerated: false,
+                isEdited: false,
+                version: 1,
+              },
+            ],
+          }
           : s
       )
     );
@@ -432,6 +432,7 @@ export function STRDraftTab({ caseData, readOnly = false, onSubmitToPO }: STRDra
           caseId={caseData.id}
           customerName={caseData.customerName}
           investigatorComments={investigatorComments}
+          caseData={caseData}
         />
       )}
     </div>
