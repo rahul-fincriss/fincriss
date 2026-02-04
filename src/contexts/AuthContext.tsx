@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { User, UserRole } from '@/types';
+import React, { createContext, useContext, useState, ReactNode } from "react";
+import { User, UserRole } from "@/types";
 
 interface AuthContextType {
   user: User | null;
@@ -14,34 +14,34 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 // Demo users for different roles
 const demoUsers: Record<UserRole, User> = {
   analyst: {
-    id: 'usr-001',
-    name: 'Sarah Chen',
-    email: 'sarah.chen@bank.com',
-    role: 'analyst',
+    id: "usr-001",
+    name: "Sarah Chen",
+    email: "sarah.chen@bank.com",
+    role: "analyst",
   },
   investigator: {
-    id: 'usr-002',
-    name: 'Michael Torres',
-    email: 'michael.torres@bank.com',
-    role: 'investigator',
+    id: "usr-002",
+    name: "Anoop Nambiar",
+    email: "anoop.nambiar@bank.com",
+    role: "investigator",
   },
   principal_officer: {
-    id: 'usr-003',
-    name: 'Dr. Amanda Williams',
-    email: 'amanda.williams@bank.com',
-    role: 'principal_officer',
+    id: "usr-003",
+    name: "Dr. Amanda Williams",
+    email: "amanda.williams@bank.com",
+    role: "principal_officer",
   },
   compliance: {
-    id: 'usr-004',
-    name: 'Robert Kim',
-    email: 'robert.kim@bank.com',
-    role: 'compliance',
+    id: "usr-004",
+    name: "Robert Kim",
+    email: "robert.kim@bank.com",
+    role: "compliance",
   },
   super_admin: {
-    id: 'usr-005',
-    name: 'James Patterson',
-    email: 'james.patterson@bank.com',
-    role: 'super_admin',
+    id: "usr-005",
+    name: "Rahul Arora",
+    email: "rahul.arora@bank.com",
+    role: "super_admin",
   },
 };
 
@@ -50,7 +50,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (email: string, _password: string) => {
     // Demo: Find user by email or default to analyst
-    const matchedUser = Object.values(demoUsers).find(u => u.email === email);
+    const matchedUser = Object.values(demoUsers).find((u) => u.email === email);
     setUser(matchedUser || demoUsers.analyst);
   };
 
@@ -80,7 +80,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 }
