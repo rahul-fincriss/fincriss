@@ -240,27 +240,68 @@ export default function CaseWorkspacePage() {
                 <CardDescription>AI-generated analysis and recommendations</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="ai-generated rounded-lg p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Badge className="badge-risk-high">High Confidence</Badge>
-                    <span className="text-sm font-medium">Trade-Based Money Laundering Pattern</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Analysis indicates systematic over-invoicing of goods through shell companies 
-                    in high-risk jurisdictions. Transaction velocity and amounts are inconsistent 
-                    with declared business operations.
-                  </p>
-                </div>
-                <div className="ai-generated rounded-lg p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Badge className="badge-risk-medium">Medium Confidence</Badge>
-                    <span className="text-sm font-medium">Layering Through Multiple Accounts</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Funds appear to be moved rapidly through multiple intermediary accounts 
-                    before settling in offshore entities. Pattern consistent with layering phase.
-                  </p>
-                </div>
+                {/* Dynamic findings based on case */}
+                {caseData.id === 'CASE-MM-2026-001' ? (
+                  <>
+                    <div className="ai-generated rounded-lg p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Badge className="badge-risk-high">High Confidence</Badge>
+                        <span className="text-sm font-medium">Money Mule / Funnel Account Typology Match</span>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        Account exhibits classic funnel pattern: Multiple unrelated domestic inflows from 8 geographically 
+                        dispersed sources (Delhi, Jaipur, Mumbai, Kolkata, Hyderabad, Chennai, Ahmedabad, Indore) rapidly 
+                        aggregated, followed by single large international outflow to high-risk jurisdiction (Cyprus).
+                      </p>
+                    </div>
+                    <div className="ai-generated rounded-lg p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Badge className="badge-risk-high">High Confidence</Badge>
+                        <span className="text-sm font-medium">Severe Profile Mismatch</span>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        Account holder is a homemaker with zero declared income and expected turnover of ₹0-₹50,000. 
+                        Actual inflows of ₹12,00,000 over 10 days represent a deviation exceeding 24,000% from declared profile.
+                        No commercial rationale exists for "Consulting Fee" payment to Cyprus entity.
+                      </p>
+                    </div>
+                    <div className="ai-generated rounded-lg p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Badge className="badge-risk-high">High Confidence</Badge>
+                        <span className="text-sm font-medium">Rapid Transfer to High-Risk Jurisdiction</span>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        ₹10,00,000 transferred to Eurolink Consulting Ltd (Cyprus) within 48 hours of final domestic deposit.
+                        Cyprus is classified as a high-risk jurisdiction for money laundering under FATF assessment.
+                        Timing pattern consistent with layering phase of ML typology.
+                      </p>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="ai-generated rounded-lg p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Badge className="badge-risk-high">High Confidence</Badge>
+                        <span className="text-sm font-medium">Trade-Based Money Laundering Pattern</span>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        Analysis indicates systematic over-invoicing of goods through shell companies 
+                        in high-risk jurisdictions. Transaction velocity and amounts are inconsistent 
+                        with declared business operations.
+                      </p>
+                    </div>
+                    <div className="ai-generated rounded-lg p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Badge className="badge-risk-medium">Medium Confidence</Badge>
+                        <span className="text-sm font-medium">Layering Through Multiple Accounts</span>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        Funds appear to be moved rapidly through multiple intermediary accounts 
+                        before settling in offshore entities. Pattern consistent with layering phase.
+                      </p>
+                    </div>
+                  </>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

@@ -19,24 +19,55 @@ interface STRDraftTabProps {
   onSubmitToPO?: () => void;
 }
 
-// Mock narrative content for AI generation
-const mockNarratives: Record<STRSectionType, string[]> = {
+// Mock narrative content for AI generation by case context
+const mockNarrativesByCase: Record<string, Record<STRSectionType, string[]>> = {
+  // Use Case 4: Money Mule / Funnel Account - Priya V. Sharma
+  'CASE-MM-2026-001': {
+    grounds_of_suspicion: [
+      'The subject account, held by Ms. Priya V. Sharma (Customer ID: CUS-PS-1995), a 30-year-old homemaker residing in Pune, Maharashtra, has exhibited transaction patterns strongly indicative of Money Mule / Funnel Account activity. The account holder has declared zero income and an expected monthly turnover of ₹0 to ₹50,000.',
+      'Between 20th January 2026 and 30th January 2026, the account received ₹12,00,000 through 8 inbound IMPS/NEFT transfers of ₹1,50,000 each, originating from 8 unrelated individuals across geographically dispersed locations in India (Delhi, Jaipur, Mumbai, Kolkata, Hyderabad, Chennai, Ahmedabad, and Indore). None of these remitters have any known relationship with the account holder.',
+      'Within 48 hours of the final domestic inflow, ₹10,00,000 was transferred via SWIFT to Eurolink Consulting Ltd in Cyprus, a high-risk jurisdiction under FATF assessment. The stated purpose was "Consulting Fee," which is inconsistent with the account holder\'s homemaker profile and zero declared income.',
+    ],
+    transaction_narrative: [
+      'Transaction flow analysis reveals a classic funnel account pattern: (1) Multiple small-to-medium inflows from unrelated domestic sources aggregated rapidly into the subject account, followed by (2) a single large outbound international transfer to a high-risk jurisdiction.',
+      'Inbound Transactions (Placement/Funneling Phase):\n- 20-Jan-2026: ₹1,50,000 IMPS from Rajesh Kumar Gupta (Delhi)\n- 21-Jan-2026: ₹1,50,000 NEFT from Mohan Singh Rathore (Jaipur)\n- 23-Jan-2026: ₹1,50,000 IMPS from Vikram Joshi (Mumbai)\n- 24-Jan-2026: ₹1,50,000 NEFT from Amit Banerjee (Kolkata)\n- 25-Jan-2026: ₹1,50,000 IMPS from Suresh Reddy (Hyderabad)\n- 27-Jan-2026: ₹1,50,000 NEFT from Karthik Iyer (Chennai)\n- 28-Jan-2026: ₹1,50,000 IMPS from Dinesh Patel (Ahmedabad)\n- 30-Jan-2026: ₹1,50,000 NEFT from Rakesh Tiwari (Indore)\nTotal Inflows: ₹12,00,000 over 10 days from 8 cities.',
+      'Outbound Transaction (Layering Phase):\n- 01-Feb-2026: ₹10,00,000 SWIFT transfer to Eurolink Consulting Ltd, Cyprus\n- Purpose stated: "Consulting Fee"\n- Jurisdiction Risk: HIGH (Cyprus)\n- Time from last inflow: <48 hours\n\nThe rapid aggregation and swift international remittance is characteristic of money mule operations used for layering proceeds of predicate offenses.',
+    ],
+    customer_background: [
+      'Ms. Priya V. Sharma (PAN: WXYZ1010A) is a 30-year-old individual customer, onboarded on 10th February 2023. Her KYC profile indicates: Occupation: Homemaker; Declared Income: ₹0; Source of Wealth: Spouse Income; Source of Funds: Household Transfers; Expected Monthly Turnover: ₹0 - ₹50,000.',
+      'The customer maintains a single Savings Account (A/c No: 3000XXXXXX) at the Pune branch. Pre-alert risk rating was Low based on minimal historical account activity. PEP and Sanctions screening: Clear. No prior alerts, cases, or STR filings exist for this customer.',
+      'The severe mismatch between declared profile (zero-income homemaker with minimal expected turnover) and actual transaction behavior (₹12,00,000 inflows from 8 unrelated parties, ₹10,00,000 international outflow to Cyprus) raises significant concern about the account being used as a conduit for illicit funds without the account holder\'s full understanding of the fund sources.',
+    ],
+    supporting_indicators: [
+      'FinCrisS Priority Rating: HIGH (Score: 95/100)\n\nRisk Indicators Identified:\n1. Money Mule / Funnel Account typology match (High Confidence)\n2. Severe profile mismatch: Zero declared income vs ₹12,00,000 actual inflows\n3. Multiple unrelated third-party deposits from 8 geographically dispersed cities\n4. High velocity: 8 deposits received within a 10-day window\n5. Rapid international outflow to high-risk jurisdiction (Cyprus) within 48 hours of aggregation',
+      'Behavioral Anomaly Indicators:\n- Account historically dormant with minimal activity\n- Sudden spike in both volume and velocity of transactions\n- No commercial or business rationale evident for consulting fee payment\n- Beneficiary entity (Eurolink Consulting Ltd, Cyprus) has limited verifiable corporate presence\n\nTypology Classification: Money Mule / Funnel Account\nRecommendation: File STR with FIU-IND under Section 12 of PMLA, 2002',
+    ],
+  },
+};
+
+// Default mock narratives for other cases
+const defaultMockNarratives: Record<STRSectionType, string[]> = {
   grounds_of_suspicion: [
-    'The subject account has exhibited a pattern of transactions that deviate significantly from the declared business profile. Between January 2024 and present, the entity conducted 47 wire transfers totaling USD 5,670,000 to entities incorporated in jurisdictions with elevated money laundering risk ratings.',
+    'The subject account has exhibited a pattern of transactions that deviate significantly from the declared business profile. Between January 2024 and present, the entity conducted 47 wire transfers totaling ₹5,67,00,000 to entities incorporated in jurisdictions with elevated money laundering risk ratings.',
     'Analysis of transaction flow indicates systematic structuring of payments just below reporting thresholds. The timing and amounts suggest deliberate fragmentation to evade detection, which is consistent with known money laundering methodologies.',
   ],
   transaction_narrative: [
-    'The subject initiated a series of outbound wire transfers to Global Trade BVI Ltd (British Virgin Islands), Pacific Holdings Panama (Panama), and Eastern Materials Co (Hong Kong). Individual transaction amounts ranged from USD 180,000 to USD 320,000, with an aggregate value of USD 745,000 within a 72-hour period.',
+    'The subject initiated a series of outbound wire transfers to Global Trade BVI Ltd (British Virgin Islands), Pacific Holdings Panama (Panama), and Eastern Materials Co (Hong Kong). Individual transaction amounts ranged from ₹18,00,000 to ₹32,00,000, with an aggregate value of ₹74,50,000 within a 72-hour period.',
     'Fund flow analysis reveals rapid movement of funds through multiple intermediary accounts before final settlement in offshore entities. This layering pattern is characteristic of trade-based money laundering schemes utilizing over-invoicing of goods and services.',
   ],
   customer_background: [
-    'Sunrise Exports Ltd is registered as a trading company with declared annual turnover of USD 2,000,000. The entity was incorporated 18 months ago with limited operational history. Beneficial ownership traces to a single individual with no prior commercial record in this jurisdiction.',
+    'The entity is registered as a trading company with declared annual turnover of ₹2,00,00,000. The entity was incorporated 18 months ago with limited operational history. Beneficial ownership traces to a single individual with no prior commercial record in this jurisdiction.',
     'KYC review indicates the actual transaction volume exceeds the declared business activity by approximately 280%. The customer has been unable to provide satisfactory documentation supporting the commercial rationale for transactions with counterparties in high-risk jurisdictions.',
   ],
   supporting_indicators: [
-    'FinCrisS risk scoring assigned this case a priority rating of High based on the following indicators: (1) Transactions with known shell company structures, (2) Use of high-risk jurisdictions including BVI, Panama, and Cyprus, (3) Structuring patterns consistent with evasion tactics.',
+    'FinCrisS risk scoring assigned this case a priority rating of High based on the following indicators: (1) Transactions with known shell company structures, (2) Use of high-risk jurisdictions including UAE, Singapore, and Cyprus, (3) Structuring patterns consistent with evasion of ₹10,00,000 CTR threshold.',
     'Additional red flags include: rapid account activity following dormancy period, mismatched invoice values compared to standard market pricing, and counterparties with minimal digital footprint or verifiable business operations.',
   ],
+};
+
+// Helper to get narratives based on case
+const getNarrativesForCase = (caseId: string): Record<STRSectionType, string[]> => {
+  return mockNarrativesByCase[caseId] || defaultMockNarratives;
 };
 
 // Initialize empty sections
@@ -140,14 +171,15 @@ export function STRDraftTab({ caseData, readOnly = false, onSubmitToPO }: STRDra
     async (paragraphId: string, sectionType: STRSectionType): Promise<string> => {
       return new Promise((resolve) => {
         setTimeout(() => {
-          const narratives = mockNarratives[sectionType];
+          const caseNarratives = getNarrativesForCase(caseData.id);
+          const narratives = caseNarratives[sectionType];
           // Get a random narrative or combine them
           const content = narratives.join('\n\n');
           resolve(content);
         }, 2000 + Math.random() * 1000);
       });
     },
-    []
+    [caseData.id]
   );
 
   // Generate paragraph
