@@ -1,12 +1,11 @@
 import { useState } from 'react';
-import { X, User, FileText, Network, History, Shield, MapPin, Building, Calendar, AlertTriangle, ExternalLink } from 'lucide-react';
+import { X, User, FileText, Network, History, AlertTriangle } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { RiskBadge } from '@/components/shared/RiskBadge';
-import { CustomerKYC, Transaction, PrioritizedAlert } from '@/types';
+import { ExtendedCustomerProfile, Transaction, PrioritizedAlert } from '@/types';
 import { KYCDetailsTab } from './tabs/KYCDetailsTab';
 import { TransactionsTab } from './tabs/TransactionsTab';
 import { CustomerNetworkTab } from './tabs/CustomerNetworkTab';
@@ -15,7 +14,7 @@ import { NotesHistoryTab } from './tabs/NotesHistoryTab';
 interface Customer360DrawerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  customer: CustomerKYC;
+  customerProfile: ExtendedCustomerProfile;
   transactions: Transaction[];
   alert: PrioritizedAlert;
 }
@@ -23,11 +22,12 @@ interface Customer360DrawerProps {
 export function Customer360Drawer({ 
   open, 
   onOpenChange, 
-  customer, 
+  customerProfile, 
   transactions, 
   alert 
 }: Customer360DrawerProps) {
   const [activeTab, setActiveTab] = useState('kyc');
+  const { kyc } = customerProfile;
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -43,14 +43,14 @@ export function Customer360Drawer({
                 <User className="h-6 w-6 text-primary" />
               </div>
               <div>
-                <SheetTitle className="text-xl font-semibold">{customer.name}</SheetTitle>
+                <SheetTitle className="text-xl font-semibold">{kyc.name}</SheetTitle>
                 <div className="flex items-center gap-2 mt-1">
                   <Badge variant="outline" className="text-xs capitalize">
-                    {customer.type}
+                    {kyc.type}
                   </Badge>
-                  <RiskBadge level={customer.riskRating} size="sm" />
-                  {customer.pep && <Badge variant="destructive" className="text-xs">PEP</Badge>}
-                  {customer.sanctions && <Badge variant="destructive" className="text-xs">Sanctions</Badge>}
+                  <RiskBadge level={kyc.riskRating} size="sm" />
+                  {kyc.pep && <Badge variant="destructive" className="text-xs">PEP</Badge>}
+                  {kyc.sanctions && <Badge variant="destructive" className="text-xs">Sanctions</Badge>}
                 </div>
               </div>
             </div>
@@ -103,7 +103,7 @@ export function Customer360Drawer({
             </TabsList>
 
             <TabsContent value="kyc" className="mt-4">
-              <KYCDetailsTab customer={customer} />
+              <KYCDetailsTab customerProfile={customerProfile} />
             </TabsContent>
 
             <TabsContent value="transactions" className="mt-4">
@@ -111,11 +111,11 @@ export function Customer360Drawer({
             </TabsContent>
 
             <TabsContent value="network" className="mt-4">
-              <CustomerNetworkTab customer={customer} transactions={transactions} />
+              <CustomerNetworkTab customerProfile={customerProfile} transactions={transactions} />
             </TabsContent>
 
             <TabsContent value="history" className="mt-4">
-              <NotesHistoryTab customer={customer} />
+              <NotesHistoryTab customerProfile={customerProfile} />
             </TabsContent>
           </Tabs>
         </div>

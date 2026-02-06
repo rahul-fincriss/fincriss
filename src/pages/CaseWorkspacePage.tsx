@@ -21,7 +21,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { StatusBadge } from '@/components/shared/StatusBadge';
 import { SLATimer } from '@/components/shared/SLATimer';
 import { STRDraftTab } from '@/components/str/STRDraftTab';
-import { mockCases, mockTransactions, mockCustomerKYC } from '@/data/mockData';
+import { 
+  mockCases, 
+  getExtendedCustomerProfile, 
+  getTransactionsByCustomerId,
+  mockExtendedCustomerProfiles,
+  formatINRFull
+} from '@/data/mockData';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 
@@ -31,8 +37,11 @@ export default function CaseWorkspacePage() {
   const [newNote, setNewNote] = useState('');
 
   const caseData = mockCases.find((c) => c.id === caseId) || mockCases[0];
-  const transactions = mockTransactions;
-  const customer = mockCustomerKYC;
+  
+  // Look up customer and transactions by the case's customerId
+  const customerProfile = getExtendedCustomerProfile(caseData.customerId) || mockExtendedCustomerProfiles[0];
+  const transactions = getTransactionsByCustomerId(caseData.customerId);
+  const customer = customerProfile.kyc;
 
   const handleAddNote = () => {
     if (!newNote.trim()) return;
@@ -86,7 +95,7 @@ export default function CaseWorkspacePage() {
               <div>
                 <p className="text-xs text-muted-foreground">Total Amount</p>
                 <p className="font-mono font-medium">
-                  ${caseData.totalAmount.toLocaleString()}
+                  {formatINRFull(caseData.totalAmount)}
                 </p>
               </div>
               <div>
@@ -123,34 +132,38 @@ export default function CaseWorkspacePage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {transactions.map((txn) => (
-                    <div
-                      key={txn.id}
-                      className="flex items-center justify-between rounded-lg border border-border p-4"
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className={`rounded-full p-2 ${txn.type === 'credit' ? 'bg-risk-low/20' : 'bg-risk-high/20'}`}>
-                          <AlertTriangle className={`h-4 w-4 ${txn.type === 'credit' ? 'text-risk-low' : 'text-risk-high'}`} />
-                        </div>
-                        <div>
-                          <p className="font-medium">{txn.counterparty}</p>
-                          <p className="text-sm text-muted-foreground">{txn.description}</p>
-                          <div className="flex items-center gap-2 mt-1">
-                            <Badge variant="outline" className="text-xs">{txn.channel}</Badge>
-                            <Badge variant="outline" className="text-xs">{txn.country}</Badge>
+                  {transactions.length === 0 ? (
+                    <p className="text-sm text-muted-foreground text-center py-4">No transactions found for this customer</p>
+                  ) : (
+                    transactions.map((txn) => (
+                      <div
+                        key={txn.id}
+                        className="flex items-center justify-between rounded-lg border border-border p-4"
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className={`rounded-full p-2 ${txn.type === 'credit' ? 'bg-risk-low/20' : 'bg-risk-high/20'}`}>
+                            <AlertTriangle className={`h-4 w-4 ${txn.type === 'credit' ? 'text-risk-low' : 'text-risk-high'}`} />
+                          </div>
+                          <div>
+                            <p className="font-medium">{txn.counterparty}</p>
+                            <p className="text-sm text-muted-foreground">{txn.description}</p>
+                            <div className="flex items-center gap-2 mt-1">
+                              <Badge variant="outline" className="text-xs">{txn.channel}</Badge>
+                              <Badge variant="outline" className="text-xs">{txn.country}</Badge>
+                            </div>
                           </div>
                         </div>
+                        <div className="text-right">
+                          <p className={`font-mono text-lg font-bold ${txn.type === 'credit' ? 'text-risk-low' : 'text-risk-high'}`}>
+                            {txn.type === 'credit' ? '+' : '-'}{formatINRFull(txn.amount)}
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            {format(txn.date, 'MMM dd, yyyy')}
+                          </p>
+                        </div>
                       </div>
-                      <div className="text-right">
-                        <p className={`font-mono text-lg font-bold ${txn.type === 'credit' ? 'text-risk-low' : 'text-risk-high'}`}>
-                          {txn.type === 'credit' ? '+' : '-'}${txn.amount.toLocaleString()}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          {format(txn.date, 'MMM dd, yyyy')}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
+                    ))
+                  )}
                 </div>
               </CardContent>
             </Card>

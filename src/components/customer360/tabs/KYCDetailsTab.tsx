@@ -1,55 +1,16 @@
-import { Shield, MapPin, Building, Calendar, FileCheck, AlertTriangle, User, Briefcase, Globe } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Shield, MapPin, Calendar, FileCheck, AlertTriangle, User, Briefcase, Globe } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { RiskBadge } from '@/components/shared/RiskBadge';
-import { CustomerKYC } from '@/types';
-import { Separator } from '@/components/ui/separator';
+import { ExtendedCustomerProfile } from '@/types';
+import { formatINRFull } from '@/data/mockData';
 
 interface KYCDetailsTabProps {
-  customer: CustomerKYC;
+  customerProfile: ExtendedCustomerProfile;
 }
 
-export function KYCDetailsTab({ customer }: KYCDetailsTabProps) {
-  // Mock extended KYC data
-  const extendedKYC = {
-    dateOfBirth: '1978-03-15',
-    idType: 'Passport',
-    idNumber: '****4521',
-    idExpiry: '2028-06-20',
-    address: '123 Business Park, Suite 400',
-    city: 'Singapore',
-    country: 'Singapore',
-    postalCode: '048619',
-    phoneNumber: '+65 ****-7890',
-    email: 'contact@*****.com',
-    onboardingDate: '2019-05-12',
-    lastKYCReview: '2024-01-15',
-    nextKYCReview: '2025-01-15',
-    sourceOfWealth: 'Business Income',
-    sourceOfFunds: 'Trading Revenue',
-    expectedTurnover: '$500,000 - $1,000,000',
-    riskRatingHistory: [
-      { date: '2024-01-15', rating: 'high' as const, reason: 'Increased transaction volume' },
-      { date: '2023-01-20', rating: 'medium' as const, reason: 'Annual review' },
-      { date: '2022-01-18', rating: 'low' as const, reason: 'Initial onboarding' },
-    ],
-    documents: [
-      { name: 'Passport Copy', status: 'verified', date: '2024-01-15' },
-      { name: 'Proof of Address', status: 'verified', date: '2024-01-15' },
-      { name: 'Business Registration', status: 'verified', date: '2019-05-12' },
-      { name: 'Financial Statements', status: 'pending', date: '2024-06-01' },
-    ],
-    pepScreening: {
-      lastScreened: '2024-12-01',
-      status: customer.pep ? 'hit' : 'clear',
-      details: customer.pep ? 'Identified as politically exposed person' : 'No PEP associations found',
-    },
-    sanctionsScreening: {
-      lastScreened: '2024-12-01',
-      status: customer.sanctions ? 'hit' : 'clear',
-      details: customer.sanctions ? 'Match found in sanctions database' : 'No sanctions matches',
-    },
-  };
+export function KYCDetailsTab({ customerProfile }: KYCDetailsTabProps) {
+  const { kyc, riskRatingHistory, documents, pepScreening, sanctionsScreening } = customerProfile;
 
   return (
     <div className="space-y-4">
@@ -65,27 +26,27 @@ export function KYCDetailsTab({ customer }: KYCDetailsTabProps) {
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
             <div>
               <p className="text-xs text-muted-foreground">Full Name</p>
-              <p className="font-medium">{customer.name}</p>
+              <p className="font-medium">{kyc.name}</p>
             </div>
             <div>
               <p className="text-xs text-muted-foreground">Customer Type</p>
-              <p className="font-medium capitalize">{customer.type}</p>
+              <p className="font-medium capitalize">{kyc.type}</p>
             </div>
             <div>
               <p className="text-xs text-muted-foreground">Nationality</p>
-              <p className="font-medium">{customer.nationality}</p>
+              <p className="font-medium">{kyc.nationality}</p>
             </div>
             <div>
-              <p className="text-xs text-muted-foreground">Date of Birth / Incorporation</p>
-              <p className="font-medium">{extendedKYC.dateOfBirth}</p>
+              <p className="text-xs text-muted-foreground">{kyc.type === 'corporate' ? 'Date of Incorporation' : 'Date of Birth'}</p>
+              <p className="font-medium">{kyc.dateOfBirth || 'N/A'}</p>
             </div>
             <div>
               <p className="text-xs text-muted-foreground">ID Type</p>
-              <p className="font-medium">{extendedKYC.idType}</p>
+              <p className="font-medium">{kyc.idType || 'N/A'}</p>
             </div>
             <div>
               <p className="text-xs text-muted-foreground">ID Number</p>
-              <p className="font-mono text-muted-foreground">{extendedKYC.idNumber}</p>
+              <p className="font-mono text-muted-foreground">{kyc.idNumber || 'N/A'}</p>
             </div>
           </div>
         </CardContent>
@@ -103,23 +64,23 @@ export function KYCDetailsTab({ customer }: KYCDetailsTabProps) {
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
             <div className="col-span-2">
               <p className="text-xs text-muted-foreground">Address</p>
-              <p className="font-medium">{extendedKYC.address}</p>
+              <p className="font-medium">{kyc.address || 'N/A'}</p>
             </div>
             <div>
               <p className="text-xs text-muted-foreground">City</p>
-              <p className="font-medium">{extendedKYC.city}</p>
+              <p className="font-medium">{kyc.city || 'N/A'}</p>
             </div>
             <div>
               <p className="text-xs text-muted-foreground">Country</p>
-              <p className="font-medium">{extendedKYC.country}</p>
+              <p className="font-medium">{kyc.country || 'N/A'}</p>
             </div>
             <div>
               <p className="text-xs text-muted-foreground">Postal Code</p>
-              <p className="font-medium">{extendedKYC.postalCode}</p>
+              <p className="font-medium">{kyc.postalCode || 'N/A'}</p>
             </div>
             <div>
               <p className="text-xs text-muted-foreground">Phone</p>
-              <p className="font-mono text-muted-foreground">{extendedKYC.phoneNumber}</p>
+              <p className="font-mono text-muted-foreground">{kyc.phoneNumber || 'N/A'}</p>
             </div>
           </div>
         </CardContent>
@@ -137,27 +98,27 @@ export function KYCDetailsTab({ customer }: KYCDetailsTabProps) {
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
             <div>
               <p className="text-xs text-muted-foreground">Occupation / Business</p>
-              <p className="font-medium">{customer.occupation || customer.industry}</p>
+              <p className="font-medium">{kyc.occupation || kyc.industry || 'N/A'}</p>
             </div>
             <div>
               <p className="text-xs text-muted-foreground">Industry</p>
-              <p className="font-medium">{customer.industry}</p>
+              <p className="font-medium">{kyc.industry || 'N/A'}</p>
             </div>
             <div>
               <p className="text-xs text-muted-foreground">Source of Wealth</p>
-              <p className="font-medium">{extendedKYC.sourceOfWealth}</p>
+              <p className="font-medium">{kyc.sourceOfWealth || 'N/A'}</p>
             </div>
             <div>
               <p className="text-xs text-muted-foreground">Source of Funds</p>
-              <p className="font-medium">{extendedKYC.sourceOfFunds}</p>
+              <p className="font-medium">{kyc.sourceOfFunds || 'N/A'}</p>
             </div>
             <div>
               <p className="text-xs text-muted-foreground">Declared Income</p>
-              <p className="font-mono font-medium">${customer.declaredIncome.toLocaleString()}</p>
+              <p className="font-mono font-medium">{formatINRFull(kyc.declaredIncome)}</p>
             </div>
             <div>
               <p className="text-xs text-muted-foreground">Expected Turnover</p>
-              <p className="font-medium">{extendedKYC.expectedTurnover}</p>
+              <p className="font-medium">{kyc.expectedTurnover || 'N/A'}</p>
             </div>
           </div>
         </CardContent>
@@ -171,12 +132,12 @@ export function KYCDetailsTab({ customer }: KYCDetailsTabProps) {
               <AlertTriangle className="h-4 w-4 text-primary" />
               <CardTitle className="text-sm font-medium">Risk Rating History</CardTitle>
             </div>
-            <RiskBadge level={customer.riskRating} size="sm" />
+            <RiskBadge level={kyc.riskRating} size="sm" />
           </div>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            {extendedKYC.riskRatingHistory.map((entry, idx) => (
+            {riskRatingHistory.map((entry, idx) => (
               <div key={idx} className="flex items-center justify-between py-2 border-b last:border-0">
                 <div className="flex items-center gap-3">
                   <span className="text-xs text-muted-foreground font-mono">{entry.date}</span>
@@ -201,15 +162,15 @@ export function KYCDetailsTab({ customer }: KYCDetailsTabProps) {
           <div className="grid grid-cols-3 gap-4 text-sm">
             <div>
               <p className="text-xs text-muted-foreground">Onboarding Date</p>
-              <p className="font-medium">{extendedKYC.onboardingDate}</p>
+              <p className="font-medium">{kyc.onboardingDate || 'N/A'}</p>
             </div>
             <div>
               <p className="text-xs text-muted-foreground">Last KYC Review</p>
-              <p className="font-medium">{extendedKYC.lastKYCReview}</p>
+              <p className="font-medium">{kyc.lastKYCReview || 'N/A'}</p>
             </div>
             <div>
               <p className="text-xs text-muted-foreground">Next KYC Review</p>
-              <p className="font-medium text-primary">{extendedKYC.nextKYCReview}</p>
+              <p className="font-medium text-primary">{kyc.nextKYCReview || 'N/A'}</p>
             </div>
           </div>
         </CardContent>
@@ -225,7 +186,7 @@ export function KYCDetailsTab({ customer }: KYCDetailsTabProps) {
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
-            {extendedKYC.documents.map((doc, idx) => (
+            {documents.map((doc, idx) => (
               <div key={idx} className="flex items-center justify-between py-2 border-b last:border-0">
                 <span className="text-sm">{doc.name}</span>
                 <div className="flex items-center gap-2">
@@ -245,15 +206,15 @@ export function KYCDetailsTab({ customer }: KYCDetailsTabProps) {
 
       {/* PEP & Sanctions Screening */}
       <div className="grid md:grid-cols-2 gap-4">
-        <Card className={extendedKYC.pepScreening.status === 'hit' ? 'border-risk-high/30 bg-risk-high/5' : ''}>
+        <Card className={pepScreening.status === 'hit' ? 'border-risk-high/30 bg-risk-high/5' : ''}>
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Shield className="h-4 w-4 text-primary" />
                 <CardTitle className="text-sm font-medium">PEP Screening</CardTitle>
               </div>
-              <Badge variant={extendedKYC.pepScreening.status === 'hit' ? 'destructive' : 'secondary'}>
-                {extendedKYC.pepScreening.status === 'hit' ? 'HIT' : 'CLEAR'}
+              <Badge variant={pepScreening.status === 'hit' ? 'destructive' : 'secondary'}>
+                {pepScreening.status === 'hit' ? 'HIT' : 'CLEAR'}
               </Badge>
             </div>
           </CardHeader>
@@ -261,22 +222,22 @@ export function KYCDetailsTab({ customer }: KYCDetailsTabProps) {
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Last Screened</span>
-                <span>{extendedKYC.pepScreening.lastScreened}</span>
+                <span>{pepScreening.lastScreened}</span>
               </div>
-              <p className="text-xs text-muted-foreground">{extendedKYC.pepScreening.details}</p>
+              <p className="text-xs text-muted-foreground">{pepScreening.details}</p>
             </div>
           </CardContent>
         </Card>
 
-        <Card className={extendedKYC.sanctionsScreening.status === 'hit' ? 'border-risk-high/30 bg-risk-high/5' : ''}>
+        <Card className={sanctionsScreening.status === 'hit' ? 'border-risk-high/30 bg-risk-high/5' : ''}>
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Globe className="h-4 w-4 text-primary" />
                 <CardTitle className="text-sm font-medium">Sanctions Screening</CardTitle>
               </div>
-              <Badge variant={extendedKYC.sanctionsScreening.status === 'hit' ? 'destructive' : 'secondary'}>
-                {extendedKYC.sanctionsScreening.status === 'hit' ? 'HIT' : 'CLEAR'}
+              <Badge variant={sanctionsScreening.status === 'hit' ? 'destructive' : 'secondary'}>
+                {sanctionsScreening.status === 'hit' ? 'HIT' : 'CLEAR'}
               </Badge>
             </div>
           </CardHeader>
@@ -284,9 +245,9 @@ export function KYCDetailsTab({ customer }: KYCDetailsTabProps) {
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Last Screened</span>
-                <span>{extendedKYC.sanctionsScreening.lastScreened}</span>
+                <span>{sanctionsScreening.lastScreened}</span>
               </div>
-              <p className="text-xs text-muted-foreground">{extendedKYC.sanctionsScreening.details}</p>
+              <p className="text-xs text-muted-foreground">{sanctionsScreening.details}</p>
             </div>
           </CardContent>
         </Card>
