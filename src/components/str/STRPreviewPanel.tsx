@@ -1,12 +1,12 @@
-import { FileText, Printer, Download, Loader2 } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { ReactNode, useState, useMemo } from 'react';
-import { PDFDocument } from 'pdf-lib';
-import { toast } from 'sonner';
-import { STRSection } from '@/types/str';
-import { Case } from '@/types';
+import { FileText, Printer, Download, Loader2 } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { ReactNode, useState, useMemo } from "react";
+import { PDFDocument } from "pdf-lib";
+import { toast } from "sonner";
+import { STRSection } from "@/types/str";
+import { Case } from "@/types";
 
 interface STRPreviewPanelProps {
   sections: STRSection[];
@@ -22,28 +22,26 @@ const mapSectionsToPDFData = (
   caseId: string,
   customerName: string,
   investigatorComments?: string,
-  caseData?: Case
+  caseData?: Case,
 ) => {
   // Extract section content
   const getSectionContent = (sectionType: string): string[] => {
     const section = sections.find((s) => s.type === sectionType);
     if (!section) return [];
-    return section.paragraphs
-      .filter((p) => p.content && p.content.trim())
-      .map((p) => p.content);
+    return section.paragraphs.filter((p) => p.content && p.content.trim()).map((p) => p.content);
   };
 
-  const groundsOfSuspicion = getSectionContent('grounds_of_suspicion');
-  const transactionNarrative = getSectionContent('transaction_narrative');
-  const customerBackground = getSectionContent('customer_background');
-  const supportingIndicators = getSectionContent('supporting_indicators');
+  const groundsOfSuspicion = getSectionContent("grounds_of_suspicion");
+  const transactionNarrative = getSectionContent("transaction_narrative");
+  const customerBackground = getSectionContent("customer_background");
+  const supportingIndicators = getSectionContent("supporting_indicators");
 
   // Combine all investigation details
   const investigationDetails = [
-    ...groundsOfSuspicion.map(g => `Grounds: ${g}`),
-    ...transactionNarrative.map(t => `Transaction Details: ${t}`),
-    ...customerBackground.map(c => `Customer Info: ${c}`),
-    ...supportingIndicators.map(s => `Indicators: ${s}`),
+    ...groundsOfSuspicion.map((g) => `Grounds: ${g}`),
+    ...transactionNarrative.map((t) => `Transaction Details: ${t}`),
+    ...customerBackground.map((c) => `Customer Info: ${c}`),
+    ...supportingIndicators.map((s) => `Indicators: ${s}`),
   ];
 
   if (investigatorComments && investigatorComments.trim()) {
@@ -52,7 +50,7 @@ const mapSectionsToPDFData = (
 
   return {
     reportDetails: {
-      dateOfSending: new Date().toISOString().split('T')[0],
+      dateOfSending: new Date().toISOString().split("T")[0],
       isReplacement: false,
       originalReportDate: undefined,
     },
@@ -91,7 +89,7 @@ const mapSectionsToPDFData = (
       {
         name: customerName,
         customerId: caseData?.customerId || "CUST-" + caseId,
-        annexure: "A1"
+        annexure: "A1",
       },
     ],
     linkedEntities: [
@@ -101,19 +99,17 @@ const mapSectionsToPDFData = (
       {
         accountNumber: `ACC-${caseId}`,
         accountHolderName: customerName,
-        annexure: "C1"
+        annexure: "C1",
       },
     ],
     suspiciousTransaction: {
       reasonsForSuspicion: ["D", "E", "F"], // TODO: Derive from risk drivers/alert types
-      groundsOfSuspicion: groundsOfSuspicion.length > 0
-        ? groundsOfSuspicion
-        : ["No grounds of suspicion documented yet"],
+      groundsOfSuspicion:
+        groundsOfSuspicion.length > 0 ? groundsOfSuspicion : ["No grounds of suspicion documented yet"],
     },
     actionTaken: {
-      investigationDetails: investigationDetails.length > 0
-        ? investigationDetails
-        : ["Investigation in progress - Case ID: " + caseId],
+      investigationDetails:
+        investigationDetails.length > 0 ? investigationDetails : ["Investigation in progress - Case ID: " + caseId],
     },
   };
 };
@@ -127,25 +123,27 @@ const ReportSection = ({ title, partNumber, children }: { title: string; partNum
           <span className="bg-primary text-primary-foreground text-xs font-bold px-2 py-1 rounded">
             PART {partNumber}
           </span>
-          <h2 className="font-semibold text-lg text-foreground">
-            {title}
-          </h2>
+          <h2 className="font-semibold text-lg text-foreground">{title}</h2>
         </div>
       </div>
-      <div className="p-6">
-        {children}
-      </div>
+      <div className="p-6">{children}</div>
     </div>
   );
 };
 
-const FormField = ({ label, value, fieldNumber }: { label: string; value: string | undefined; fieldNumber?: string }) => {
+const FormField = ({
+  label,
+  value,
+  fieldNumber,
+}: {
+  label: string;
+  value: string | undefined;
+  fieldNumber?: string;
+}) => {
   return (
     <div className="space-y-1.5">
       <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-        {fieldNumber && (
-          <span className="text-xs text-primary font-semibold">{fieldNumber}</span>
-        )}
+        {fieldNumber && <span className="text-xs text-primary font-semibold">{fieldNumber}</span>}
         {label}
       </label>
       <div className="bg-muted/50 border border-border rounded-md px-4 py-2.5 text-foreground font-medium min-h-[42px] flex items-center">
@@ -177,9 +175,7 @@ const DataTable = ({ columns, data }: { columns: { header: string; accessor: str
         <tbody className="divide-y divide-border">
           {data.map((row, index) => (
             <tr key={index} className="hover:bg-muted/30 transition-colors">
-              <td className="px-4 py-3 text-sm text-muted-foreground">
-                {index + 1}
-              </td>
+              <td className="px-4 py-3 text-sm text-muted-foreground">{index + 1}</td>
               {columns.map((col) => (
                 <td key={col.accessor} className="px-4 py-3 text-sm text-foreground font-medium">
                   {row[col.accessor] ?? "—"}
@@ -221,9 +217,27 @@ export function STRPreviewPanel({
   // Map actual data from sections to PDF structure
   const data = useMemo(
     () => mapSectionsToPDFData(sections, caseId, customerName, investigatorComments, caseData),
-    [sections, caseId, customerName, investigatorComments, caseData]
+    [sections, caseId, customerName, investigatorComments, caseData],
   );
   const [exporting, setExporting] = useState(false);
+
+  // Sanitize text to ensure compatibility with WinAnsi encoding used in PDF templates
+  const sanitizeForPDF = (text: string | undefined): string => {
+    if (!text) return "";
+
+    return (
+      text
+        // Replace Indian Rupee symbol with INR
+        .replace(/₹/g, "INR ")
+        // Replace other common currency symbols that might cause issues
+        .replace(/€/g, "EUR ")
+        .replace(/£/g, "GBP ")
+        .replace(/¥/g, "JPY ")
+        // Remove other problematic Unicode characters (keep only WinAnsi-safe chars)
+        // This regex keeps standard ASCII and common Western European chars
+        .replace(/[^\x20-\x7E\xA0-\xFF]/g, "")
+    );
+  };
 
   const handleExportPDF = async () => {
     setExporting(true);
@@ -231,8 +245,8 @@ export function STRPreviewPanel({
 
     try {
       // Fetch the template PDF from the template directory
-      const templateUrl = '/template/SBA STR Template.pdf';
-      const existingPdfBytes = await fetch(templateUrl).then(res => res.arrayBuffer());
+      const templateUrl = "/template/SBA STR Template.pdf";
+      const existingPdfBytes = await fetch(templateUrl).then((res) => res.arrayBuffer());
 
       // Load the PDF template
       const pdfDoc = await PDFDocument.load(existingPdfBytes);
@@ -242,49 +256,53 @@ export function STRPreviewPanel({
       try {
         // Part 1: Report Details - Date of sending report
         const dateStr = data.reportDetails.dateOfSending;
-        const [year, month, day] = dateStr.split('-');
+        const [year, month, day] = dateStr.split("-");
 
-        form.getTextField('Date1').setText(day[0]);
-        form.getTextField('Date2').setText(day[1]);
-        form.getTextField('Month1').setText(month[0]);
-        form.getTextField('Month2').setText(month[1]);
-        form.getTextField('Year').setText(year[3]);
+        form.getTextField("Date1").setText(day[0]);
+        form.getTextField("Date2").setText(day[1]);
+        form.getTextField("Month1").setText(month[0]);
+        form.getTextField("Month2").setText(month[1]);
+        form.getTextField("Year").setText(year[3]);
 
         // Part 2: Principal Officer
-        form.getTextField('NameEntity').setText(data.principalOfficer.bankName);
-        form.getTextField('UnqiueCode').setText(data.principalOfficer.bsrCode);
-        form.getTextField('IDFIU').setText(data.principalOfficer.fiuIndId);
-        form.getTextField('EntityCategory').setText(data.principalOfficer.bankCategory);
-        form.getTextField('DesignationPrincipal').setText(`${data.principalOfficer.officerName}, ${data.principalOfficer.designation}`);
-        form.getTextField('PrincipalAddress1').setText(data.principalOfficer.addressNo);
-        form.getTextField('PrincipalAddress2').setText(data.principalOfficer.street);
-        form.getTextField('PrincipalAddress3').setText(data.principalOfficer.locality);
-        form.getTextField('PrincipalAddress4').setText(data.principalOfficer.cityDistrict);
-        form.getTextField('PrincipalAddress5').setText(data.principalOfficer.stateCountry);
-        form.getTextField('PrincipalPIN').setText(data.principalOfficer.pinCode);
-        form.getTextField('PrincipalTel').setText(data.principalOfficer.telephone);
-        form.getTextField('PrincipalFAX').setText(data.principalOfficer.fax);
-        form.getTextField('PrincipalEmail').setText(data.principalOfficer.email);
+        form.getTextField("NameEntity").setText(sanitizeForPDF(data.principalOfficer.bankName));
+        form.getTextField("UnqiueCode").setText(sanitizeForPDF(data.principalOfficer.bsrCode));
+        form.getTextField("IDFIU").setText(sanitizeForPDF(data.principalOfficer.fiuIndId));
+        form.getTextField("EntityCategory").setText(sanitizeForPDF(data.principalOfficer.bankCategory));
+        form
+          .getTextField("DesignationPrincipal")
+          .setText(sanitizeForPDF(`${data.principalOfficer.officerName}, ${data.principalOfficer.designation}`));
+        form.getTextField("PrincipalAddress1").setText(sanitizeForPDF(data.principalOfficer.addressNo));
+        form.getTextField("PrincipalAddress2").setText(sanitizeForPDF(data.principalOfficer.street));
+        form.getTextField("PrincipalAddress3").setText(sanitizeForPDF(data.principalOfficer.locality));
+        form.getTextField("PrincipalAddress4").setText(sanitizeForPDF(data.principalOfficer.cityDistrict));
+        form.getTextField("PrincipalAddress5").setText(sanitizeForPDF(data.principalOfficer.stateCountry));
+        form.getTextField("PrincipalPIN").setText(sanitizeForPDF(data.principalOfficer.pinCode));
+        form.getTextField("PrincipalTel").setText(sanitizeForPDF(data.principalOfficer.telephone));
+        form.getTextField("PrincipalFAX").setText(sanitizeForPDF(data.principalOfficer.fax));
+        form.getTextField("PrincipalEmail").setText(sanitizeForPDF(data.principalOfficer.email));
 
         // Part 3: Reporting Branch
-        form.getTextField('NameBranch').setText(data.reportingBranch.branchName);
-        form.getTextField('BranchCode').setText(data.reportingBranch.bsrCode);
-        form.getTextField('BranchIDFIU').setText(data.reportingBranch.fiuIndId);
-        form.getTextField('BranchAddress1').setText(data.reportingBranch.addressNo);
-        form.getTextField('BranchAddress2').setText(data.reportingBranch.street);
-        form.getTextField('BranchAddress3').setText(data.reportingBranch.locality);
-        form.getTextField('BranchAddress4').setText(data.reportingBranch.cityDistrict);
-        form.getTextField('BranchAddress5').setText(data.reportingBranch.stateCountry);
-        form.getTextField('BranchPIN').setText(data.reportingBranch.pinCode);
-        form.getTextField('BranchTel').setText(data.reportingBranch.telephone);
-        form.getTextField('BranchFAX').setText(data.reportingBranch.fax);
-        form.getTextField('BranchEmail').setText(data.reportingBranch.email);
+        form.getTextField("NameBranch").setText(sanitizeForPDF(data.reportingBranch.branchName));
+        form.getTextField("BranchCode").setText(sanitizeForPDF(data.reportingBranch.bsrCode));
+        form.getTextField("BranchIDFIU").setText(sanitizeForPDF(data.reportingBranch.fiuIndId));
+        form.getTextField("BranchAddress1").setText(sanitizeForPDF(data.reportingBranch.addressNo));
+        form.getTextField("BranchAddress2").setText(sanitizeForPDF(data.reportingBranch.street));
+        form.getTextField("BranchAddress3").setText(sanitizeForPDF(data.reportingBranch.locality));
+        form.getTextField("BranchAddress4").setText(sanitizeForPDF(data.reportingBranch.cityDistrict));
+        form.getTextField("BranchAddress5").setText(sanitizeForPDF(data.reportingBranch.stateCountry));
+        form.getTextField("BranchPIN").setText(sanitizeForPDF(data.reportingBranch.pinCode));
+        form.getTextField("BranchTel").setText(sanitizeForPDF(data.reportingBranch.telephone));
+        form.getTextField("BranchFAX").setText(sanitizeForPDF(data.reportingBranch.fax));
+        form.getTextField("BranchEmail").setText(sanitizeForPDF(data.reportingBranch.email));
 
         // Part 4: Linked Individuals (up to 15)
         data.linkedIndividuals.forEach((individual, index) => {
           if (index < 15) {
             const fieldNum = index + 1;
-            form.getTextField(`Individual${fieldNum}`).setText(`${individual.name} | ${individual.customerId} | ${individual.annexure}`);
+            form
+              .getTextField(`Individual${fieldNum}`)
+              .setText(sanitizeForPDF(`${individual.name} | ${individual.customerId} | ${individual.annexure}`));
           }
         });
 
@@ -292,7 +310,9 @@ export function STRPreviewPanel({
         data.linkedEntities.forEach((entity, index) => {
           if (index < 3) {
             const fieldNum = index + 1;
-            form.getTextField(`LegalPerson${fieldNum}`).setText(`${entity.name} | ${entity.customerId} | ${entity.annexure}`);
+            form
+              .getTextField(`LegalPerson${fieldNum}`)
+              .setText(sanitizeForPDF(`${entity.name} | ${entity.customerId} | ${entity.annexure}`));
           }
         });
 
@@ -300,8 +320,8 @@ export function STRPreviewPanel({
         data.linkedAccounts.forEach((account, index) => {
           if (index < 10) {
             const fieldNum = index + 1;
-            form.getTextField(`Account${fieldNum}`).setText(account.accountNumber);
-            form.getTextField(`AccountHolder${fieldNum}`).setText(account.accountHolderName);
+            form.getTextField(`Account${fieldNum}`).setText(sanitizeForPDF(account.accountNumber));
+            form.getTextField(`AccountHolder${fieldNum}`).setText(sanitizeForPDF(account.accountHolderName));
             if (account.annexure) {
               form.getCheckBox(`AccountAnnexureYN${fieldNum}`).check();
             }
@@ -309,9 +329,9 @@ export function STRPreviewPanel({
         });
 
         // Part 7: Suspicious Transaction Details
-        data.suspiciousTransaction.reasonsForSuspicion.forEach(reason => {
-          if (reason === 'Z') {
-            form.getCheckBox('SuspicionCategoryZ').check();
+        data.suspiciousTransaction.reasonsForSuspicion.forEach((reason) => {
+          if (reason === "Z") {
+            form.getCheckBox("SuspicionCategoryZ").check();
           } else {
             form.getCheckBox(`SuspicionCategory${reason}`).check();
           }
@@ -319,22 +339,21 @@ export function STRPreviewPanel({
 
         const grounds = data.suspiciousTransaction.groundsOfSuspicion;
         if (grounds.length > 0) {
-          form.getTextField('GroundOfSuspicion1').setText(grounds[0]);
+          form.getTextField("GroundOfSuspicion1").setText(sanitizeForPDF(grounds[0]));
         }
         if (grounds.length > 1) {
-          const remainingGrounds = grounds.slice(1).join(' | ');
-          form.getTextField('GroundOfSuspicion2').setText(remainingGrounds);
+          const remainingGrounds = grounds.slice(1).join(" | ");
+          form.getTextField("GroundOfSuspicion2").setText(sanitizeForPDF(remainingGrounds));
         }
 
         // Part 8: Action Taken
-        const actions = data.actionTaken.investigationDetails.join(' | ');
-        form.getTextField('ActionTaken').setText(actions);
+        const actions = data.actionTaken.investigationDetails.join(" | ");
+        form.getTextField("ActionTaken").setText(sanitizeForPDF(actions));
 
-        toast.success('PDF form filled with STR data');
-
+        toast.success("PDF form filled with STR data");
       } catch (fieldError) {
-        console.error('Error filling form fields:', fieldError);
-        toast.warning('Some fields could not be filled: ' + fieldError);
+        console.error("Error filling form fields:", fieldError);
+        toast.warning("Some fields could not be filled: " + fieldError);
       }
 
       // Update field appearances before flattening
@@ -347,9 +366,9 @@ export function STRPreviewPanel({
       const pdfBytes = await pdfDoc.save();
 
       // Create a blob and download
-      const blob = new Blob([pdfBytes as any], { type: 'application/pdf' });
+      const blob = new Blob([pdfBytes as any], { type: "application/pdf" });
       const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = url;
       link.download = `STR_Report_${new Date().toISOString().split("T")[0]}.pdf`;
       document.body.appendChild(link);
@@ -396,9 +415,7 @@ export function STRPreviewPanel({
             <div className="container mx-auto px-6 py-6">
               <div className="text-center">
                 <p className="text-sm text-muted-foreground mb-1">FIU-IND Financial Intelligence Unit - India</p>
-                <h2 className="font-display font-bold text-2xl text-foreground">
-                  SUSPICIOUS TRANSACTION REPORT (STR)
-                </h2>
+                <h2 className="font-display font-bold text-2xl text-foreground">SUSPICIOUS TRANSACTION REPORT (STR)</h2>
                 <p className="text-sm text-muted-foreground mt-1">FOR A BANKING COMPANY</p>
               </div>
             </div>
@@ -409,11 +426,7 @@ export function STRPreviewPanel({
             {/* Part 1: Report Details */}
             <ReportSection title="DETAILS OF REPORT" partNumber="1">
               <div className="grid md:grid-cols-3 gap-4">
-                <FormField
-                  label="Date of sending report"
-                  value={data.reportDetails.dateOfSending}
-                  fieldNumber="1.1"
-                />
+                <FormField label="Date of sending report" value={data.reportDetails.dateOfSending} fieldNumber="1.1" />
                 <FormField
                   label="Is this a replacement to an earlier report?"
                   value={data.reportDetails.isReplacement ? "YES" : "NO"}
@@ -433,8 +446,16 @@ export function STRPreviewPanel({
                 <FormField label="Name of Bank" value={data.principalOfficer.bankName} fieldNumber="2.1" />
                 <FormField label="BSR Code" value={data.principalOfficer.bsrCode} fieldNumber="2.2" />
                 <FormField label="ID allotted by FIU-IND" value={data.principalOfficer.fiuIndId} fieldNumber="2.3" />
-                <FormField label="Category of Bank" value={bankCategoryLabels[data.principalOfficer.bankCategory] || data.principalOfficer.bankCategory} fieldNumber="2.4" />
-                <FormField label="Name of Principal Officer" value={data.principalOfficer.officerName} fieldNumber="2.5" />
+                <FormField
+                  label="Category of Bank"
+                  value={bankCategoryLabels[data.principalOfficer.bankCategory] || data.principalOfficer.bankCategory}
+                  fieldNumber="2.4"
+                />
+                <FormField
+                  label="Name of Principal Officer"
+                  value={data.principalOfficer.officerName}
+                  fieldNumber="2.5"
+                />
                 <FormField label="Designation" value={data.principalOfficer.designation} fieldNumber="2.6" />
                 <FormField label="Address (No., Building)" value={data.principalOfficer.addressNo} fieldNumber="2.7" />
                 <FormField label="Street/Road" value={data.principalOfficer.street} fieldNumber="2.8" />
