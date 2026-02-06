@@ -241,7 +241,78 @@ export default function CaseWorkspacePage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 {/* Dynamic findings based on case */}
-                {caseData.id === 'CASE-MM-2026-001' ? (
+                {caseData.id === 'CASE-PONZI-2025-001' ? (
+                  <>
+                    <div className="ai-generated rounded-lg p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Badge className="badge-risk-high">High Confidence</Badge>
+                        <span className="text-sm font-medium">Investment Fraud / Ponzi Scheme Typology Match</span>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        Account exhibits classic Ponzi scheme pattern: High-value inflows from 12 unrelated "investors" 
+                        totaling ₹1.5 Crore with memos like "Fund Commitment" and "Seed Capital". Rapid layering via 
+                        internal transfer to related party LLP (R.K. Health Investment LLP) within 72 hours. Cyclical 
+                        "Quarterly Profit Share" payouts to original investors on 45-day cycles.
+                      </p>
+                    </div>
+                    <div className="ai-generated rounded-lg p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Badge className="badge-risk-high">High Confidence</Badge>
+                        <span className="text-sm font-medium">High-Value Unrelated Investor Inflows</span>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        Dr. Ravi Gopal Kumar, a cardiologist with declared monthly income of ₹4,00,000, received 
+                        ₹1.5 Crore from 12 unrelated third-party individuals via RTGS/NEFT over 23 days. Transaction 
+                        memos reference investment terminology ("Seed Capital", "Fund Commitment") inconsistent with 
+                        medical practice operations.
+                      </p>
+                    </div>
+                    <div className="ai-generated rounded-lg p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Badge className="badge-risk-high">High Confidence</Badge>
+                        <span className="text-sm font-medium">Rapid Layering via Related LLP Account</span>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        ₹1.5 Crore transferred from personal savings to R.K. Health Investment LLP (related party entity) 
+                        within 72 hours of final investor deposit. LLP is controlled by Dr. Kumar as sole authorized 
+                        signatory. Declared LLP business activity ("Consulting") inconsistent with investment fund collection.
+                      </p>
+                    </div>
+                    <div className="ai-generated rounded-lg p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Badge className="badge-risk-high">High Confidence</Badge>
+                        <span className="text-sm font-medium">Cyclical Payouts Labeled "Profit Distribution"</span>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        "Quarterly Profit Share" payments totaling ₹1.2 Crore+ disbursed to original investors on 
+                        approximately 45-day cycles. Payout schedule does not align with any legitimate investment 
+                        instrument. Pattern indicates returns funded from subsequent investor inflows (classic pyramid structure).
+                      </p>
+                    </div>
+                    <div className="ai-generated rounded-lg p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Badge className="badge-risk-medium">Medium Confidence</Badge>
+                        <span className="text-sm font-medium">Integration via ₹50L Personal Real Estate Purchase</span>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        ₹50,00,000 transferred to Goa Seaside Properties Pvt Ltd for "Commercial Real Estate Purchase" 
+                        (luxury villa in Goa). Payment sourced from business LLP account - personal asset acquisition 
+                        funded via investor capital indicates integration phase of proceeds.
+                      </p>
+                    </div>
+                    <div className="ai-generated rounded-lg p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Badge variant="outline">Advisory</Badge>
+                        <span className="text-sm font-medium">No SEBI Registration Indication</span>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        No evidence of SEBI registration found for any collective investment scheme operated by 
+                        Dr. Ravi Gopal Kumar or R.K. Health Investment LLP. Operating an unregistered CIS is a violation 
+                        under SEBI Act, 1992. Consider referral to SEBI and Enforcement Directorate.
+                      </p>
+                    </div>
+                  </>
+                ) : caseData.id === 'CASE-MM-2026-001' ? (
                   <>
                     <div className="ai-generated rounded-lg p-4">
                       <div className="flex items-center gap-2 mb-2">
