@@ -1,4 +1,23 @@
-import { RawAlert, PrioritizedAlert, Case, STRDraft, CustomerKYC, Transaction, AuditEntry, User } from '@/types';
+import { 
+  RawAlert, 
+  PrioritizedAlert, 
+  Case, 
+  STRDraft, 
+  CustomerKYC, 
+  Transaction, 
+  AuditEntry, 
+  User,
+  ExtendedCustomerProfile,
+  CustomerRiskHistory,
+  CustomerDocument,
+  CustomerAccount,
+  RelatedEntity,
+  CommonIdentifier,
+  PriorAlert,
+  PriorCase,
+  PriorSTR,
+  InvestigatorNote
+} from '@/types';
 
 // Helper function to format INR in Indian numbering system (lakhs, crores)
 export const formatINR = (amount: number): string => {
@@ -40,6 +59,314 @@ export const priorityReasonCategories = [
   'RBI/FIU-IND directive',
   'Other',
 ];
+
+// ============================================================================
+// CUSTOMER DATA STORE - Single Source of Truth for all customer-related data
+// ============================================================================
+
+// Extended customer profiles with all Customer 360 data
+export const mockExtendedCustomerProfiles: ExtendedCustomerProfile[] = [
+  // ABC Exports Pvt Ltd - CUS-45678 (High Risk Corporate)
+  {
+    kyc: {
+      id: 'CUS-45678',
+      name: 'ABC Exports Pvt Ltd',
+      type: 'corporate',
+      riskRating: 'high',
+      industry: 'Import/Export',
+      declaredIncome: 20000000,
+      actualTurnover: 56700000,
+      accountAge: 18,
+      nationality: 'India',
+      pep: false,
+      sanctions: false,
+      dateOfBirth: '2018-05-12',
+      idType: 'CIN',
+      idNumber: 'U51909MH2018PTC******',
+      address: '301, Trade Centre, Nariman Point',
+      city: 'Mumbai',
+      country: 'India',
+      postalCode: '400021',
+      phoneNumber: '+91 ****-567890',
+      email: 'accounts@abc*****.com',
+      onboardingDate: '2018-08-15',
+      lastKYCReview: '2024-01-15',
+      nextKYCReview: '2025-01-15',
+      sourceOfWealth: 'Business Income',
+      sourceOfFunds: 'Trading Revenue',
+      expectedTurnover: '₹2,00,00,000 - ₹5,00,00,000',
+    },
+    riskRatingHistory: [
+      { date: '2024-01-15', rating: 'high', reason: 'Increased transaction volume with high-risk jurisdictions' },
+      { date: '2023-06-20', rating: 'medium', reason: 'Annual review - trade volume increase' },
+      { date: '2022-01-18', rating: 'low', reason: 'Initial onboarding assessment' },
+    ],
+    documents: [
+      { name: 'Certificate of Incorporation', status: 'verified', date: '2024-01-15' },
+      { name: 'GST Registration', status: 'verified', date: '2024-01-15' },
+      { name: 'IEC Certificate', status: 'verified', date: '2018-08-15' },
+      { name: 'Financial Statements FY24', status: 'pending', date: '2024-06-01' },
+      { name: 'Board Resolution', status: 'verified', date: '2024-01-15' },
+    ],
+    pepScreening: {
+      lastScreened: '2024-12-01',
+      status: 'clear',
+      details: 'No PEP associations found for directors',
+    },
+    sanctionsScreening: {
+      lastScreened: '2024-12-01',
+      status: 'clear',
+      details: 'No sanctions matches',
+    },
+    accounts: [
+      { id: 'ACC-456-001', type: 'Current Account', currency: 'INR', status: 'active', balance: 14500000 },
+      { id: 'ACC-456-002', type: 'CC/OD Facility', currency: 'INR', status: 'active', balance: -2500000 },
+      { id: 'ACC-456-003', type: 'EEFC Account', currency: 'USD', status: 'active', balance: 85000 },
+    ],
+    relatedEntities: [
+      { id: 'ENT-001', name: 'Global Trade FZE', relationship: 'Regular Counterparty', jurisdiction: 'UAE', flagged: true },
+      { id: 'ENT-002', name: 'Pacific Holdings Pte Ltd', relationship: 'Buyer', jurisdiction: 'Singapore', flagged: false },
+      { id: 'ENT-003', name: 'Eastern Materials Ltd', relationship: 'Supplier', jurisdiction: 'Hong Kong', flagged: false },
+    ],
+    commonIdentifiers: [
+      { type: 'Registered Address', value: '301, Trade Centre, Mumbai', sharedWith: ['XYZ Trading Pvt Ltd'] },
+      { type: 'Director', value: 'Rajiv Malhotra', sharedWith: ['Global Trade FZE', 'Sunrise Group'] },
+      { type: 'Phone Number', value: '+91 22 ****-5678', sharedWith: ['XYZ Trading Pvt Ltd'] },
+    ],
+    priorAlerts: [
+      { id: 'ALT-2024-000892', date: new Date('2024-08-15'), type: 'Structuring', riskLevel: 'medium', resolution: 'Closed - False Positive', resolvedBy: 'Priya Sharma' },
+      { id: 'ALT-2023-004521', date: new Date('2023-11-22'), type: 'Rapid Movement', riskLevel: 'high', resolution: 'Escalated to Case', caseId: 'CASE-2023-001245', resolvedBy: 'Arjun Mehta' },
+      { id: 'ALT-2023-002189', date: new Date('2023-06-10'), type: 'Geo Anomaly', riskLevel: 'low', resolution: 'Closed - Explained', resolvedBy: 'Priya Sharma' },
+    ],
+    priorCases: [
+      { id: 'CASE-2023-001245', date: new Date('2023-11-25'), linkedAlerts: 2, status: 'closed', outcome: 'STR Filed', strId: 'STR-2023-000456', investigator: 'Arjun Mehta' },
+    ],
+    priorSTRs: [
+      { id: 'STR-2023-000456', filedDate: new Date('2023-12-15'), fiuReference: 'FIU-IND-2023-REF-78901', amount: 18500000, status: 'submitted', filedBy: 'Principal Officer' },
+    ],
+    investigatorNotes: [
+      { id: 'NOTE-001', author: 'Priya Sharma', role: 'AML Analyst', date: new Date('2024-12-10'), content: 'Customer provided documentation explaining increased trading activity. Business expansion into new markets appears legitimate based on IEC amendment and new buyer contracts.' },
+      { id: 'NOTE-002', author: 'Arjun Mehta', role: 'Case Investigator', date: new Date('2023-11-28'), content: 'Conducted enhanced due diligence. Found links to shell company in UAE (Global Trade FZE). Transaction pattern consistent with trade-based money laundering typology.' },
+      { id: 'NOTE-003', author: 'Arjun Mehta', role: 'Case Investigator', date: new Date('2023-12-01'), content: 'Customer unable to provide satisfactory explanation for source of funds. Recommending STR filing with FIU-IND.' },
+    ],
+  },
+  // Mahadev Impex LLP - CUS-67890 (High Risk Trade Entity)
+  {
+    kyc: {
+      id: 'CUS-67890',
+      name: 'Mahadev Impex LLP',
+      type: 'corporate',
+      riskRating: 'high',
+      industry: 'Import/Export - Textiles',
+      declaredIncome: 35000000,
+      actualTurnover: 125000000,
+      accountAge: 24,
+      nationality: 'India',
+      pep: false,
+      sanctions: false,
+      dateOfBirth: '2017-03-22',
+      idType: 'LLPIN',
+      idNumber: 'AAE-****',
+      address: '15, GIDC Industrial Estate',
+      city: 'Ahmedabad',
+      country: 'India',
+      postalCode: '382445',
+      phoneNumber: '+91 ****-234567',
+      email: 'info@mahadev*****.com',
+      onboardingDate: '2017-06-10',
+      lastKYCReview: '2024-02-01',
+      nextKYCReview: '2024-08-01',
+      sourceOfWealth: 'Business Operations',
+      sourceOfFunds: 'Export Proceeds',
+      expectedTurnover: '₹3,00,00,000 - ₹5,00,00,000',
+    },
+    riskRatingHistory: [
+      { date: '2024-02-01', rating: 'high', reason: 'Unusual counterparty network in UAE' },
+      { date: '2023-02-15', rating: 'medium', reason: 'Periodic review' },
+      { date: '2022-02-10', rating: 'low', reason: 'Standard rating' },
+    ],
+    documents: [
+      { name: 'LLP Agreement', status: 'verified', date: '2024-02-01' },
+      { name: 'IEC Certificate', status: 'verified', date: '2017-06-10' },
+      { name: 'GST Registration', status: 'verified', date: '2024-02-01' },
+      { name: 'PAN Card', status: 'verified', date: '2017-06-10' },
+    ],
+    pepScreening: { lastScreened: '2024-12-01', status: 'clear', details: 'No PEP associations found' },
+    sanctionsScreening: { lastScreened: '2024-12-01', status: 'clear', details: 'No sanctions matches' },
+    accounts: [
+      { id: 'ACC-678-001', type: 'Current Account', currency: 'INR', status: 'active', balance: 8900000 },
+      { id: 'ACC-678-002', type: 'EEFC Account', currency: 'USD', status: 'active', balance: 125000 },
+    ],
+    relatedEntities: [
+      { id: 'ENT-004', name: 'Al Rashid Trading LLC', relationship: 'Buyer', jurisdiction: 'UAE', flagged: true },
+      { id: 'ENT-005', name: 'Sunrise Textiles Singapore', relationship: 'Supplier', jurisdiction: 'Singapore', flagged: false },
+    ],
+    commonIdentifiers: [],
+    priorAlerts: [],
+    priorCases: [],
+    priorSTRs: [],
+    investigatorNotes: [],
+  },
+  // Rahul Sharma - CUS-78901 (Individual - Medium Risk)
+  {
+    kyc: {
+      id: 'CUS-78901',
+      name: 'Rahul Sharma',
+      type: 'individual',
+      riskRating: 'medium',
+      occupation: 'Business Owner',
+      industry: 'Retail Trade',
+      declaredIncome: 2500000,
+      actualTurnover: 8900000,
+      accountAge: 36,
+      nationality: 'India',
+      pep: false,
+      sanctions: false,
+      dateOfBirth: '1985-07-22',
+      idType: 'PAN',
+      idNumber: 'ABCPS****K',
+      address: '45, Sector 18, Noida',
+      city: 'Noida',
+      country: 'India',
+      postalCode: '201301',
+      phoneNumber: '+91 ****-123456',
+      email: 'rahul.s****@gmail.com',
+      onboardingDate: '2021-01-15',
+      lastKYCReview: '2024-01-20',
+      nextKYCReview: '2025-01-20',
+      sourceOfWealth: 'Business Income',
+      sourceOfFunds: 'Trading Profits',
+      expectedTurnover: '₹20,00,000 - ₹50,00,000',
+    },
+    riskRatingHistory: [
+      { date: '2024-01-20', rating: 'medium', reason: 'Increased transaction volume' },
+      { date: '2023-01-15', rating: 'low', reason: 'Annual review' },
+    ],
+    documents: [
+      { name: 'PAN Card', status: 'verified', date: '2024-01-20' },
+      { name: 'Aadhaar Card', status: 'verified', date: '2024-01-20' },
+      { name: 'Address Proof', status: 'verified', date: '2024-01-20' },
+    ],
+    pepScreening: { lastScreened: '2024-12-01', status: 'clear', details: 'No PEP associations found' },
+    sanctionsScreening: { lastScreened: '2024-12-01', status: 'clear', details: 'No sanctions matches' },
+    accounts: [
+      { id: 'ACC-789-001', type: 'Savings Account', currency: 'INR', status: 'active', balance: 450000 },
+      { id: 'ACC-789-002', type: 'Current Account', currency: 'INR', status: 'active', balance: 1200000 },
+    ],
+    relatedEntities: [],
+    commonIdentifiers: [],
+    priorAlerts: [],
+    priorCases: [],
+    priorSTRs: [],
+    investigatorNotes: [],
+  },
+  // Shree Ganesh Traders - CUS-34521 (Corporate - High Risk)
+  {
+    kyc: {
+      id: 'CUS-34521',
+      name: 'Shree Ganesh Traders',
+      type: 'corporate',
+      riskRating: 'high',
+      industry: 'Commodities Trading',
+      declaredIncome: 15000000,
+      actualTurnover: 34500000,
+      accountAge: 30,
+      nationality: 'India',
+      pep: false,
+      sanctions: false,
+      dateOfBirth: '2019-02-14',
+      idType: 'CIN',
+      idNumber: 'U51100GJ2019PTC******',
+      address: '12, APMC Market, Vashi',
+      city: 'Navi Mumbai',
+      country: 'India',
+      postalCode: '400703',
+      phoneNumber: '+91 ****-345678',
+      email: 'contact@shreeganesh*****.com',
+      onboardingDate: '2019-05-20',
+      lastKYCReview: '2024-01-10',
+      nextKYCReview: '2024-07-10',
+      sourceOfWealth: 'Business Operations',
+      sourceOfFunds: 'Commodity Sales',
+      expectedTurnover: '₹1,00,00,000 - ₹2,00,00,000',
+    },
+    riskRatingHistory: [
+      { date: '2024-01-10', rating: 'high', reason: 'Shell company connections identified' },
+      { date: '2023-01-15', rating: 'medium', reason: 'Annual review' },
+      { date: '2022-01-10', rating: 'low', reason: 'Initial assessment' },
+    ],
+    documents: [
+      { name: 'Certificate of Incorporation', status: 'verified', date: '2024-01-10' },
+      { name: 'GST Registration', status: 'verified', date: '2024-01-10' },
+      { name: 'PAN Card', status: 'verified', date: '2019-05-20' },
+    ],
+    pepScreening: { lastScreened: '2024-12-01', status: 'clear', details: 'No PEP associations found' },
+    sanctionsScreening: { lastScreened: '2024-12-01', status: 'clear', details: 'No sanctions matches' },
+    accounts: [
+      { id: 'ACC-345-001', type: 'Current Account', currency: 'INR', status: 'active', balance: 5600000 },
+    ],
+    relatedEntities: [
+      { id: 'ENT-010', name: 'Gulf Commodities FZE', relationship: 'Buyer', jurisdiction: 'UAE', flagged: true },
+      { id: 'ENT-011', name: 'Singapore Metals Pte Ltd', relationship: 'Supplier', jurisdiction: 'Singapore', flagged: false },
+    ],
+    commonIdentifiers: [
+      { type: 'Director', value: 'Mahesh Patel', sharedWith: ['Gulf Commodities FZE'] },
+    ],
+    priorAlerts: [
+      { id: 'ALT-2024-001198', date: new Date('2024-01-08'), type: 'Rapid Movement', riskLevel: 'high', resolution: 'Escalated to Case', caseId: 'CASE-2024-0089', resolvedBy: 'Arjun Mehta' },
+    ],
+    priorCases: [],
+    priorSTRs: [],
+    investigatorNotes: [
+      { id: 'NOTE-010', author: 'Arjun Mehta', role: 'Case Investigator', date: new Date('2024-01-11'), content: 'Initial review completed. Multiple shell company connections identified via Dubai and Singapore.' },
+    ],
+  },
+];
+
+// Lookup functions for consistent data access
+export const getCustomerById = (customerId: string): CustomerKYC | undefined => {
+  const profile = mockExtendedCustomerProfiles.find(p => p.kyc.id === customerId);
+  return profile?.kyc;
+};
+
+export const getExtendedCustomerProfile = (customerId: string): ExtendedCustomerProfile | undefined => {
+  return mockExtendedCustomerProfiles.find(p => p.kyc.id === customerId);
+};
+
+export const getTransactionsByCustomerId = (customerId: string): Transaction[] => {
+  return mockTransactionsByCustomer[customerId] || [];
+};
+
+// Transaction data by customer ID - Single source of truth
+export const mockTransactionsByCustomer: Record<string, Transaction[]> = {
+  'CUS-45678': [
+    { id: 'TXN-001', date: new Date('2024-01-14'), type: 'debit', amount: 2450000, currency: 'INR', counterparty: 'Global Trade FZE (Dubai)', channel: 'Wire - SWIFT', country: 'AE', description: 'Invoice payment - machinery parts (IEC: AAACA****J)' },
+    { id: 'TXN-002', date: new Date('2024-01-13'), type: 'credit', amount: 1800000, currency: 'INR', counterparty: 'Eastern Materials Pte Ltd (Singapore)', channel: 'Wire - SWIFT', country: 'SG', description: 'Goods received - textiles' },
+    { id: 'TXN-003', date: new Date('2024-01-12'), type: 'debit', amount: 3200000, currency: 'INR', counterparty: 'Pacific Holdings Ltd (Hong Kong)', channel: 'Wire - SWIFT', country: 'HK', description: 'Consulting services - trade advisory' },
+    { id: 'TXN-004', date: new Date('2024-01-11'), type: 'credit', amount: 950000, currency: 'INR', counterparty: 'Domestic - Cash Deposit', channel: 'Cash', country: 'IN', description: 'Cash deposit - Mumbai Fort Branch (IFSC: HDFC0000123)' },
+    { id: 'TXN-005', date: new Date('2024-01-10'), type: 'credit', amount: 980000, currency: 'INR', counterparty: 'Domestic - Cash Deposit', channel: 'Cash', country: 'IN', description: 'Cash deposit - Nariman Point Branch (IFSC: HDFC0000456)' },
+    { id: 'TXN-006', date: new Date('2024-01-09'), type: 'debit', amount: 4500000, currency: 'INR', counterparty: 'Al Rashid Trading LLC (UAE)', channel: 'Wire - SWIFT', country: 'AE', description: 'Import payment - electronics components' },
+    { id: 'TXN-007', date: new Date('2024-01-08'), type: 'credit', amount: 890000, currency: 'INR', counterparty: 'Shree Krishna Enterprises (Delhi)', channel: 'RTGS', country: 'IN', description: 'Domestic sale proceeds' },
+  ],
+  'CUS-67890': [
+    { id: 'TXN-101', date: new Date('2024-01-16'), type: 'debit', amount: 7800000, currency: 'INR', counterparty: 'Al Rashid Trading LLC (Dubai)', channel: 'Wire - SWIFT', country: 'AE', description: 'Textile export advance' },
+    { id: 'TXN-102', date: new Date('2024-01-15'), type: 'credit', amount: 4500000, currency: 'INR', counterparty: 'Sunrise Textiles Singapore', channel: 'Wire - SWIFT', country: 'SG', description: 'Raw material supply payment' },
+    { id: 'TXN-103', date: new Date('2024-01-14'), type: 'debit', amount: 2200000, currency: 'INR', counterparty: 'Gulf Trading FZE', channel: 'Wire - SWIFT', country: 'AE', description: 'Commission payment' },
+  ],
+  'CUS-78901': [
+    { id: 'TXN-201', date: new Date('2024-01-15'), type: 'credit', amount: 450000, currency: 'INR', counterparty: 'Cash Deposit', channel: 'Cash', country: 'IN', description: 'Cash deposit - Noida Branch' },
+    { id: 'TXN-202', date: new Date('2024-01-12'), type: 'debit', amount: 280000, currency: 'INR', counterparty: 'Sharma Electronics', channel: 'NEFT', country: 'IN', description: 'Stock purchase' },
+  ],
+  'CUS-34521': [
+    { id: 'TXN-301', date: new Date('2024-01-10'), type: 'debit', amount: 12500000, currency: 'INR', counterparty: 'Gulf Commodities FZE (Dubai)', channel: 'Wire - SWIFT', country: 'AE', description: 'Commodity export advance' },
+    { id: 'TXN-302', date: new Date('2024-01-08'), type: 'credit', amount: 8900000, currency: 'INR', counterparty: 'Singapore Metals Pte Ltd', channel: 'Wire - SWIFT', country: 'SG', description: 'Metal supply payment' },
+    { id: 'TXN-303', date: new Date('2024-01-05'), type: 'credit', amount: 950000, currency: 'INR', counterparty: 'Cash Deposit', channel: 'Cash', country: 'IN', description: 'Cash deposit - Vashi Branch' },
+  ],
+};
+
+// Legacy exports for backward compatibility - point to first customer's data
+export const mockCustomerKYC: CustomerKYC = mockExtendedCustomerProfiles[0].kyc;
+export const mockTransactions: Transaction[] = mockTransactionsByCustomer['CUS-45678'];
 
 // Generate mock raw alerts - Indian context
 export const mockRawAlerts: RawAlert[] = [
@@ -342,101 +669,11 @@ export const mockSTRDrafts: STRDraft[] = [
   },
 ];
 
-// Mock customer KYC - Indian context
-export const mockCustomerKYC: CustomerKYC = {
-  id: 'CUS-45678',
-  name: 'ABC Exports Pvt Ltd',
-  type: 'corporate',
-  riskRating: 'high',
-  industry: 'Import/Export',
-  declaredIncome: 20000000,
-  actualTurnover: 56700000,
-  accountAge: 18,
-  nationality: 'India',
-  pep: false,
-  sanctions: false,
-};
+// Note: mockCustomerKYC is defined earlier in file (line 368) using mockExtendedCustomerProfiles
+// This section intentionally removed to avoid duplicate declarations
 
-// Mock transactions - Indian context with INR
-export const mockTransactions: Transaction[] = [
-  {
-    id: 'TXN-001',
-    date: new Date('2024-01-14'),
-    type: 'debit',
-    amount: 2450000,
-    currency: 'INR',
-    counterparty: 'Global Trade FZE (Dubai)',
-    channel: 'Wire - SWIFT',
-    country: 'AE',
-    description: 'Invoice payment - machinery parts (IEC: AAACA****J)',
-  },
-  {
-    id: 'TXN-002',
-    date: new Date('2024-01-13'),
-    type: 'credit',
-    amount: 1800000,
-    currency: 'INR',
-    counterparty: 'Eastern Materials Pte Ltd (Singapore)',
-    channel: 'Wire - SWIFT',
-    country: 'SG',
-    description: 'Goods received - textiles',
-  },
-  {
-    id: 'TXN-003',
-    date: new Date('2024-01-12'),
-    type: 'debit',
-    amount: 3200000,
-    currency: 'INR',
-    counterparty: 'Pacific Holdings Ltd (Hong Kong)',
-    channel: 'Wire - SWIFT',
-    country: 'HK',
-    description: 'Consulting services - trade advisory',
-  },
-  {
-    id: 'TXN-004',
-    date: new Date('2024-01-11'),
-    type: 'credit',
-    amount: 950000,
-    currency: 'INR',
-    counterparty: 'Domestic - Cash Deposit',
-    channel: 'Cash',
-    country: 'IN',
-    description: 'Cash deposit - Mumbai Fort Branch (IFSC: HDFC0000123)',
-  },
-  {
-    id: 'TXN-005',
-    date: new Date('2024-01-10'),
-    type: 'credit',
-    amount: 980000,
-    currency: 'INR',
-    counterparty: 'Domestic - Cash Deposit',
-    channel: 'Cash',
-    country: 'IN',
-    description: 'Cash deposit - Nariman Point Branch (IFSC: HDFC0000456)',
-  },
-  {
-    id: 'TXN-006',
-    date: new Date('2024-01-09'),
-    type: 'debit',
-    amount: 4500000,
-    currency: 'INR',
-    counterparty: 'Al Rashid Trading LLC (UAE)',
-    channel: 'Wire - SWIFT',
-    country: 'AE',
-    description: 'Import payment - electronics components',
-  },
-  {
-    id: 'TXN-007',
-    date: new Date('2024-01-08'),
-    type: 'credit',
-    amount: 890000,
-    currency: 'INR',
-    counterparty: 'Shree Krishna Enterprises (Delhi)',
-    channel: 'RTGS',
-    country: 'IN',
-    description: 'Domestic sale proceeds',
-  },
-];
+// Note: mockTransactions is defined earlier in file (line 369) using mockTransactionsByCustomer
+// This section intentionally removed to avoid duplicate declarations
 
 // Mock audit entries - Indian context
 export const mockAuditEntries: AuditEntry[] = [

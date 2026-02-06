@@ -165,6 +165,117 @@ export interface CustomerKYC {
   nationality: string;
   pep: boolean;
   sanctions: boolean;
+  // Extended KYC fields
+  dateOfBirth?: string;
+  idType?: string;
+  idNumber?: string;
+  idExpiry?: string;
+  address?: string;
+  city?: string;
+  country?: string;
+  postalCode?: string;
+  phoneNumber?: string;
+  email?: string;
+  onboardingDate?: string;
+  lastKYCReview?: string;
+  nextKYCReview?: string;
+  sourceOfWealth?: string;
+  sourceOfFunds?: string;
+  expectedTurnover?: string;
+}
+
+// Extended customer data for Customer 360 view
+export interface CustomerRiskHistory {
+  date: string;
+  rating: RiskLevel;
+  reason: string;
+}
+
+export interface CustomerDocument {
+  name: string;
+  status: 'verified' | 'pending' | 'expired';
+  date: string;
+}
+
+export interface CustomerScreening {
+  lastScreened: string;
+  status: 'hit' | 'clear';
+  details: string;
+}
+
+export interface CustomerAccount {
+  id: string;
+  type: string;
+  currency: string;
+  status: 'active' | 'dormant' | 'frozen';
+  balance: number;
+}
+
+export interface RelatedEntity {
+  id: string;
+  name: string;
+  relationship: string;
+  jurisdiction: string;
+  flagged: boolean;
+}
+
+export interface CommonIdentifier {
+  type: string;
+  value: string;
+  sharedWith: string[];
+}
+
+export interface PriorAlert {
+  id: string;
+  date: Date;
+  type: string;
+  riskLevel: RiskLevel;
+  resolution: string;
+  caseId?: string;
+  resolvedBy: string;
+}
+
+export interface PriorCase {
+  id: string;
+  date: Date;
+  linkedAlerts: number;
+  status: string;
+  outcome: string;
+  strId?: string;
+  investigator: string;
+}
+
+export interface PriorSTR {
+  id: string;
+  filedDate: Date;
+  fiuReference: string;
+  amount: number;
+  status: string;
+  filedBy: string;
+}
+
+export interface InvestigatorNote {
+  id: string;
+  author: string;
+  role: string;
+  date: Date;
+  content: string;
+}
+
+// Extended customer profile combining KYC with history
+export interface ExtendedCustomerProfile {
+  kyc: CustomerKYC;
+  riskRatingHistory: CustomerRiskHistory[];
+  documents: CustomerDocument[];
+  pepScreening: CustomerScreening;
+  sanctionsScreening: CustomerScreening;
+  accounts: CustomerAccount[];
+  relatedEntities: RelatedEntity[];
+  commonIdentifiers: CommonIdentifier[];
+  priorAlerts: PriorAlert[];
+  priorCases: PriorCase[];
+  priorSTRs: PriorSTR[];
+  investigatorNotes: InvestigatorNote[];
 }
 
 // Transaction data

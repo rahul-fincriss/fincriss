@@ -20,7 +20,13 @@ import { RiskBadge } from '@/components/shared/RiskBadge';
 import { SLATimer } from '@/components/shared/SLATimer';
 import { RawAlertDrawer } from '@/components/workbench/RawAlertDrawer';
 import { Customer360Drawer } from '@/components/customer360/Customer360Drawer';
-import { mockPrioritizedAlerts, mockCustomerKYC, mockTransactions } from '@/data/mockData';
+import { 
+  mockPrioritizedAlerts, 
+  getExtendedCustomerProfile, 
+  getTransactionsByCustomerId,
+  mockExtendedCustomerProfiles,
+  formatINRFull
+} from '@/data/mockData';
 import { useAuth } from '@/contexts/AuthContext';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
@@ -33,8 +39,11 @@ export default function AlertDetailsPage() {
   const [customer360Open, setCustomer360Open] = useState(false);
 
   const alert = mockPrioritizedAlerts.find((a) => a.id === alertId) || mockPrioritizedAlerts[0];
-  const customer = mockCustomerKYC;
-  const transactions = mockTransactions;
+  
+  // Look up customer and transactions by the alert's customerId
+  const customerProfile = getExtendedCustomerProfile(alert.customerId) || mockExtendedCustomerProfiles[0];
+  const transactions = getTransactionsByCustomerId(alert.customerId);
+  const customer = customerProfile.kyc;
 
   const handleCreateCase = () => {
     toast.success('Case created successfully');
@@ -162,11 +171,11 @@ export default function AlertDetailsPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <p className="text-xs text-muted-foreground">Declared Income</p>
-                    <p className="font-mono font-medium">${customer.declaredIncome.toLocaleString()}</p>
+                    <p className="font-mono font-medium">{formatINRFull(customer.declaredIncome)}</p>
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Actual Turnover</p>
-                    <p className="font-mono font-medium text-risk-high">${customer.actualTurnover.toLocaleString()}</p>
+                    <p className="font-mono font-medium text-risk-high">{formatINRFull(customer.actualTurnover)}</p>
                   </div>
                 </div>
               </div>
@@ -203,33 +212,37 @@ export default function AlertDetailsPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {transactions.map((txn) => (
-                  <div
-                    key={txn.id}
-                    className="flex items-center justify-between rounded-lg border border-border p-3"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className={`rounded-full p-1.5 ${txn.type === 'credit' ? 'bg-risk-low/20' : 'bg-risk-high/20'}`}>
-                        <TrendingUp className={`h-4 w-4 ${txn.type === 'credit' ? 'text-risk-low' : 'text-risk-high rotate-180'}`} />
+                {transactions.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-4">No transactions found for this customer</p>
+                ) : (
+                  transactions.slice(0, 5).map((txn) => (
+                    <div
+                      key={txn.id}
+                      className="flex items-center justify-between rounded-lg border border-border p-3"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`rounded-full p-1.5 ${txn.type === 'credit' ? 'bg-risk-low/20' : 'bg-risk-high/20'}`}>
+                          <TrendingUp className={`h-4 w-4 ${txn.type === 'credit' ? 'text-risk-low' : 'text-risk-high rotate-180'}`} />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium">{txn.counterparty}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {format(txn.date, 'MMM dd')} • {txn.channel}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-sm font-medium">{txn.counterparty}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {format(txn.date, 'MMM dd')} • {txn.channel}
+                      <div className="text-right">
+                        <p className={`font-mono font-medium ${txn.type === 'credit' ? 'text-risk-low' : 'text-risk-high'}`}>
+                          {txn.type === 'credit' ? '+' : '-'}{formatINRFull(txn.amount)}
                         </p>
+                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                          <Globe className="h-3 w-3" />
+                          {txn.country}
+                        </div>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <p className={`font-mono font-medium ${txn.type === 'credit' ? 'text-risk-low' : 'text-risk-high'}`}>
-                        {txn.type === 'credit' ? '+' : '-'}${txn.amount.toLocaleString()}
-                      </p>
-                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                        <Globe className="h-3 w-3" />
-                        {txn.country}
-                      </div>
-                    </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </CardContent>
           </Card>
@@ -251,7 +264,7 @@ export default function AlertDetailsPage() {
                     <Badge className="badge-risk-high">Detected</Badge>
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    Multiple transactions just below $10,000 threshold within 48-hour window
+                    Multiple transactions just below ₹10,00,000 CTR threshold within 48-hour window
                   </p>
                 </div>
 
@@ -261,7 +274,7 @@ export default function AlertDetailsPage() {
                     <Badge className="badge-risk-medium">Flagged</Badge>
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    Transactions originating from 3 high-risk jurisdictions: VG, PA, CY
+                    Transactions originating from 3 high-risk jurisdictions: UAE, SG, HK
                   </p>
                 </div>
 
@@ -297,7 +310,7 @@ export default function AlertDetailsPage() {
       <Customer360Drawer
         open={customer360Open}
         onOpenChange={setCustomer360Open}
-        customer={customer}
+        customerProfile={customerProfile}
         transactions={transactions}
         alert={alert}
       />

@@ -1,91 +1,18 @@
-import { AlertTriangle, FileText, MessageSquare, Clock, User, Send } from 'lucide-react';
+import { AlertTriangle, FileText, MessageSquare, User, Send } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { RiskBadge } from '@/components/shared/RiskBadge';
-import { CustomerKYC } from '@/types';
+import { ExtendedCustomerProfile } from '@/types';
 import { format } from 'date-fns';
 import { Separator } from '@/components/ui/separator';
+import { formatINRFull } from '@/data/mockData';
 
 interface NotesHistoryTabProps {
-  customer: CustomerKYC;
+  customerProfile: ExtendedCustomerProfile;
 }
 
-export function NotesHistoryTab({ customer }: NotesHistoryTabProps) {
-  // Mock historical data
-  const priorAlerts = [
-    {
-      id: 'ALT-2024-000892',
-      date: new Date('2024-08-15'),
-      type: 'Structuring',
-      riskLevel: 'medium' as const,
-      resolution: 'Closed - False Positive',
-      resolvedBy: 'Sarah Chen',
-    },
-    {
-      id: 'ALT-2023-004521',
-      date: new Date('2023-11-22'),
-      type: 'Rapid Movement',
-      riskLevel: 'high' as const,
-      resolution: 'Escalated to Case',
-      caseId: 'CASE-2023-001245',
-      resolvedBy: 'Michael Wong',
-    },
-    {
-      id: 'ALT-2023-002189',
-      date: new Date('2023-06-10'),
-      type: 'Geo Anomaly',
-      riskLevel: 'low' as const,
-      resolution: 'Closed - Explained',
-      resolvedBy: 'Sarah Chen',
-    },
-  ];
-
-  const priorCases = [
-    {
-      id: 'CASE-2023-001245',
-      date: new Date('2023-11-25'),
-      linkedAlerts: 2,
-      status: 'closed',
-      outcome: 'STR Filed',
-      strId: 'STR-2023-000456',
-      investigator: 'Michael Wong',
-    },
-  ];
-
-  const priorSTRs = [
-    {
-      id: 'STR-2023-000456',
-      filedDate: new Date('2023-12-15'),
-      fiuReference: 'FIU-2023-REF-78901',
-      amount: 185000,
-      status: 'submitted',
-      filedBy: 'Principal Officer',
-    },
-  ];
-
-  const investigatorNotes = [
-    {
-      id: 'NOTE-001',
-      author: 'Sarah Chen',
-      role: 'AML Analyst',
-      date: new Date('2024-12-10'),
-      content: 'Customer provided documentation explaining the increased trading activity. Business expansion into new markets appears legitimate based on submitted evidence.',
-    },
-    {
-      id: 'NOTE-002',
-      author: 'Michael Wong',
-      role: 'Case Investigator',
-      date: new Date('2023-11-28'),
-      content: 'Conducted enhanced due diligence. Found links to shell company in BVI. Transaction pattern consistent with trade-based money laundering typology.',
-    },
-    {
-      id: 'NOTE-003',
-      author: 'Michael Wong',
-      role: 'Case Investigator',
-      date: new Date('2023-12-01'),
-      content: 'Customer unable to provide satisfactory explanation for source of funds. Recommending STR filing.',
-    },
-  ];
+export function NotesHistoryTab({ customerProfile }: NotesHistoryTabProps) {
+  const { priorAlerts, priorCases, priorSTRs, investigatorNotes } = customerProfile;
 
   return (
     <div className="space-y-4">
@@ -127,29 +54,33 @@ export function NotesHistoryTab({ customer }: NotesHistoryTabProps) {
           <CardDescription>Historical alerts for this customer</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-3">
-            {priorAlerts.map((alert) => (
-              <div key={alert.id} className="flex items-center justify-between py-3 px-3 rounded-lg border">
-                <div className="flex items-center gap-3">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <p className="text-sm font-mono font-medium">{alert.id}</p>
-                      <RiskBadge level={alert.riskLevel} size="sm" />
+          {priorAlerts.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-4">No prior alerts</p>
+          ) : (
+            <div className="space-y-3">
+              {priorAlerts.map((alert) => (
+                <div key={alert.id} className="flex items-center justify-between py-3 px-3 rounded-lg border">
+                  <div className="flex items-center gap-3">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-mono font-medium">{alert.id}</p>
+                        <RiskBadge level={alert.riskLevel} size="sm" />
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {format(alert.date, 'MMM dd, yyyy')} • {alert.type}
+                      </p>
                     </div>
-                    <p className="text-xs text-muted-foreground">
-                      {format(alert.date, 'MMM dd, yyyy')} • {alert.type}
-                    </p>
+                  </div>
+                  <div className="text-right">
+                    <Badge variant={alert.resolution.includes('Case') ? 'default' : 'secondary'} className="text-xs">
+                      {alert.resolution}
+                    </Badge>
+                    <p className="text-xs text-muted-foreground mt-1">by {alert.resolvedBy}</p>
                   </div>
                 </div>
-                <div className="text-right">
-                  <Badge variant={alert.resolution.includes('Case') ? 'default' : 'secondary'} className="text-xs">
-                    {alert.resolution}
-                  </Badge>
-                  <p className="text-xs text-muted-foreground mt-1">by {alert.resolvedBy}</p>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -222,7 +153,7 @@ export function NotesHistoryTab({ customer }: NotesHistoryTabProps) {
                     </div>
                     <div>
                       <p className="text-xs text-muted-foreground">Amount</p>
-                      <p className="font-mono">${str.amount.toLocaleString()}</p>
+                      <p className="font-mono">{formatINRFull(str.amount)}</p>
                     </div>
                     <div className="col-span-2">
                       <p className="text-xs text-muted-foreground">FIU Reference</p>
@@ -246,28 +177,32 @@ export function NotesHistoryTab({ customer }: NotesHistoryTabProps) {
           <CardDescription>Notes from previous investigations</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {investigatorNotes.map((note, idx) => (
-              <div key={note.id}>
-                <div className="flex items-start gap-3">
-                  <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center shrink-0">
-                    <User className="h-4 w-4 text-muted-foreground" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-sm font-medium">{note.author}</span>
-                      <Badge variant="outline" className="text-xs">{note.role}</Badge>
-                      <span className="text-xs text-muted-foreground">
-                        {format(note.date, 'MMM dd, yyyy')}
-                      </span>
+          {investigatorNotes.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-4">No investigator notes</p>
+          ) : (
+            <div className="space-y-4">
+              {investigatorNotes.map((note, idx) => (
+                <div key={note.id}>
+                  <div className="flex items-start gap-3">
+                    <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center shrink-0">
+                      <User className="h-4 w-4 text-muted-foreground" />
                     </div>
-                    <p className="text-sm text-muted-foreground">{note.content}</p>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-sm font-medium">{note.author}</span>
+                        <Badge variant="outline" className="text-xs">{note.role}</Badge>
+                        <span className="text-xs text-muted-foreground">
+                          {format(note.date, 'MMM dd, yyyy')}
+                        </span>
+                      </div>
+                      <p className="text-sm text-muted-foreground">{note.content}</p>
+                    </div>
                   </div>
+                  {idx < investigatorNotes.length - 1 && <Separator className="mt-4" />}
                 </div>
-                {idx < investigatorNotes.length - 1 && <Separator className="mt-4" />}
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
 
