@@ -66,6 +66,73 @@ export const priorityReasonCategories = [
 
 // Extended customer profiles with all Customer 360 data
 export const mockExtendedCustomerProfiles: ExtendedCustomerProfile[] = [
+  // ===========================================================================
+  // USE CASE 4: MONEY MULE / FUNNEL ACCOUNT - Priya V. Sharma (CUS-PS-1995)
+  // ===========================================================================
+  {
+    kyc: {
+      id: 'CUS-PS-1995',
+      name: 'Priya V. Sharma',
+      type: 'individual',
+      riskRating: 'low', // Pre-alert risk rating was Low
+      occupation: 'Homemaker',
+      industry: 'N/A',
+      declaredIncome: 0, // Zero declared income
+      actualTurnover: 0,
+      accountAge: 24,
+      nationality: 'India',
+      pep: false,
+      sanctions: false,
+      dateOfBirth: '1995-03-15', // Age 30
+      idType: 'PAN',
+      idNumber: 'WXYZ1010A',
+      address: '42, Koregaon Park',
+      city: 'Pune',
+      country: 'India',
+      postalCode: '411001',
+      phoneNumber: '+91 ****-789012',
+      email: 'priya.v****@gmail.com',
+      onboardingDate: '2023-02-10',
+      lastKYCReview: '2024-02-10',
+      nextKYCReview: '2025-02-10',
+      sourceOfWealth: 'Spouse Income',
+      sourceOfFunds: 'Household Transfers',
+      expectedTurnover: '₹0 - ₹50,000',
+    },
+    riskRatingHistory: [
+      { date: '2024-02-10', rating: 'low', reason: 'Annual review - minimal account activity' },
+      { date: '2023-02-10', rating: 'low', reason: 'Initial onboarding - homemaker profile' },
+    ],
+    documents: [
+      { name: 'PAN Card', status: 'verified', date: '2023-02-10' },
+      { name: 'Aadhaar Card', status: 'verified', date: '2023-02-10' },
+      { name: 'Address Proof (Electricity Bill)', status: 'verified', date: '2024-02-10' },
+      { name: 'Passport', status: 'pending', date: '' },
+    ],
+    pepScreening: { lastScreened: '2024-12-01', status: 'clear', details: 'No PEP associations found' },
+    sanctionsScreening: { lastScreened: '2024-12-01', status: 'clear', details: 'No sanctions matches' },
+    accounts: [
+      { id: '3000XXXXXX', type: 'Savings Account', currency: 'INR', status: 'active', balance: 215000 },
+    ],
+    relatedEntities: [
+      // Inbound senders - unrelated individuals (funnel sources)
+      { id: 'SND-001', name: 'Rajesh Kumar Gupta', relationship: 'Unknown Third Party', jurisdiction: 'Delhi', flagged: true },
+      { id: 'SND-002', name: 'Mohan Singh Rathore', relationship: 'Unknown Third Party', jurisdiction: 'Jaipur', flagged: true },
+      { id: 'SND-003', name: 'Vikram Joshi', relationship: 'Unknown Third Party', jurisdiction: 'Mumbai', flagged: true },
+      { id: 'SND-004', name: 'Amit Banerjee', relationship: 'Unknown Third Party', jurisdiction: 'Kolkata', flagged: true },
+      { id: 'SND-005', name: 'Suresh Reddy', relationship: 'Unknown Third Party', jurisdiction: 'Hyderabad', flagged: true },
+      { id: 'SND-006', name: 'Karthik Iyer', relationship: 'Unknown Third Party', jurisdiction: 'Chennai', flagged: true },
+      { id: 'SND-007', name: 'Dinesh Patel', relationship: 'Unknown Third Party', jurisdiction: 'Ahmedabad', flagged: true },
+      { id: 'SND-008', name: 'Rakesh Tiwari', relationship: 'Unknown Third Party', jurisdiction: 'Indore', flagged: true },
+      // Outbound beneficiary
+      { id: 'BEN-001', name: 'Eurolink Consulting Ltd', relationship: 'Foreign Beneficiary', jurisdiction: 'Cyprus', flagged: true },
+    ],
+    commonIdentifiers: [],
+    priorAlerts: [],
+    priorCases: [],
+    priorSTRs: [],
+    investigatorNotes: [],
+  },
   // ABC Exports Pvt Ltd - CUS-45678 (High Risk Corporate)
   {
     kyc: {
@@ -339,6 +406,23 @@ export const getTransactionsByCustomerId = (customerId: string): Transaction[] =
 
 // Transaction data by customer ID - Single source of truth
 export const mockTransactionsByCustomer: Record<string, Transaction[]> = {
+  // ===========================================================================
+  // USE CASE 4: MONEY MULE / FUNNEL ACCOUNT - Priya V. Sharma Transactions
+  // 8 Inbound IMPS/NEFT (₹1,50,000 each = ₹12,00,000) + 1 Outbound SWIFT (₹10,00,000)
+  // ===========================================================================
+  'CUS-PS-1995': [
+    // Domestic Inflows - Funneling Pattern (8 transactions over 10 days)
+    { id: 'TXN-MM-001', date: new Date('2026-01-20'), type: 'credit', amount: 150000, currency: 'INR', counterparty: 'Rajesh Kumar Gupta (Delhi)', channel: 'IMPS', country: 'IN', description: 'IMPS transfer from unknown third party - Delhi' },
+    { id: 'TXN-MM-002', date: new Date('2026-01-21'), type: 'credit', amount: 150000, currency: 'INR', counterparty: 'Mohan Singh Rathore (Jaipur)', channel: 'NEFT', country: 'IN', description: 'NEFT transfer from unknown third party - Jaipur' },
+    { id: 'TXN-MM-003', date: new Date('2026-01-23'), type: 'credit', amount: 150000, currency: 'INR', counterparty: 'Vikram Joshi (Mumbai)', channel: 'IMPS', country: 'IN', description: 'IMPS transfer from unknown third party - Mumbai' },
+    { id: 'TXN-MM-004', date: new Date('2026-01-24'), type: 'credit', amount: 150000, currency: 'INR', counterparty: 'Amit Banerjee (Kolkata)', channel: 'NEFT', country: 'IN', description: 'NEFT transfer from unknown third party - Kolkata' },
+    { id: 'TXN-MM-005', date: new Date('2026-01-25'), type: 'credit', amount: 150000, currency: 'INR', counterparty: 'Suresh Reddy (Hyderabad)', channel: 'IMPS', country: 'IN', description: 'IMPS transfer from unknown third party - Hyderabad' },
+    { id: 'TXN-MM-006', date: new Date('2026-01-27'), type: 'credit', amount: 150000, currency: 'INR', counterparty: 'Karthik Iyer (Chennai)', channel: 'NEFT', country: 'IN', description: 'NEFT transfer from unknown third party - Chennai' },
+    { id: 'TXN-MM-007', date: new Date('2026-01-28'), type: 'credit', amount: 150000, currency: 'INR', counterparty: 'Dinesh Patel (Ahmedabad)', channel: 'IMPS', country: 'IN', description: 'IMPS transfer from unknown third party - Ahmedabad' },
+    { id: 'TXN-MM-008', date: new Date('2026-01-30'), type: 'credit', amount: 150000, currency: 'INR', counterparty: 'Rakesh Tiwari (Indore)', channel: 'NEFT', country: 'IN', description: 'NEFT transfer from unknown third party - Indore' },
+    // International Outflow - Layering (within 48 hours of last inflow)
+    { id: 'TXN-MM-009', date: new Date('2026-02-01'), type: 'debit', amount: 1000000, currency: 'INR', counterparty: 'Eurolink Consulting Ltd (Cyprus)', channel: 'Wire - SWIFT', country: 'CY', description: 'SWIFT transfer - "Consulting Fee" - High-Risk Jurisdiction (Cyprus)' },
+  ],
   'CUS-45678': [
     { id: 'TXN-001', date: new Date('2024-01-14'), type: 'debit', amount: 2450000, currency: 'INR', counterparty: 'Global Trade FZE (Dubai)', channel: 'Wire - SWIFT', country: 'AE', description: 'Invoice payment - machinery parts (IEC: AAACA****J)' },
     { id: 'TXN-002', date: new Date('2024-01-13'), type: 'credit', amount: 1800000, currency: 'INR', counterparty: 'Eastern Materials Pte Ltd (Singapore)', channel: 'Wire - SWIFT', country: 'SG', description: 'Goods received - textiles' },
@@ -434,6 +518,84 @@ export const mockRawAlerts: RawAlert[] = [
 
 // Generate mock prioritized alerts - with multiple alerts per customer for grouping demo
 export const mockPrioritizedAlerts: PrioritizedAlert[] = [
+  // ===========================================================================
+  // USE CASE 4: MONEY MULE / FUNNEL ACCOUNT - Priya V. Sharma (3 Alerts)
+  // ===========================================================================
+  {
+    id: 'ALT-MM-2026-001',
+    sourceSystem: 'Core Banking',
+    alertType: 'behavior_deviation',
+    customerId: 'CUS-PS-1995',
+    customerName: 'Priya V. Sharma',
+    amount: 1200000,
+    currency: 'INR',
+    timestamp: new Date('2026-02-02T09:00:00'),
+    status: 'sent_to_maps',
+    rawPayload: { 
+      deviation_score: 0.96, 
+      declared_income: 0, 
+      actual_inflow: '₹12,00,000',
+      profile_type: 'Homemaker'
+    },
+    mapsScore: 95,
+    riskLevel: 'high',
+    riskDrivers: [
+      'Severe profile mismatch: Zero declared income vs ₹12L inflows',
+      'Homemaker profile inconsistent with transaction volume',
+      'Multiple unrelated third-party deposits from 8 cities'
+    ],
+    slaDeadline: new Date(Date.now() + 2 * 60 * 60 * 1000), // 2 hours - urgent
+  },
+  {
+    id: 'ALT-MM-2026-002',
+    sourceSystem: 'Wire Transfer',
+    alertType: 'structuring',
+    customerId: 'CUS-PS-1995',
+    customerName: 'Priya V. Sharma',
+    amount: 1200000,
+    currency: 'INR',
+    timestamp: new Date('2026-02-02T10:30:00'),
+    status: 'sent_to_maps',
+    rawPayload: { 
+      pattern: 'velocity_anomaly', 
+      deposit_count: 8,
+      unique_remitters: 8,
+      geographic_dispersion: 'high'
+    },
+    mapsScore: 92,
+    riskLevel: 'high',
+    riskDrivers: [
+      'High velocity: 8 deposits in 10 days',
+      'Multiple unrelated third-party deposits',
+      'Geographically dispersed sources: Delhi, Jaipur, Mumbai, Kolkata, Hyderabad, Chennai, Ahmedabad, Indore'
+    ],
+    slaDeadline: new Date(Date.now() + 2 * 60 * 60 * 1000), // 2 hours - urgent
+  },
+  {
+    id: 'ALT-MM-2026-003',
+    sourceSystem: 'Wire Transfer',
+    alertType: 'rapid_movement',
+    customerId: 'CUS-PS-1995',
+    customerName: 'Priya V. Sharma',
+    amount: 1000000,
+    currency: 'INR',
+    timestamp: new Date('2026-02-02T11:00:00'),
+    status: 'sent_to_maps',
+    rawPayload: { 
+      outbound_jurisdiction: 'CY',
+      jurisdiction_risk: 'High',
+      purpose: 'Consulting Fee',
+      swift_code: 'BCYPCY****'
+    },
+    mapsScore: 94,
+    riskLevel: 'high',
+    riskDrivers: [
+      'High-risk jurisdiction transfer (Cyprus)',
+      'Rapid outflow within 48 hours of aggregated inflows',
+      'Suspicious purpose: "Consulting Fee" from homemaker account'
+    ],
+    slaDeadline: new Date(Date.now() + 2 * 60 * 60 * 1000), // 2 hours - urgent
+  },
   // Mahadev Impex LLP - 2 alerts (High priority customer)
   {
     ...mockRawAlerts[4],
@@ -542,6 +704,33 @@ export const mockPrioritizedAlerts: PrioritizedAlert[] = [
 
 // Mock cases - Indian context
 export const mockCases: Case[] = [
+  // ===========================================================================
+  // USE CASE 4: MONEY MULE / FUNNEL ACCOUNT - Case for Priya V. Sharma
+  // ===========================================================================
+  {
+    id: 'CASE-MM-2026-001',
+    linkedAlerts: ['ALT-MM-2026-001', 'ALT-MM-2026-002', 'ALT-MM-2026-003'],
+    customerId: 'CUS-PS-1995',
+    customerName: 'Priya V. Sharma',
+    investigatorId: 'usr-002',
+    investigatorName: 'Arjun Mehta',
+    status: 'investigation',
+    strStatus: 'draft_in_progress',
+    createdAt: new Date('2026-02-02'),
+    slaDeadline: new Date(Date.now() + 24 * 60 * 60 * 1000),
+    totalAmount: 1200000,
+    currency: 'INR',
+    notes: [
+      {
+        id: 'note-mm-001',
+        authorId: 'usr-002',
+        authorName: 'Arjun Mehta',
+        content: 'Money Mule / Funnel Account typology confirmed. Homemaker with zero declared income received ₹12,00,000 from 8 unrelated individuals across India within 10 days. ₹10,00,000 transferred to Cyprus-based entity within 48 hours of last deposit.',
+        timestamp: new Date('2026-02-02T14:30:00'),
+      },
+    ],
+    documents: [],
+  },
   {
     id: 'CASE-2024-0089',
     linkedAlerts: ['ALT-2024-001198', 'ALT-2024-001199'],
@@ -650,6 +839,26 @@ export const mockCases: Case[] = [
 
 // Mock STR drafts - Indian regulatory context
 export const mockSTRDrafts: STRDraft[] = [
+  // ===========================================================================
+  // USE CASE 4: MONEY MULE / FUNNEL ACCOUNT - STR Draft for Priya V. Sharma
+  // ===========================================================================
+  {
+    id: 'STR-MM-2026-001',
+    caseId: 'CASE-MM-2026-001',
+    status: 'draft',
+    groundsOfSuspicion: '',
+    transactionNarrative: '',
+    customerProfile: '',
+    riskRationale: '',
+    aiGenerated: {
+      groundsOfSuspicion: false,
+      transactionNarrative: false,
+      customerProfile: false,
+      riskRationale: false,
+    },
+    changes: [],
+    investigatorComments: '',
+  },
   {
     id: 'STR-2024-0045',
     caseId: 'CASE-2024-0091',
@@ -677,6 +886,58 @@ export const mockSTRDrafts: STRDraft[] = [
 
 // Mock audit entries - Indian context
 export const mockAuditEntries: AuditEntry[] = [
+  // ===========================================================================
+  // USE CASE 4: MONEY MULE / FUNNEL ACCOUNT - Audit Trail
+  // ===========================================================================
+  {
+    id: 'AUD-MM-001',
+    entityType: 'alert',
+    entityId: 'ALT-MM-2026-001',
+    action: 'Alert created - Profile Deviation',
+    performedBy: 'System',
+    performedAt: new Date('2026-02-02T09:00:00'),
+    details: 'Auto-generated: Zero income homemaker profile vs ₹12,00,000 inflows from 8 unrelated parties',
+    modelVersion: 'FinCrisS-v2.4.0',
+  },
+  {
+    id: 'AUD-MM-002',
+    entityType: 'alert',
+    entityId: 'ALT-MM-2026-002',
+    action: 'Alert created - Velocity Anomaly',
+    performedBy: 'System',
+    performedAt: new Date('2026-02-02T10:30:00'),
+    details: 'Auto-generated: 8 deposits in 10 days from geographically dispersed unrelated remitters',
+    modelVersion: 'FinCrisS-v2.4.0',
+  },
+  {
+    id: 'AUD-MM-003',
+    entityType: 'alert',
+    entityId: 'ALT-MM-2026-003',
+    action: 'Alert created - High-Risk Jurisdiction Transfer',
+    performedBy: 'System',
+    performedAt: new Date('2026-02-02T11:00:00'),
+    details: 'Auto-generated: ₹10,00,000 SWIFT to Cyprus within 48 hours of inflow aggregation',
+    modelVersion: 'FinCrisS-v2.4.0',
+  },
+  {
+    id: 'AUD-MM-004',
+    entityType: 'case',
+    entityId: 'CASE-MM-2026-001',
+    action: 'Case created',
+    performedBy: 'Arjun Mehta',
+    performedAt: new Date('2026-02-02T14:00:00'),
+    details: 'Created from 3 linked alerts: ALT-MM-2026-001, ALT-MM-2026-002, ALT-MM-2026-003 (Money Mule typology)',
+  },
+  {
+    id: 'AUD-MM-005',
+    entityType: 'str',
+    entityId: 'STR-MM-2026-001',
+    action: 'STR Draft initiated',
+    performedBy: 'Arjun Mehta',
+    performedAt: new Date('2026-02-02T14:30:00'),
+    details: 'FIU-IND SBA01 template selected for Money Mule / Funnel Account filing',
+  },
+  // Other audit entries
   {
     id: 'AUD-001',
     entityType: 'alert',
