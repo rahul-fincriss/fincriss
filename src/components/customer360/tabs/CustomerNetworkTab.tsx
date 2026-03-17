@@ -2,7 +2,7 @@ import { Users, Building, AlertTriangle, Link2, CreditCard, Globe } from 'lucide
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ExtendedCustomerProfile, Transaction } from '@/types';
-import { formatINRFull } from '@/data/mockData';
+import { formatINRFull } from '@/lib/formatters';
 
 interface CustomerNetworkTabProps {
   customerProfile: ExtendedCustomerProfile;

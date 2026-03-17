@@ -9,7 +9,7 @@ import { Transaction } from '@/types';
 import { format } from 'date-fns';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Separator } from '@/components/ui/separator';
-import { formatINRFull } from '@/data/mockData';
+import { formatINRFull } from '@/lib/formatters';
 
 interface TransactionsTabProps {
   transactions: Transaction[];

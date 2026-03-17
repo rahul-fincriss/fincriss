@@ -57,8 +57,11 @@ const roleLabels: Record<UserRole, string> = {
   super_admin: 'Super Admin',
 };
 
+import { useUsers } from '@/hooks/useAlerts';
+import { Loader2, AlertCircle } from 'lucide-react';
+
 export function UserTable() {
-  const [users, setUsers] = useState<ManagedUser[]>(mockManagedUsers);
+  const { data: usersData, isLoading, error } = useUsers();
   const [queues] = useState<WorkforceQueue[]>(mockWorkforceQueues);
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState<string>('all');
@@ -66,6 +69,8 @@ export function UserTable() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<ManagedUser | null>(null);
   const [deletingUser, setDeletingUser] = useState<ManagedUser | null>(null);
+
+  const users = (usersData as ManagedUser[]) || [];
 
   const getQueueNames = (queueIds: string[]): string[] => {
     return queueIds
@@ -102,47 +107,46 @@ export function UserTable() {
   };
 
   const handleSaveUser = (userData: Partial<ManagedUser>) => {
-    if (editingUser) {
-      setUsers(users.map((u) =>
-        u.id === editingUser.id ? { ...u, ...userData } : u
-      ));
-      toast.success(`User "${userData.name}" updated successfully`);
-    } else {
-      const newUser: ManagedUser = {
-        id: `usr-${Date.now()}`,
-        name: userData.name || '',
-        email: userData.email || '',
-        username: userData.username || '',
-        roles: userData.roles || ['analyst'],
-        status: userData.status || 'active',
-        department: userData.department,
-        team: userData.team,
-        assignedQueueIds: userData.assignedQueueIds || [],
-        createdAt: new Date(),
-      };
-      setUsers([...users, newUser]);
-      toast.success(`User "${userData.name}" created successfully`);
-    }
+    // API mutation to save user not yet integrated
+    toast.info(`API: Saving user "${userData.name || 'new user'}"...`);
     setIsFormOpen(false);
   };
 
   const handleToggleStatus = (user: ManagedUser) => {
     const newStatus: UserStatus = user.status === 'active' ? 'inactive' : 'active';
-    setUsers(users.map((u) =>
-      u.id === user.id ? { ...u, status: newStatus } : u
-    ));
-    toast.success(
-      `User "${user.name}" ${newStatus === 'active' ? 'activated' : 'deactivated'}`
-    );
+    // API mutation to toggle status not yet integrated
+    toast.info(`API: User "${user.name}" status toggled to ${newStatus}`);
   };
 
   const handleDeleteUser = () => {
     if (deletingUser) {
-      setUsers(users.filter((u) => u.id !== deletingUser.id));
-      toast.success(`User "${deletingUser.name}" deleted successfully`);
+      // API mutation to delete user not yet integrated
+      toast.info(`API: Deleting user "${deletingUser.name}"...`);
       setDeletingUser(null);
     }
   };
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardContent className="h-64 flex flex-col items-center justify-center gap-3">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-muted-foreground animate-pulse">Fetching system users...</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card>
+        <CardContent className="h-64 flex flex-col items-center justify-center gap-3 text-destructive">
+          <AlertCircle className="h-8 w-8" />
+          <p>Failed to load workforce data. Contact system administrator.</p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <>

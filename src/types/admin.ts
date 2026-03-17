@@ -21,6 +21,7 @@ export interface ManagedUser {
   name: string;
   email: string;
   username: string;
+  role: UserRole; // For backward compatibility
   roles: UserRole[];
   status: UserStatus;
   department?: string;

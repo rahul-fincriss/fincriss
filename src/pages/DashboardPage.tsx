@@ -13,18 +13,27 @@ import { MetricCard } from '@/components/shared/MetricCard';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { mockPrioritizedAlerts, mockCases, mockSTRDrafts } from '@/data/mockData';
 import { RiskBadge } from '@/components/shared/RiskBadge';
 import { SLATimer } from '@/components/shared/SLATimer';
 import { StatusBadge } from '@/components/shared/StatusBadge';
+
+import { useDashboardSummary } from '@/hooks/useDashboard';
+import { useAlerts } from '@/hooks/useAlerts';
+import { useCases } from '@/hooks/useCases';
+import { Loader2 } from 'lucide-react';
 
 export default function DashboardPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  const highRiskAlerts = mockPrioritizedAlerts.filter(a => a.riskLevel === 'high').length;
-  const openCases = mockCases.filter(c => c.status !== 'closed' && c.status !== 'submitted').length;
-  const pendingSTRs = mockSTRDrafts.filter(s => s.status === 'pending_po_review').length;
+  // Metrics from summary API
+  const { data: summary, isLoading: isSummaryLoading } = useDashboardSummary();
+  
+  // Real alert and case data for quick actions
+  const { data: alerts, isLoading: isAlertsLoading } = useAlerts({ limit: 3 });
+  const { data: cases, isLoading: isCasesLoading } = useCases({ limit: 3 });
+
+  const isLoading = isSummaryLoading || isAlertsLoading || isCasesLoading;
 
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -32,6 +41,17 @@ export default function DashboardPage() {
     if (hour < 17) return 'Good afternoon';
     return 'Good evening';
   };
+
+  if (isLoading) {
+    return (
+      <AppLayout>
+        <div className="flex flex-col items-center justify-center min-h-[60vh] gap-3">
+          <Loader2 className="h-10 w-10 animate-spin text-primary" />
+          <p className="text-muted-foreground animate-pulse">Computing compliance metrics...</p>
+        </div>
+      </AppLayout>
+    );
+  }
 
   return (
     <AppLayout>
@@ -50,28 +70,28 @@ export default function DashboardPage() {
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <MetricCard
             title="High Risk Alerts"
-            value={highRiskAlerts}
+            value={summary?.highRiskAlerts || 0}
             subtitle="Require immediate attention"
             icon={AlertTriangle}
             variant="risk-high"
-            trend={{ value: 12, isPositive: true }}
+            trend={summary?.highRiskTrend ? { value: summary.highRiskTrend, isPositive: summary.highRiskTrend > 0 } : undefined}
           />
           <MetricCard
             title="Alerts in Queue"
-            value={mockPrioritizedAlerts.length}
+            value={summary?.alertsInQueue || 0}
             subtitle="Pending review"
             icon={Zap}
-            trend={{ value: 5, isPositive: true }}
+            trend={summary?.alertsTrend ? { value: summary.alertsTrend, isPositive: summary.alertsTrend > 0 } : undefined}
           />
           <MetricCard
             title="Open Cases"
-            value={openCases}
+            value={summary?.openCases || 0}
             subtitle="Under investigation"
             icon={FolderOpen}
           />
           <MetricCard
             title="Pending STRs"
-            value={pendingSTRs}
+            value={summary?.pendingSTRs || 0}
             subtitle="Awaiting PO approval"
             icon={FileText}
             variant="risk-medium"
@@ -92,7 +112,7 @@ export default function DashboardPage() {
               </Button>
             </CardHeader>
             <CardContent className="space-y-3">
-              {mockPrioritizedAlerts.slice(0, 3).map((alert) => (
+              {(alerts || []).slice(0, 3).map((alert) => (
                 <div
                   key={alert.id}
                   className="flex items-center justify-between rounded-lg border border-border bg-muted/30 p-3 table-row-interactive"
@@ -115,6 +135,9 @@ export default function DashboardPage() {
                   </div>
                 </div>
               ))}
+              {(!alerts || alerts.length === 0) && (
+                <p className="text-sm text-muted-foreground py-4 text-center">No priority alerts</p>
+              )}
             </CardContent>
           </Card>
 
@@ -130,7 +153,7 @@ export default function DashboardPage() {
               </Button>
             </CardHeader>
             <CardContent className="space-y-3">
-              {mockCases.map((caseItem) => (
+              {(cases || []).slice(0, 3).map((caseItem) => (
                 <div
                   key={caseItem.id}
                   className="flex items-center justify-between rounded-lg border border-border bg-muted/30 p-3 table-row-interactive"
@@ -153,6 +176,9 @@ export default function DashboardPage() {
                   </div>
                 </div>
               ))}
+              {(!cases || cases.length === 0) && (
+                <p className="text-sm text-muted-foreground py-4 text-center">No active cases</p>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -170,7 +196,7 @@ export default function DashboardPage() {
                   <CheckCircle className="h-5 w-5 text-risk-low" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold">47</p>
+                  <p className="text-2xl font-bold">{summary?.resolvedAlerts || 0}</p>
                   <p className="text-sm text-muted-foreground">Alerts Resolved</p>
                 </div>
               </div>
@@ -179,7 +205,7 @@ export default function DashboardPage() {
                   <Clock className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold">2.3h</p>
+                  <p className="text-2xl font-bold">{summary?.avgResolutionTime || '0h'}</p>
                   <p className="text-sm text-muted-foreground">Avg. Resolution Time</p>
                 </div>
               </div>
@@ -188,7 +214,7 @@ export default function DashboardPage() {
                   <TrendingDown className="h-5 w-5 text-risk-medium" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold">23%</p>
+                  <p className="text-2xl font-bold">{summary?.falsePositiveRate || '0%'}</p>
                   <p className="text-sm text-muted-foreground">False Positive Rate</p>
                 </div>
               </div>
@@ -197,7 +223,7 @@ export default function DashboardPage() {
                   <FileText className="h-5 w-5 text-risk-high" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold">8</p>
+                  <p className="text-2xl font-bold">{summary?.strsFiled || 0}</p>
                   <p className="text-sm text-muted-foreground">STRs Filed</p>
                 </div>
               </div>

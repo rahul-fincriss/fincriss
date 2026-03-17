@@ -86,19 +86,25 @@ export type STRStatusType = 'no_str' | 'draft_in_progress' | 'str_ready' | 'str_
 
 export interface Case {
   id: string;
+  title?: string;
   linkedAlerts: string[];
   customerId: string;
   customerName: string;
-  investigatorId: string;
-  investigatorName: string;
+  investigatorId?: string;
+  investigatorName?: string;
+  assignedTo?: string;
   status: CaseStatus;
-  strStatus: STRStatusType;
+  priority?: RiskLevel;
+  strStatus?: STRStatusType;
   createdAt: Date;
+  updatedAt: Date;
   slaDeadline: Date;
   totalAmount: number;
   currency: string;
   notes: CaseNote[];
   documents: CaseDocument[];
+  description?: string;
+  alertsCount?: number;
 }
 
 export interface CaseNote {

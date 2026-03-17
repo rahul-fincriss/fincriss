@@ -22,37 +22,89 @@ import { StatusBadge } from '@/components/shared/StatusBadge';
 import { SLATimer } from '@/components/shared/SLATimer';
 import { STRDraftTab } from '@/components/str/STRDraftTab';
 import { 
-  mockCases, 
   getExtendedCustomerProfile, 
   getTransactionsByCustomerId,
-  mockExtendedCustomerProfiles,
-  formatINRFull
+  mockExtendedCustomerProfiles
 } from '@/data/mockData';
+import { formatINRFull } from '@/lib/formatters';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+
+import { useCase, useUpdateCase, useCloseCase } from '@/hooks/useCases';
+import { Loader2, AlertCircle } from 'lucide-react';
 
 export default function CaseWorkspacePage() {
   const { caseId } = useParams();
   const navigate = useNavigate();
   const [newNote, setNewNote] = useState('');
 
-  const caseData = mockCases.find((c) => c.id === caseId) || mockCases[0];
-  
-  // Look up customer and transactions by the case's customerId
-  const customerProfile = getExtendedCustomerProfile(caseData.customerId) || mockExtendedCustomerProfiles[0];
-  const transactions = getTransactionsByCustomerId(caseData.customerId);
-  const customer = customerProfile.kyc;
+  // Real API data
+  const { data: caseData, isLoading, error } = useCase(caseId || '');
+  const updateCaseMutation = useUpdateCase();
+  const closeCaseMutation = useCloseCase();
 
   const handleAddNote = () => {
-    if (!newNote.trim()) return;
+    if (!newNote.trim() || !caseId) return;
+    
+    // In a real app we'd call an API to add a note
     toast.success('Note added successfully');
     setNewNote('');
+  };
+
+  const handleCloseCase = () => {
+    if (!caseId) return;
+    
+    toast.promise(
+      closeCaseMutation.mutateAsync({ caseId, notes: 'Closed from workspace' }),
+      {
+        loading: 'Closing case...',
+        success: () => {
+          navigate('/cases');
+          return 'Case closed successfully';
+        },
+        error: 'Failed to close case',
+      }
+    );
   };
 
   const handleSubmitSTRToPO = () => {
     toast.success('STR submitted to Principal Officer for review');
     navigate('/cases');
   };
+
+  if (isLoading) {
+    return (
+      <AppLayout>
+        <div className="flex flex-col items-center justify-center min-h-[60vh] gap-3">
+          <Loader2 className="h-10 w-10 animate-spin text-primary" />
+          <p className="text-muted-foreground animate-pulse">Loading case workspace...</p>
+        </div>
+      </AppLayout>
+    );
+  }
+
+  if (error || !caseData) {
+    return (
+      <AppLayout>
+        <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+          <AlertCircle className="h-12 w-12 text-destructive" />
+          <div className="text-center">
+            <h2 className="text-xl font-bold">Case Not Found</h2>
+            <p className="text-muted-foreground">The case ID might be invalid or has been deleted.</p>
+          </div>
+          <Button onClick={() => navigate('/cases')}>
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Cases
+          </Button>
+        </div>
+      </AppLayout>
+    );
+  }
+
+  // Look up customer and transactions (keeping mock for now)
+  const customerProfile = getExtendedCustomerProfile(caseData.customerId) || mockExtendedCustomerProfiles[0];
+  const transactions = getTransactionsByCustomerId(caseData.customerId);
+  const customer = customerProfile.kyc;
 
   return (
     <AppLayout>
@@ -73,9 +125,13 @@ export default function CaseWorkspacePage() {
           </div>
           <div className="flex items-center gap-2">
             <SLATimer deadline={caseData.slaDeadline} />
-            <Button variant="outline">
+            <Button 
+              variant="outline" 
+              onClick={handleCloseCase}
+              disabled={closeCaseMutation.isPending}
+            >
               <XCircle className="mr-2 h-4 w-4" />
-              Close as False Positive
+              {closeCaseMutation.isPending ? 'Closing...' : 'Close as False Positive'}
             </Button>
           </div>
         </div>

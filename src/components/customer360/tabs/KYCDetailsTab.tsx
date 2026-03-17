@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { RiskBadge } from '@/components/shared/RiskBadge';
 import { ExtendedCustomerProfile } from '@/types';
-import { formatINRFull } from '@/data/mockData';
+import { formatINRFull } from '@/lib/formatters';
 
 interface KYCDetailsTabProps {
   customerProfile: ExtendedCustomerProfile;

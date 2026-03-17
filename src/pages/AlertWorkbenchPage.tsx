@@ -32,7 +32,6 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { RiskBadge } from '@/components/shared/RiskBadge';
 import { SLATimer } from '@/components/shared/SLATimer';
-import { mockPrioritizedAlerts, mockAnalysts } from '@/data/mockData';
 import { PrioritizedAlert, RiskLevel, UserPriority, CustomerGroupOverrides, WorkbenchAuditEntry, User, QueueType } from '@/types';
 import { toast } from 'sonner';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -41,6 +40,8 @@ import { AuditPanel } from '@/components/workbench/AuditPanel';
 import { AnalystAssignmentDropdown } from '@/components/workbench/AnalystAssignmentDropdown';
 import { RawAlertDrawer } from '@/components/workbench/RawAlertDrawer';
 import { QueueTypeDropdown, queueTypeShortLabels } from '@/components/workbench/QueueTypeDropdown';
+import { useAlerts, useUsers, useOpenCase } from '@/hooks/useAlerts';
+import { Loader2 } from 'lucide-react';
 
 const alertTypeLabels: Record<string, string> = {
   large_cash: 'Large Cash',
@@ -123,7 +124,16 @@ function groupAlertsByCustomer(alerts: PrioritizedAlert[]): CustomerGroup[] {
 export default function AlertWorkbenchPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [alerts] = useState<PrioritizedAlert[]>(mockPrioritizedAlerts);
+  
+  // Real API data
+  const { data: alertsData, isLoading: alertsLoading, error: alertsError } = useAlerts();
+  const { data: usersData, isLoading: usersLoading } = useUsers();
+  const openCaseMutation = useOpenCase();
+  
+  const alerts = alertsData || [];
+  const analysts = usersData || [];
+  const isLoading = alertsLoading || usersLoading;
+
   const [searchQuery, setSearchQuery] = useState('');
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
   const [expandedCustomers, setExpandedCustomers] = useState<Set<string>>(new Set());
@@ -292,9 +302,21 @@ export default function AlertWorkbenchPage() {
     navigate(`/alerts/${alert.id}`);
   };
 
-  const handleCreateCustomerCase = (group: CustomerGroup) => {
-    toast.success(`Case created for ${group.customerName} with ${group.totalAlerts} alerts`);
-    navigate('/cases');
+  const handleCreateCustomerCase = async (group: CustomerGroup) => {
+    // Open cases for all alerts in the group
+    toast.promise(
+      Promise.all(group.alerts.map(alert => 
+        openCaseMutation.mutateAsync({ 
+          alertId: alert.id, 
+          request: { notes: 'Bulk case opening from workbench' } 
+        })
+      )),
+      {
+        loading: 'Opening cases...',
+        success: `Successfully created cases for ${group.customerName}`,
+        error: 'Failed to open one or more cases',
+      }
+    );
   };
 
   const handleDropAlert = (e: React.MouseEvent, alertId: string) => {
@@ -397,7 +419,7 @@ export default function AlertWorkbenchPage() {
         </div>
 
         {/* Customer-Grouped Alerts Table */}
-        <div className="rounded-lg border border-border">
+        <div className="rounded-lg border border-border bg-card overflow-hidden">
           <Table>
             <TableHeader>
               <TableRow>
@@ -413,273 +435,291 @@ export default function AlertWorkbenchPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {customerGroups.map((group) => {
-                const override = customerOverrides.get(group.customerId);
-                const hasOverride = override?.userPriority && override.userPriority !== 'none';
-                const assignee = override?.assignedAnalystId 
-                  ? { id: override.assignedAnalystId, name: override.assignedAnalystName! }
-                  : undefined;
-                const auditEntries = auditLog.get(group.customerId) || [];
+              {alertsLoading ? (
+                <TableRow>
+                  <TableCell colSpan={9} className="h-48 text-center">
+                    <div className="flex flex-col items-center justify-center gap-2">
+                      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                      <span className="text-muted-foreground">Loading prioritized alerts...</span>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ) : alertsError ? (
+                <TableRow>
+                  <TableCell colSpan={9} className="h-48 text-center text-destructive">
+                    <div className="flex flex-col items-center justify-center gap-2">
+                      <XCircle className="h-8 w-8" />
+                      <span>Failed to load alerts. Please check your API connection.</span>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ) : customerGroups.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={9} className="h-48 text-center text-muted-foreground text-lg">
+                    No alerts found matching your criteria.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                customerGroups.map((group) => {
+                  const override = customerOverrides.get(group.customerId);
+                  const hasOverride = override?.userPriority && override.userPriority !== 'none';
+                  const assignee = override?.assignedAnalystId 
+                    ? { id: override.assignedAnalystId, name: override.assignedAnalystName! }
+                    : undefined;
+                  const auditEntries = auditLog.get(group.customerId) || [];
 
-                return (
-                  <Collapsible
-                    key={group.customerId}
-                    open={expandedCustomers.has(group.customerId)}
-                    onOpenChange={() => toggleCustomerExpand(group.customerId)}
-                    asChild
-                  >
-                    <>
-                      {/* Customer Row */}
-                      <CollapsibleTrigger asChild>
-                        <TableRow className="table-row-interactive cursor-pointer hover:bg-muted/50">
-                          <TableCell className="w-[40px]">
-                            {expandedCustomers.has(group.customerId) ? (
-                              <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                            ) : (
-                              <ChevronRight className="h-4 w-4 text-muted-foreground" />
-                            )}
-                          </TableCell>
-                          <TableCell>
-                            <div>
-                              <p className="font-semibold">{group.customerName}</p>
-                              <p className="text-xs text-muted-foreground font-mono">
-                                {group.customerId}
-                              </p>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant="secondary" className="font-mono">
-                              {group.totalAlerts}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex flex-col gap-0.5">
-                              {group.priorityBreakdown.high > 0 && (
-                                <Badge className="badge-risk-high text-[10px] leading-tight px-2 py-0 h-5 w-fit rounded-sm font-medium">
-                                  {group.priorityBreakdown.high} High
-                                </Badge>
-                              )}
-                              {group.priorityBreakdown.medium > 0 && (
-                                <Badge className="badge-risk-medium text-[10px] leading-tight px-2 py-0 h-5 w-fit rounded-sm font-medium">
-                                  {group.priorityBreakdown.medium} Med
-                                </Badge>
-                              )}
-                              {group.priorityBreakdown.low > 0 && (
-                                <Badge className="badge-risk-low text-[10px] leading-tight px-2 py-0 h-5 w-fit rounded-sm font-medium">
-                                  {group.priorityBreakdown.low} Low
-                                </Badge>
-                              )}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <RiskBadge level={group.maxPriority} size="sm" />
-                          </TableCell>
-                          <TableCell onClick={(e) => e.stopPropagation()}>
-                            {canEdit ? (
-                              <QueueTypeDropdown
-                                currentQueue={override?.queueType}
-                                onQueueChange={(queue) => handleQueueChange(group.customerId, queue)}
-                              />
-                            ) : (
-                              <Badge variant="outline" className="text-xs">
-                                {queueTypeShortLabels[override?.queueType || 'default_aml']}
-                              </Badge>
-                            )}
-                          </TableCell>
-                          <TableCell onClick={(e) => e.stopPropagation()}>
-                            {canEdit ? (
-                              <AnalystAssignmentDropdown
-                                analysts={mockAnalysts}
-                                currentAssignee={assignee}
-                                onAssign={(analyst) => handleAssignAnalyst(group.customerId, analyst, !!assignee)}
-                                onAssignToMe={() => handleAssignToMe(group.customerId)}
-                              />
-                            ) : (
-                              assignee ? (
-                                <Badge variant="secondary" className="gap-1">
-                                  {assignee.name}
-                                </Badge>
+                  return (
+                    <Collapsible
+                      key={group.customerId}
+                      open={expandedCustomers.has(group.customerId)}
+                      onOpenChange={() => toggleCustomerExpand(group.customerId)}
+                      asChild
+                    >
+                      <>
+                        {/* Customer Row */}
+                        <CollapsibleTrigger asChild>
+                          <TableRow className="table-row-interactive cursor-pointer hover:bg-muted/50">
+                            <TableCell className="w-[40px]">
+                              {expandedCustomers.has(group.customerId) ? (
+                                <ChevronDown className="h-4 w-4 text-muted-foreground" />
                               ) : (
-                                <Badge variant="outline" className="text-muted-foreground border-dashed">
-                                  Unassigned
+                                <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              <div>
+                                <p className="font-semibold">{group.customerName}</p>
+                                <p className="text-xs text-muted-foreground font-mono">
+                                  {group.customerId}
+                                </p>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant="secondary" className="font-mono">
+                                {group.totalAlerts}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex flex-col gap-0.5">
+                                {group.priorityBreakdown.high > 0 && (
+                                  <Badge className="badge-risk-high text-[10px] leading-tight px-2 py-0 h-5 w-fit rounded-sm font-medium">
+                                    {group.priorityBreakdown.high} High
+                                  </Badge>
+                                )}
+                                {group.priorityBreakdown.medium > 0 && (
+                                  <Badge className="badge-risk-medium text-[10px] leading-tight px-2 py-0 h-5 w-fit rounded-sm font-medium">
+                                    {group.priorityBreakdown.medium} Med
+                                  </Badge>
+                                )}
+                                {group.priorityBreakdown.low > 0 && (
+                                  <Badge className="badge-risk-low text-[10px] leading-tight px-2 py-0 h-5 w-fit rounded-sm font-medium">
+                                    {group.priorityBreakdown.low} Low
+                                  </Badge>
+                                )}
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <RiskBadge level={group.maxPriority} size="sm" />
+                            </TableCell>
+                            <TableCell onClick={(e) => e.stopPropagation()}>
+                              {canEdit ? (
+                                <QueueTypeDropdown
+                                  currentQueue={override?.queueType}
+                                  onQueueChange={(queue) => handleQueueChange(group.customerId, queue)}
+                                />
+                              ) : (
+                                <Badge variant="outline" className="text-xs">
+                                  {queueTypeShortLabels[override?.queueType || 'default_aml']}
                                 </Badge>
-                              )
-                            )}
-                          </TableCell>
-                          <TableCell>
-                            <SLATimer deadline={group.earliestSLA} />
-                          </TableCell>
-                          <TableCell>
-                            <div
-                              className="flex items-center justify-end gap-1"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-7 w-7"
-                                onClick={() => openAuditPanel(group)}
-                                title="View activity log"
+                              )}
+                            </TableCell>
+                            <TableCell onClick={(e) => e.stopPropagation()}>
+                              {canEdit ? (
+                                <AnalystAssignmentDropdown
+                                  analysts={analysts}
+                                  currentAssignee={assignee}
+                                  onAssign={(analyst) => handleAssignAnalyst(group.customerId, analyst, !!assignee)}
+                                  onAssignToMe={() => handleAssignToMe(group.customerId)}
+                                />
+                              ) : (
+                                assignee ? (
+                                  <Badge variant="secondary" className="gap-1">
+                                    {assignee.name}
+                                  </Badge>
+                                ) : (
+                                  <Badge variant="outline" className="text-muted-foreground border-dashed">
+                                    Unassigned
+                                  </Badge>
+                                )
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              <SLATimer deadline={group.earliestSLA} />
+                            </TableCell>
+                            <TableCell>
+                              <div
+                                className="flex items-center justify-end gap-1"
+                                onClick={(e) => e.stopPropagation()}
                               >
-                                <History className="h-3.5 w-3.5" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-8 px-2 text-xs"
-                                onClick={() => toggleCustomerExpand(group.customerId)}
-                              >
-                                <Eye className="h-3.5 w-3.5 mr-1" />
-                                View
-                              </Button>
-                              <Button
-                                variant="default"
-                                size="sm"
-                                className="h-8 px-2 text-xs"
-                                onClick={() => handleCreateCustomerCase(group)}
-                              >
-                                <FolderPlus className="h-3.5 w-3.5 mr-1" />
-                                Create Case
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      </CollapsibleTrigger>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-7 w-7"
+                                  onClick={() => openAuditPanel(group)}
+                                  title="View activity log"
+                                >
+                                  <History className="h-3.5 w-3.5" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-8 px-2 text-xs"
+                                  onClick={() => toggleCustomerExpand(group.customerId)}
+                                >
+                                  <Eye className="h-3.5 w-3.5 mr-1" />
+                                  View
+                                </Button>
+                                <Button
+                                  variant="default"
+                                  size="sm"
+                                  className="h-8 px-2 text-xs"
+                                  onClick={() => handleCreateCustomerCase(group)}
+                                >
+                                  <FolderPlus className="h-3.5 w-3.5 mr-1" />
+                                  Create Case
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        </CollapsibleTrigger>
 
-                      {/* Expanded Alert Rows */}
-                      <CollapsibleContent asChild>
-                        <>
-                          {group.alerts.map((alert) => {
-                            const effectiveAssignee = getEffectiveAlertAssignee(alert, override);
+                        {/* Expanded Alert Rows */}
+                        <CollapsibleContent asChild>
+                          <>
+                            {group.alerts.map((alert) => {
+                              const effectiveAssignee = getEffectiveAlertAssignee(alert, override);
 
-                            return (
-                              <TableRow
-                                key={alert.id}
-                                className="bg-muted/30 hover:bg-muted/50 cursor-pointer border-l-2 border-l-primary/20"
-                                onClick={() => handleViewAlertDetails(alert)}
-                              >
-                                <TableCell className="w-[40px]"></TableCell>
-                                <TableCell colSpan={1}>
-                                  <div className="pl-4 flex items-center gap-2">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-primary/50" />
-                                    <span className="font-mono text-sm">{alert.id}</span>
-                                    <Badge variant="secondary" className="text-xs">
-                                      {alertTypeLabels[alert.alertType] || alert.alertType}
-                                    </Badge>
-                                  </div>
-                                </TableCell>
-                                <TableCell>
-                                  <span className="text-sm text-muted-foreground">
-                                    {alert.amount.toLocaleString()} {alert.currency}
-                                  </span>
-                                </TableCell>
-                                <TableCell>
-                                  <div className="flex flex-wrap gap-1">
-                                    {alert.riskDrivers.slice(0, 2).map((driver, i) => (
-                                      <Badge key={i} variant="outline" className="text-xs">
-                                        {driver}
+                              return (
+                                <TableRow
+                                  key={alert.id}
+                                  className="bg-muted/30 hover:bg-muted/50 cursor-pointer border-l-2 border-l-primary/20"
+                                  onClick={() => handleViewAlertDetails(alert)}
+                                >
+                                  <TableCell className="w-[40px]"></TableCell>
+                                  <TableCell colSpan={1}>
+                                    <div className="pl-4 flex items-center gap-2">
+                                      <div className="w-1.5 h-1.5 rounded-full bg-primary/50" />
+                                      <span className="font-mono text-sm">{alert.id}</span>
+                                      <Badge variant="secondary" className="text-xs">
+                                        {alertTypeLabels[alert.alertType] || alert.alertType}
                                       </Badge>
-                                    ))}
-                                    {alert.riskDrivers.length > 2 && (
-                                      <Badge variant="outline" className="text-xs text-muted-foreground">
-                                        +{alert.riskDrivers.length - 2}
-                                      </Badge>
-                                    )}
-                                  </div>
-                                </TableCell>
-                                <TableCell>
-                                  <RiskBadge level={alert.riskLevel} size="sm" />
-                                </TableCell>
-                                <TableCell>
-                                  {/* Queue inherited from customer level */}
-                                  <span className="text-xs text-muted-foreground italic">
-                                    (inherited)
-                                  </span>
-                                </TableCell>
-                                <TableCell onClick={(e) => e.stopPropagation()}>
-                                  {canEdit ? (
-                                    <AnalystAssignmentDropdown
-                                      analysts={mockAnalysts}
-                                      currentAssignee={effectiveAssignee}
-                                      onAssign={(analyst) => handleAlertAssignment(alert.id, analyst)}
-                                      onAssignToMe={() => user && handleAlertAssignment(alert.id, user)}
-                                      compact
-                                    />
-                                  ) : (
-                                    effectiveAssignee ? (
-                                      <span className="text-xs">{effectiveAssignee.name}</span>
+                                    </div>
+                                  </TableCell>
+                                  <TableCell>
+                                    <span className="text-sm text-muted-foreground">
+                                      {alert.amount.toLocaleString()} {alert.currency}
+                                    </span>
+                                  </TableCell>
+                                  <TableCell>
+                                    <div className="flex flex-wrap gap-1">
+                                      {alert.riskDrivers.slice(0, 2).map((driver, i) => (
+                                        <Badge key={i} variant="outline" className="text-xs">
+                                          {driver}
+                                        </Badge>
+                                      ))}
+                                      {alert.riskDrivers.length > 2 && (
+                                        <Badge variant="outline" className="text-xs text-muted-foreground">
+                                          +{alert.riskDrivers.length - 2}
+                                        </Badge>
+                                      )}
+                                    </div>
+                                  </TableCell>
+                                  <TableCell>
+                                    <RiskBadge level={alert.riskLevel} size="sm" />
+                                  </TableCell>
+                                  <TableCell>
+                                    {/* Queue inherited from customer level */}
+                                    <span className="text-xs text-muted-foreground italic">
+                                      (inherited)
+                                    </span>
+                                  </TableCell>
+                                  <TableCell onClick={(e) => e.stopPropagation()}>
+                                    {canEdit ? (
+                                      <AnalystAssignmentDropdown
+                                        analysts={analysts}
+                                        currentAssignee={effectiveAssignee}
+                                        onAssign={(analyst) => handleAlertAssignment(alert.id, analyst)}
+                                        onAssignToMe={() => user && handleAlertAssignment(alert.id, user)}
+                                        compact
+                                      />
                                     ) : (
-                                      <span className="text-xs text-muted-foreground">—</span>
-                                    )
-                                  )}
-                                </TableCell>
-                                <TableCell>
-                                  <SLATimer deadline={alert.slaDeadline} />
-                                </TableCell>
-                                <TableCell>
-                                  <div
-                                    className="flex items-center justify-end gap-1"
-                                    onClick={(e) => e.stopPropagation()}
-                                  >
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      className="h-7 w-7"
-                                      onClick={() => openRawAlertDrawer(alert)}
-                                      title="View raw alert"
+                                      effectiveAssignee ? (
+                                        <span className="text-xs">{effectiveAssignee.name}</span>
+                                      ) : (
+                                        <span className="text-xs text-muted-foreground">—</span>
+                                      )
+                                    )}
+                                  </TableCell>
+                                  <TableCell>
+                                    <SLATimer deadline={alert.slaDeadline} />
+                                  </TableCell>
+                                  <TableCell>
+                                    <div
+                                      className="flex items-center justify-end gap-1"
+                                      onClick={(e) => e.stopPropagation()}
                                     >
-                                      <FileCode className="h-3.5 w-3.5" />
-                                    </Button>
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      className="h-7 w-7"
-                                      onClick={() => handleViewAlertDetails(alert)}
-                                      title="View details"
-                                    >
-                                      <Eye className="h-3.5 w-3.5" />
-                                    </Button>
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      className="h-7 w-7 text-destructive hover:text-destructive"
-                                      onClick={(e) => handleDropAlert(e, alert.id)}
-                                      title="Drop alert"
-                                    >
-                                      <XCircle className="h-3.5 w-3.5" />
-                                    </Button>
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      className="h-7 w-7"
-                                      onClick={(e) => handleAddToCase(e, alert.id)}
-                                      title="Add to case"
-                                    >
-                                      <FolderPlus className="h-3.5 w-3.5" />
-                                    </Button>
-                                  </div>
-                                </TableCell>
-                              </TableRow>
-                            );
-                          })}
-                        </>
-                      </CollapsibleContent>
-                    </>
-                  </Collapsible>
-                );
-              })}
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-7 w-7"
+                                        onClick={() => openRawAlertDrawer(alert)}
+                                        title="View raw alert"
+                                      >
+                                        <FileCode className="h-3.5 w-3.5" />
+                                      </Button>
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-7 w-7"
+                                        onClick={() => handleViewAlertDetails(alert)}
+                                        title="View details"
+                                      >
+                                        <Eye className="h-3.5 w-3.5" />
+                                      </Button>
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-7 w-7 text-destructive hover:text-destructive"
+                                        onClick={(e) => handleDropAlert(e, alert.id)}
+                                        title="Drop alert"
+                                      >
+                                        <XCircle className="h-3.5 w-3.5" />
+                                      </Button>
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-7 w-7"
+                                        onClick={(e) => handleAddToCase(e, alert.id)}
+                                        title="Add to case"
+                                      >
+                                        <FolderPlus className="h-3.5 w-3.5" />
+                                      </Button>
+                                    </div>
+                                  </TableCell>
+                                </TableRow>
+                              );
+                            })}
+                          </>
+                        </CollapsibleContent>
+                      </>
+                    </Collapsible>
+                  );
+                })
+              )}
             </TableBody>
           </Table>
         </div>
-
-        {customerGroups.length === 0 && (
-          <div className="text-center py-12 text-muted-foreground">
-            <Users className="h-12 w-12 mx-auto mb-3 opacity-30" />
-            <p>No customers match your search criteria</p>
-          </div>
-        )}
       </div>
-
 
       {/* Audit Panel */}
       {selectedCustomerForAudit && (

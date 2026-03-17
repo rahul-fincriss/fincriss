@@ -5,7 +5,7 @@ import { RiskBadge } from '@/components/shared/RiskBadge';
 import { ExtendedCustomerProfile } from '@/types';
 import { format } from 'date-fns';
 import { Separator } from '@/components/ui/separator';
-import { formatINRFull } from '@/data/mockData';
+import { formatINRFull } from '@/lib/formatters';
 
 interface NotesHistoryTabProps {
   customerProfile: ExtendedCustomerProfile;

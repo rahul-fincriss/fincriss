@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Eye, FileCheck, Search, SortAsc, SortDesc } from 'lucide-react';
+import { Eye, FileCheck, Search, SortAsc, SortDesc, Loader2, AlertCircle } from 'lucide-react';
+import { useCases } from '@/hooks/useCases';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -23,7 +24,6 @@ import { Badge } from '@/components/ui/badge';
 import { StatusBadge } from '@/components/shared/StatusBadge';
 import { STRStatusBadge } from '@/components/shared/STRStatusBadge';
 import { SLATimer } from '@/components/shared/SLATimer';
-import { mockCases } from '@/data/mockData';
 import { Case, CaseStatus, STRStatusType } from '@/types';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -41,7 +41,9 @@ const strStatusOrder: Record<STRStatusType, number> = {
 
 export default function CasesPage() {
   const navigate = useNavigate();
-  const [cases] = useState<Case[]>(mockCases);
+  const { data: casesData, isLoading, error } = useCases();
+  const cases = casesData || [];
+  
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [strStatusFilter, setStrStatusFilter] = useState<string>('all');
@@ -248,62 +250,88 @@ export default function CasesPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredAndSortedCases.map((caseItem) => (
-                <TableRow
-                  key={caseItem.id}
-                  className={cn(
-                    'table-row-interactive',
-                    caseItem.strStatus === 'str_ready' && 'bg-emerald-500/5 hover:bg-emerald-500/10'
-                  )}
-                  onClick={() => handleViewCase(caseItem.id)}
-                >
-                  <TableCell className="font-mono text-sm">{caseItem.id}</TableCell>
-                  <TableCell>
-                    <div>
-                      <p className="font-medium">{caseItem.customerName}</p>
-                      <p className="text-xs text-muted-foreground">{caseItem.customerId}</p>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="secondary">
-                      {caseItem.linkedAlerts.length} alert{caseItem.linkedAlerts.length !== 1 ? 's' : ''}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>{caseItem.investigatorName}</TableCell>
-                  <TableCell className="text-right font-mono">
-                    {caseItem.totalAmount.toLocaleString()} {caseItem.currency}
-                  </TableCell>
-                  <TableCell>
-                    <StatusBadge status={caseItem.status} size="sm" />
-                  </TableCell>
-                  <TableCell>
-                    <STRStatusBadge 
-                      status={caseItem.strStatus} 
-                      size="sm" 
-                      highlighted={caseItem.strStatus === 'str_ready'}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <SLATimer deadline={caseItem.slaDeadline} />
-                  </TableCell>
-                  <TableCell>
-                    <div
-                      className="flex items-center justify-end gap-1"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={() => handleViewCase(caseItem.id)}
-                        title="View case"
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
+              {isLoading ? (
+                <TableRow>
+                  <TableCell colSpan={9} className="h-48 text-center">
+                    <div className="flex flex-col items-center justify-center gap-2">
+                      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                      <span className="text-muted-foreground">Loading cases...</span>
                     </div>
                   </TableCell>
                 </TableRow>
-              ))}
+              ) : error ? (
+                <TableRow>
+                  <TableCell colSpan={9} className="h-48 text-center text-destructive">
+                    <div className="flex flex-col items-center justify-center gap-2">
+                      <AlertCircle className="h-8 w-8" />
+                      <span>Failed to load cases. Please check your connection.</span>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ) : filteredAndSortedCases.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={9} className="h-48 text-center text-muted-foreground">
+                    No cases match your filters.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                filteredAndSortedCases.map((caseItem) => (
+                  <TableRow
+                    key={caseItem.id}
+                    className={cn(
+                      'table-row-interactive',
+                      caseItem.strStatus === 'str_ready' && 'bg-emerald-500/5 hover:bg-emerald-500/10'
+                    )}
+                    onClick={() => handleViewCase(caseItem.id)}
+                  >
+                    <TableCell className="font-mono text-sm">{caseItem.id}</TableCell>
+                    <TableCell>
+                      <div>
+                        <p className="font-medium">{caseItem.customerName}</p>
+                        <p className="text-xs text-muted-foreground">{caseItem.customerId}</p>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="secondary">
+                        {caseItem.linkedAlerts.length} alert{caseItem.linkedAlerts.length !== 1 ? 's' : ''}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>{caseItem.investigatorName || 'Unassigned'}</TableCell>
+                    <TableCell className="text-right font-mono">
+                      {caseItem.totalAmount.toLocaleString()} {caseItem.currency}
+                    </TableCell>
+                    <TableCell>
+                      <StatusBadge status={caseItem.status} size="sm" />
+                    </TableCell>
+                    <TableCell>
+                      <STRStatusBadge 
+                        status={caseItem.strStatus || 'no_str'} 
+                        size="sm" 
+                        highlighted={caseItem.strStatus === 'str_ready'}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <SLATimer deadline={caseItem.slaDeadline} />
+                    </TableCell>
+                    <TableCell>
+                      <div
+                        className="flex items-center justify-end gap-1"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={() => handleViewCase(caseItem.id)}
+                          title="View case"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </div>

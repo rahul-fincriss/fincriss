@@ -31,6 +31,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 
+import { useAlert, useOpenCase } from '@/hooks/useAlerts';
+import { Loader2 } from 'lucide-react';
+
 export default function AlertDetailsPage() {
   const { alertId } = useParams();
   const navigate = useNavigate();
@@ -38,16 +41,28 @@ export default function AlertDetailsPage() {
   const [rawAlertDrawerOpen, setRawAlertDrawerOpen] = useState(false);
   const [customer360Open, setCustomer360Open] = useState(false);
 
-  const alert = mockPrioritizedAlerts.find((a) => a.id === alertId) || mockPrioritizedAlerts[0];
+  // Real API data
+  const { data: alert, isLoading, error } = useAlert(alertId || '');
+  const openCaseMutation = useOpenCase();
   
-  // Look up customer and transactions by the alert's customerId
-  const customerProfile = getExtendedCustomerProfile(alert.customerId) || mockExtendedCustomerProfiles[0];
-  const transactions = getTransactionsByCustomerId(alert.customerId);
-  const customer = customerProfile.kyc;
-
-  const handleCreateCase = () => {
-    toast.success('Case created successfully');
-    navigate('/cases');
+  // Handlers
+  const handleCreateCase = async () => {
+    if (!alert) return;
+    
+    toast.promise(
+      openCaseMutation.mutateAsync({ 
+        alertId: alert.id, 
+        request: { notes: `Case manually opened for alert ${alert.id}` } 
+      }),
+      {
+        loading: 'Opening case...',
+        success: () => {
+          navigate('/cases');
+          return 'Case created successfully';
+        },
+        error: 'Failed to create case',
+      }
+    );
   };
 
   const handleDropAlert = () => {
@@ -56,10 +71,43 @@ export default function AlertDetailsPage() {
   };
 
   const handleRawPayloadAuditLog = (alertId: string, userId: string, userName: string) => {
-    // In a real app, this would log to the audit system
     toast.info(`Raw payload view logged for ${alertId}`);
     console.log(`[AUDIT] User ${userName} (${userId}) viewed raw payload for alert ${alertId} at ${new Date().toISOString()}`);
   };
+
+  if (isLoading) {
+    return (
+      <AppLayout>
+        <div className="flex flex-col items-center justify-center min-h-[60vh] gap-3">
+          <Loader2 className="h-10 w-10 animate-spin text-primary" />
+          <p className="text-muted-foreground animate-pulse">Fetching alert details...</p>
+        </div>
+      </AppLayout>
+    );
+  }
+
+  if (error || !alert) {
+    return (
+      <AppLayout>
+        <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+          <XCircle className="h-12 w-12 text-destructive" />
+          <div className="text-center">
+            <h2 className="text-xl font-bold">Alert Not Found</h2>
+            <p className="text-muted-foreground">The alert ID might be invalid or you don't have permission to view it.</p>
+          </div>
+          <Button onClick={() => navigate('/alerts/workbench')}>
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Workbench
+          </Button>
+        </div>
+      </AppLayout>
+    );
+  }
+
+  // Look up customer and transactions (keeping mock for these for now as they are Phase 2/3)
+  const customerProfile = getExtendedCustomerProfile(alert.customerId) || mockExtendedCustomerProfiles[0];
+  const transactions = getTransactionsByCustomerId(alert.customerId);
+  const customer = customerProfile.kyc;
 
   return (
     <AppLayout>

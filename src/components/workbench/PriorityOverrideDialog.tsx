@@ -20,7 +20,7 @@ import {
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { UserPriority } from '@/types';
-import { priorityReasonCategories } from '@/data/mockData';
+import { priorityReasonCategories } from '@/constants';
 
 interface PriorityOverrideDialogProps {
   open: boolean;
