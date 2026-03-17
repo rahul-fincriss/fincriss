@@ -19,16 +19,17 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { mockAuditEntries } from '@/data/mockData';
-import { AuditEntry } from '@/types';
+import { useAuditLogs } from '@/hooks/useAudit';
+import { Loader2, AlertCircle } from 'lucide-react';
 import { format } from 'date-fns';
 
 export default function AuditTrailPage() {
-  const [entries] = useState<AuditEntry[]>(mockAuditEntries);
   const [searchQuery, setSearchQuery] = useState('');
   const [entityFilter, setEntityFilter] = useState<string>('all');
+  
+  const { data: entries, isLoading, error } = useAuditLogs();
 
-  const filteredEntries = entries.filter((entry) => {
+  const filteredEntries = (entries || []).filter((entry) => {
     const matchesSearch =
       entry.entityId.toLowerCase().includes(searchQuery.toLowerCase()) ||
       entry.action.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -100,33 +101,55 @@ export default function AuditTrailPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredEntries.map((entry) => (
-                <TableRow key={entry.id}>
-                  <TableCell className="font-mono text-sm">
-                    {format(entry.performedAt, 'MMM dd, HH:mm:ss')}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Badge className={getEntityBadgeVariant(entry.entityType)}>
-                        {entry.entityType.toUpperCase()}
-                      </Badge>
-                      <span className="font-mono text-xs">{entry.entityId}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>{entry.action}</TableCell>
-                  <TableCell>{entry.performedBy}</TableCell>
-                  <TableCell className="max-w-[300px] truncate text-sm text-muted-foreground">
-                    {entry.details}
-                  </TableCell>
-                  <TableCell>
-                    {entry.modelVersion && (
-                      <Badge variant="outline" className="font-mono text-xs">
-                        {entry.modelVersion}
-                      </Badge>
-                    )}
+              {isLoading ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="h-32 text-center py-8">
+                    <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
+                    <p className="mt-2 text-muted-foreground animate-pulse">Loading activity history...</p>
                   </TableCell>
                 </TableRow>
-              ))}
+              ) : error ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="h-32 text-center py-8 text-destructive">
+                    <AlertCircle className="h-8 w-8 mx-auto" />
+                    <p className="mt-2 font-medium">Failed to load audit logs</p>
+                  </TableCell>
+                </TableRow>
+              ) : filteredEntries.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="h-32 text-center py-8 text-muted-foreground">
+                    No matching audit entries found
+                  </TableCell>
+                </TableRow>
+              ) : (
+                filteredEntries.map((entry) => (
+                  <TableRow key={entry.id}>
+                    <TableCell className="font-mono text-sm">
+                      {format(entry.performedAt, 'MMM dd, HH:mm:ss')}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Badge className={getEntityBadgeVariant(entry.entityType)}>
+                          {entry.entityType.toUpperCase()}
+                        </Badge>
+                        <span className="font-mono text-xs">{entry.entityId}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>{entry.action}</TableCell>
+                    <TableCell>{entry.performedBy}</TableCell>
+                    <TableCell className="max-w-[300px] truncate text-sm text-muted-foreground">
+                      {entry.details}
+                    </TableCell>
+                    <TableCell>
+                      {entry.modelVersion && (
+                        <Badge variant="outline" className="font-mono text-xs">
+                          {entry.modelVersion}
+                        </Badge>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </div>

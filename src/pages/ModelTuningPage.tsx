@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   AlertTriangle,
   Activity,
@@ -13,6 +13,7 @@ import {
   FlaskConical,
   Shield,
   Sliders,
+  AlertCircle,
 } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -74,34 +75,67 @@ const driftIndicators = [
   { metric: "High-Risk Ratio", status: "stable", change: -1.8 },
 ];
 
+import { useRules, useRuleThresholds, useToggleRule, useUpdateThresholds } from "@/hooks/useRules";
+import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
+
 export default function ModelTuningPage() {
-  const [activeModel, setActiveModel] = useState("fincriss-v3.2.1");
-  const [sensitivityThreshold, setSensitivityThreshold] = useState([65]);
-  const [highRiskWeight, setHighRiskWeight] = useState([80]);
-  const [geoAnomalyEnabled, setGeoAnomalyEnabled] = useState(true);
-  const [structuringDetection, setStructuringDetection] = useState(true);
+  const { data: rules, isLoading, error } = useRules();
+  const [activeModel, setActiveModel] = useState<string | null>(null);
+  
+  // Selection logic - pick first rule by default if none selected
+  const selectedRuleId = activeModel || (rules?.[0]?.rule_id || null);
+  const { data: thresholds, isLoading: thresholdsLoading } = useRuleThresholds(selectedRuleId);
+  const toggleMutation = useToggleRule();
+  const updateMutation = useUpdateThresholds();
+
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [localThresholdValues, setLocalThresholdValues] = useState<Record<string, number>>({});
+
+  // Sync local state when thresholds load
+  useEffect(() => {
+    if (thresholds) {
+      const initialValues: Record<string, number> = {};
+      thresholds.forEach(t => initialValues[t.threshold_id] = t.parameter_value);
+      setLocalThresholdValues(initialValues);
+      setHasUnsavedChanges(false);
+    }
+  }, [thresholds]);
 
   const handleModelChange = (modelId: string) => {
     setActiveModel(modelId);
+    setHasUnsavedChanges(false);
+  };
+
+  const handleThresholdUpdate = (id: string, val: number) => {
+    setLocalThresholdValues(prev => ({ ...prev, [id]: val }));
     setHasUnsavedChanges(true);
   };
 
-  const handleParameterChange = () => {
-    setHasUnsavedChanges(true);
+  const handleSaveAll = async () => {
+    if (!selectedRuleId || !thresholds) return;
+    
+    toast.promise(
+      updateMutation.mutateAsync({
+        ruleId: selectedRuleId,
+        thresholds: Object.entries(localThresholdValues).map(([id, val]) => ({
+          threshold_id: id,
+          parameter_value: val
+        }))
+      }),
+      {
+        loading: 'Updating parameters...',
+        success: 'Production configuration updated',
+        error: 'Failed to update configuration'
+      }
+    );
+    setHasUnsavedChanges(false);
   };
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "active":
-        return <Badge className="bg-status-success/20 text-status-success border-status-success/30">Active</Badge>;
-      case "available":
-        return <Badge variant="outline">Available</Badge>;
-      case "testing":
-        return <Badge className="bg-status-warning/20 text-status-warning border-status-warning/30">Testing</Badge>;
-      default:
-        return <Badge variant="secondary">{status}</Badge>;
-    }
+  const getStatusBadge = (active: boolean) => {
+    return active ? 
+      <Badge className="bg-status-success/20 text-status-success border-status-success/30">Active</Badge> : 
+      <Badge variant="outline" className="text-muted-foreground">Inactive</Badge>;
   };
 
   const getDriftIcon = (status: string) => {
@@ -150,7 +184,10 @@ export default function ModelTuningPage() {
             <Button variant="outline" size="sm" onClick={() => setHasUnsavedChanges(false)}>
               Discard
             </Button>
-            <Button size="sm">Submit for Review</Button>
+            <Button size="sm" onClick={handleSaveAll} disabled={updateMutation.isPending}>
+              {updateMutation.isPending ? <RefreshCw className="h-4 w-4 animate-spin mr-2" /> : null}
+              Submit for Review
+            </Button>
           </div>
         )}
 
@@ -163,62 +200,79 @@ export default function ModelTuningPage() {
 
           {/* Model Selection Tab */}
           <TabsContent value="models" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Shield className="h-5 w-5 text-primary" />
-                  Available FinCrisS Models
-                </CardTitle>
-                <CardDescription>
-                  Select the active model for alert prioritization. Changes require governance approval.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Model</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Accuracy</TableHead>
-                      <TableHead>FP Rate</TableHead>
-                      <TableHead>Deployed</TableHead>
-                      <TableHead className="text-right">Action</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {availableModels.map((model) => (
-                      <TableRow key={model.id} className={activeModel === model.id ? "bg-primary/5" : ""}>
-                        <TableCell>
-                          <div>
-                            <p className="font-medium">{model.name}</p>
-                            <p className="text-sm text-muted-foreground">{model.description}</p>
-                          </div>
-                        </TableCell>
-                        <TableCell>{getStatusBadge(model.status)}</TableCell>
-                        <TableCell>
-                          <span className="text-status-success">{model.accuracy}%</span>
-                        </TableCell>
-                        <TableCell>
-                          <span className="text-status-warning">{model.fpRate}%</span>
-                        </TableCell>
-                        <TableCell>
-                          {model.deployedAt || <span className="text-muted-foreground">Not deployed</span>}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          {activeModel === model.id ? (
-                            <Badge className="bg-primary/20 text-primary">Selected</Badge>
-                          ) : (
-                            <Button variant="outline" size="sm" onClick={() => handleModelChange(model.id)}>
-                              {model.status === "testing" ? "Test in Shadow" : "Select"}
-                            </Button>
-                          )}
-                        </TableCell>
+            {isLoading ? (
+              <Card>
+                <CardContent className="h-64 flex flex-col items-center justify-center gap-3">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                  <p className="text-muted-foreground animate-pulse">Fetching rule configurations...</p>
+                </CardContent>
+              </Card>
+            ) : error ? (
+              <Card>
+                <CardContent className="h-64 flex flex-col items-center justify-center gap-3 text-destructive">
+                  <AlertCircle className="h-8 w-8" />
+                  <p>Failed to load detection parameters. Check API connection.</p>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Shield className="h-5 w-5 text-primary" />
+                    Available Detection Rules
+                  </CardTitle>
+                  <CardDescription>
+                    Select a rule to view and adjust its sensitivity parameters.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Rule Name</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Category</TableHead>
+                        <TableHead>Last Updated</TableHead>
+                        <TableHead className="text-right">Action</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
+                    </TableHeader>
+                    <TableBody>
+                      {rules?.map((rule) => (
+                        <TableRow 
+                          key={rule.rule_id} 
+                          className={selectedRuleId === rule.rule_id ? "bg-primary/5 border-l-2 border-l-primary" : ""}
+                        >
+                          <TableCell>
+                            <div>
+                              <p className="font-medium">{rule.rule_name}</p>
+                              <p className="text-sm text-muted-foreground truncate max-w-xs">{rule.description}</p>
+                            </div>
+                          </TableCell>
+                          <TableCell>{getStatusBadge(rule.is_active)}</TableCell>
+                          <TableCell>
+                            <Badge variant="secondary" className="capitalize">
+                              {rule.category}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-sm text-muted-foreground">
+                            {new Date(rule.updated_at).toLocaleDateString()}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            {selectedRuleId === rule.rule_id ? (
+                              <Badge className="bg-primary/20 text-primary">Focused</Badge>
+                            ) : (
+                              <Button variant="outline" size="sm" onClick={() => handleModelChange(rule.rule_id)}>
+                                Select
+                              </Button>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Drift Monitoring */}
             <Card>
@@ -348,10 +402,12 @@ export default function ModelTuningPage() {
           <TabsContent value="tuning" className="space-y-6">
             <Alert className="border-status-info/30 bg-status-info/10">
               <Info className="h-4 w-4 text-status-info" />
-              <AlertTitle className="text-status-info">Configuration Changes</AlertTitle>
+              <AlertTitle className="text-status-info">Direct Configuration</AlertTitle>
               <AlertDescription className="text-muted-foreground">
-                Parameter adjustments will be tested in shadow mode before production deployment. All changes are
-                subject to compliance review and audit logging.
+                Adjusting thresholds for rule: <span className="font-mono font-bold text-foreground">
+                  {rules?.find(r => r.rule_id === selectedRuleId)?.rule_name || selectedRuleId}
+                </span>. 
+                All changes are subject to compliance audit and monitoring.
               </AlertDescription>
             </Alert>
 
@@ -360,54 +416,43 @@ export default function ModelTuningPage() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Sliders className="h-5 w-5 text-primary" />
-                    Sensitivity Controls
+                    Parameter Controls
                   </CardTitle>
-                  <CardDescription>Adjust model sensitivity thresholds</CardDescription>
+                  <CardDescription>Adjust specific numeric thresholds for detection triggers</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="sensitivity">Alert Sensitivity Threshold</Label>
-                      <span className="text-sm text-muted-foreground">{sensitivityThreshold[0]}%</span>
+                  {thresholdsLoading ? (
+                    <div className="flex justify-center py-8">
+                      <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
                     </div>
-                    <Slider
-                      id="sensitivity"
-                      value={sensitivityThreshold}
-                      onValueChange={(val) => {
-                        setSensitivityThreshold(val);
-                        handleParameterChange();
-                      }}
-                      min={30}
-                      max={90}
-                      step={5}
-                      className="w-full"
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      Higher values reduce false positives but may miss subtle patterns
-                    </p>
-                  </div>
-
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="highRisk">High-Risk Weighting</Label>
-                      <span className="text-sm text-muted-foreground">{highRiskWeight[0]}%</span>
+                  ) : thresholds && thresholds.length > 0 ? (
+                    thresholds.map((t) => (
+                      <div key={t.threshold_id} className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <div className="space-y-0.5">
+                            <Label htmlFor={t.threshold_id}>{t.parameter_name}</Label>
+                            <p className="text-xs text-muted-foreground">{t.description}</p>
+                          </div>
+                          <span className="text-sm font-mono font-medium text-primary">
+                            {localThresholdValues[t.threshold_id] ?? t.parameter_value} {t.unit}
+                          </span>
+                        </div>
+                        <Slider
+                          id={t.threshold_id}
+                          value={[localThresholdValues[t.threshold_id] ?? t.parameter_value]}
+                          onValueChange={(val) => handleThresholdUpdate(t.threshold_id, val[0])}
+                          min={0}
+                          max={t.parameter_name.toLowerCase().includes('amount') ? 1000000 : 100}
+                          step={1}
+                          className="w-full"
+                        />
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-8 text-muted-foreground">
+                      No adjustable thresholds found for this rule.
                     </div>
-                    <Slider
-                      id="highRisk"
-                      value={highRiskWeight}
-                      onValueChange={(val) => {
-                        setHighRiskWeight(val);
-                        handleParameterChange();
-                      }}
-                      min={50}
-                      max={100}
-                      step={5}
-                      className="w-full"
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      Adjusts priority weight given to high-risk indicators
-                    </p>
-                  </div>
+                  )}
                 </CardContent>
               </Card>
 
@@ -415,51 +460,43 @@ export default function ModelTuningPage() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Settings2 className="h-5 w-5 text-primary" />
-                    Detection Modules
+                    Operational Status
                   </CardTitle>
-                  <CardDescription>Enable or disable specific detection capabilities</CardDescription>
+                  <CardDescription>Toggle detection capability in production</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
-                      <Label htmlFor="geoAnomaly">Geo-Anomaly Detection</Label>
+                      <Label htmlFor="rule-status">Detection Active</Label>
                       <p className="text-xs text-muted-foreground">
-                        Flag transactions from unusual geographic locations
+                        Turn this rule ON or OFF to affect real-time alert generation
                       </p>
                     </div>
                     <Switch
-                      id="geoAnomaly"
-                      checked={geoAnomalyEnabled}
-                      onCheckedChange={(checked) => {
-                        setGeoAnomalyEnabled(checked);
-                        handleParameterChange();
-                      }}
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label htmlFor="structuring">Structuring Detection</Label>
-                      <p className="text-xs text-muted-foreground">Identify potential transaction splitting patterns</p>
-                    </div>
-                    <Switch
-                      id="structuring"
-                      checked={structuringDetection}
-                      onCheckedChange={(checked) => {
-                        setStructuringDetection(checked);
-                        handleParameterChange();
+                      id="rule-status"
+                      checked={rules?.find(r => r.rule_id === selectedRuleId)?.is_active || false}
+                      onCheckedChange={() => {
+                        if (selectedRuleId) {
+                          toast.promise(toggleMutation.mutateAsync(selectedRuleId), {
+                            loading: 'Toggling rule status...',
+                            success: 'Rule status updated',
+                            error: 'Failed to toggle rule'
+                          });
+                        }
                       }}
                     />
                   </div>
 
                   <div className="pt-4 border-t">
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">Last Configuration Update</span>
-                      <span>2024-01-28 14:32 UTC</span>
+                      <span className="text-muted-foreground">Current Category</span>
+                      <Badge variant="outline" className="capitalize">
+                        {rules?.find(r => r.rule_id === selectedRuleId)?.category || 'General'}
+                      </Badge>
                     </div>
                     <div className="flex items-center justify-between text-sm mt-2">
-                      <span className="text-muted-foreground">Updated By</span>
-                      <span>Rahul Arora (Super Admin)</span>
+                      <span className="text-muted-foreground">Last Modified</span>
+                      <span>{selectedRuleId ? new Date(rules?.find(r => r.rule_id === selectedRuleId)?.updated_at || '').toLocaleString() : 'N/A'}</span>
                     </div>
                   </div>
                 </CardContent>
@@ -468,50 +505,24 @@ export default function ModelTuningPage() {
 
             <Card>
               <CardHeader>
-                <CardTitle>Change History</CardTitle>
-                <CardDescription>Recent parameter modifications and their review status</CardDescription>
+                <CardTitle>Recent Tuning History</CardTitle>
+                <CardDescription>View detailed change logs in the Audit Trail module</CardDescription>
               </CardHeader>
               <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Change</TableHead>
-                      <TableHead>Made By</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Impact</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    <TableRow>
-                      <TableCell>2024-01-28</TableCell>
-                      <TableCell>Sensitivity threshold: 60% → 65%</TableCell>
-                      <TableCell>Rahul Arora</TableCell>
-                      <TableCell>
-                        <Badge className="bg-status-success/20 text-status-success">Deployed</Badge>
-                      </TableCell>
-                      <TableCell className="text-status-success">-2.1% FP Rate</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>2024-01-20</TableCell>
-                      <TableCell>Enabled enhanced structuring module</TableCell>
-                      <TableCell>Rahul Arora</TableCell>
-                      <TableCell>
-                        <Badge className="bg-status-success/20 text-status-success">Deployed</Badge>
-                      </TableCell>
-                      <TableCell className="text-status-success">+1.2% Accuracy</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>2024-01-15</TableCell>
-                      <TableCell>Model upgrade: v3.1.0 → v3.2.1</TableCell>
-                      <TableCell>Rahul Arora</TableCell>
-                      <TableCell>
-                        <Badge className="bg-status-success/20 text-status-success">Deployed</Badge>
-                      </TableCell>
-                      <TableCell className="text-status-success">+1.4% Accuracy</TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
+                <div className="flex flex-col items-center justify-center py-8 text-center gap-3">
+                  <Activity className="h-8 w-8 text-muted-foreground/50" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">Detailed history is maintained in the Audit Trail</p>
+                    <Button 
+                      variant="link" 
+                      size="sm" 
+                      onClick={() => (window.location.hash = '/admin/audit')}
+                      className="mt-1"
+                    >
+                      Go to Audit Trail
+                    </Button>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>

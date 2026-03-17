@@ -1,73 +1,64 @@
-# Welcome to your Lovable project
+# FinCrisS - Financial Crime Surveillance System
 
-## Project info
+FinCrisS is a high-performance, real-time platform designed for financial institutions to detect, manage, and investigate suspicious activities. This application provides a unified interface for analysts, investigators, and administrators to monitor alerts, manage cases, and tune detection models.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## 🚀 Recent Accomplishments: API Integration Phase
 
-## How can I edit this code?
+We have successfully migrated the core modules from mock data to a fully integrated backend API (`api.fincriss.com`).
 
-There are several ways of editing your application.
+### Integrated Modules
+- **Authentication & Security**: Fully integrated with JWT-based sessions, role-based navigation, and persistent login status.
+- **Analyst Workbench**: Real-time alert ingestion, filtering, and assignment. Implemented "Open Case" workflow directly from alerts.
+- **Investigator Workspace**: Full case lifecycle management, including metadata updates, status transitions, and final closures.
+- **Dashboard & Analytics**: Dynamic metrics pulling global counts for alerts, open cases, and pending STRs.
+- **Workforce Management**: Live user administration, including role assignments and account status toggles.
+- **Model Tuning & Governance**: Granular control over detection rules and their specific sensitivity thresholds via live API mutations.
+- **Audit Trail**: Centralized logging system capturing all administrative and investigative actions for compliance.
 
-**Use Lovable**
+> [!NOTE]
+> **Customer 360** currently operates on mock data as the backend endpoints are pending deployment.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+## 🛠️ Technology Stack
+- **Frontend**: React 18, Vite
+- **Data Fetching**: React Query (TanStack Query) for robust caching and state management.
+- **State Management**: Context API (Auth, UI states).
+- **Styling**: Tailwind CSS & shadcn/ui (Radix UI) for a premium, accessible interface.
+- **Icons**: Lucide React.
+- **Date Handling**: date-fns.
 
-Changes made via Lovable will be committed automatically to this repo.
+## 📦 Getting Started
 
-**Use your preferred IDE**
+### Prerequisites
+- Node.js (v18.0.0 or higher)
+- npm or yarn
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### Installation
+```bash
+# Clone the repository
+git clone <repository-url>
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+# Install dependencies
+npm install
+```
 
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+### Development
+```bash
+# Start the local development server
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+### Environment Configuration
+Ensure your `.env` file points to the correct API environment:
+```env
+VITE_API_URL=https://api.fincriss.com
+```
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## 🏗️ Project Structure
+- `src/services/`: API communication layer (Axios clients).
+- `src/hooks/`: Custom React Query hooks for each domain.
+- `src/components/`: Reusable UI components and domain-specific fragments.
+- `src/pages/`: Main application screens and routing logic.
+- `src/constants/`: Shared business logic constants (Priorities, Queues, Categories).
 
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+## ⚖️ Governance & Compliance
+All configuration changes to detection parameters (Thresholds, Rule Toggles) are captured in the **Audit Trail**. FinCrisS maintains a strict "Submit for Review" pattern for production-level model updates.
