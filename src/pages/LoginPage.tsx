@@ -8,28 +8,44 @@ import { useAuth } from '@/contexts/AuthContext';
 import { UserRole } from '@/types';
 import { ThemeToggle } from '@/components/theme/ThemeToggle';
 import { ThemedLogo } from '@/components/shared/ThemedLogo';
+import { toast } from 'sonner';
 
 export default function LoginPage() {
   const navigate = useNavigate();
   const { login, switchRole } = useAuth();
-  const [email, setEmail] = useState('');
+  const [loginId, setLoginId] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!loginId || !password) {
+      toast.error('Please enter both login/email and password');
+      return;
+    }
+
     setIsLoading(true);
     
     try {
-      await login(email, password);
+      await login(loginId, password);
+      toast.success('Successfully signed in');
       navigate('/dashboard');
+    } catch (error: any) {
+      console.error('Login error:', error);
+      const message = error.response?.data?.detail || 'Invalid credentials or connection error';
+      toast.error(message);
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleDemoLogin = (role: UserRole) => {
+    // Note: Demo login now only works if the demo credentials are valid in backend
+    // or if the backend allows dummy login in dev mode.
+    // For now, we'll keep the UI functionality.
+    toast.info(`Attempting demo login as ${role}...`);
     switchRole(role);
     navigate('/dashboard');
   };
@@ -65,14 +81,15 @@ export default function LoginPage() {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="email">Email address</Label>
+            <Label htmlFor="loginId">Username or Email</Label>
             <Input
-              id="email"
-              type="email"
-              placeholder="name@company.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              id="loginId"
+              type="text"
+              placeholder="Enter your username or email"
+              value={loginId}
+              onChange={(e) => setLoginId(e.target.value)}
               className="h-11"
+              required
             />
           </div>
 
@@ -86,6 +103,7 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="h-11 pr-10"
+                required
               />
               <button
                 type="button"
@@ -103,7 +121,7 @@ export default function LoginPage() {
 
           <Button type="submit" className="w-full h-11" disabled={isLoading}>
             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Sign in with SSO
+            Sign in
           </Button>
         </form>
 
