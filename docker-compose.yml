@@ -7,5 +7,9 @@ services:
     image: fincriss:latest
     container_name: fincriss
     restart: unless-stopped
-    ports:
-      - "80:80"
+    networks:
+      - fincriss-bcknd_default
+
+networks:
+  fincriss-bcknd_default:
+    external: true
