@@ -1,0 +1,11 @@
+services:
+  fincriss:
+    build:
+      context: .
+      args:
+        VITE_API_URL: ${VITE_API_URL:-https://api.fincriss.com}
+    image: fincriss:latest
+    container_name: fincriss
+    restart: unless-stopped
+    ports:
+      - "80:80"
