@@ -23,7 +23,7 @@ export const alertsService = {
     console.log("alertsService.listAlerts raw data:", data);
     
     // Preliminary mapping based on common patterns
-    const alerts = Array.isArray(data) ? data : (data.items || []);
+    const alerts = Array.isArray(data) ? data : (data.alerts || data.items || []);
     return alerts.map((alert: any) => ({
       id: alert.alert_id || alert.id,
       sourceSystem: alert.source_system || alert.sourceSystem || 'Legacy',

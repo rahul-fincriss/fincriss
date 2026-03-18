@@ -20,7 +20,7 @@ export const casesService = {
     const data = response.data;
     console.log("casesService.listCases raw data:", data);
     
-    const cases = Array.isArray(data) ? data : (data.items || []);
+    const cases = Array.isArray(data) ? data : (data.cases || data.items || []);
     return cases.map((c: any) => ({
       id: (c.case_id || c.id).toString(),
       title: c.title || `Investigation: ${c.customer_name || 'Customer'}`,
