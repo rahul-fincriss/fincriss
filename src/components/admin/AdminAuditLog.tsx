@@ -19,8 +19,9 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { mockAdminAuditLog } from '@/data/adminMockData';
 import { AdminAuditEntry, AdminAuditActionType } from '@/types/admin';
+import { useAdminAuditLogs } from '@/hooks/useAudit';
+import { Loader2, AlertCircle } from 'lucide-react';
 
 const actionTypeLabels: Record<AdminAuditActionType, string> = {
   user_created: 'User Created',
@@ -57,13 +58,13 @@ const actionTypeColors: Record<AdminAuditActionType, string> = {
 };
 
 export function AdminAuditLog() {
-  const [auditLog] = useState<AdminAuditEntry[]>(mockAdminAuditLog);
+  const { data: auditLog, isLoading, error } = useAdminAuditLogs();
   const [searchQuery, setSearchQuery] = useState('');
   const [entityFilter, setEntityFilter] = useState<string>('all');
   const [actionFilter, setActionFilter] = useState<string>('all');
 
   const filteredLog = useMemo(() => {
-    return auditLog
+    return (auditLog || [])
       .filter((entry) => {
         const matchesSearch =
           searchQuery === '' ||
@@ -145,7 +146,21 @@ export function AdminAuditLog() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredLog.length === 0 ? (
+              {isLoading ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="h-32 text-center py-8">
+                    <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
+                    <p className="mt-2 text-muted-foreground animate-pulse">Loading audit history...</p>
+                  </TableCell>
+                </TableRow>
+              ) : error ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="h-32 text-center py-8 text-destructive">
+                    <AlertCircle className="h-8 w-8 mx-auto" />
+                    <p className="mt-2 font-medium">Failed to load audit logs</p>
+                  </TableCell>
+                </TableRow>
+              ) : filteredLog.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
                     No audit entries found matching your criteria
@@ -206,7 +221,7 @@ export function AdminAuditLog() {
 
         {/* Summary */}
         <div className="text-sm text-muted-foreground">
-          Showing {filteredLog.length} of {auditLog.length} entries
+          Showing {filteredLog.length} of {auditLog?.length || 0} entries
         </div>
       </CardContent>
     </Card>

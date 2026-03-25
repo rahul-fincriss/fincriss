@@ -76,8 +76,10 @@ const driftIndicators = [
 ];
 
 import { useRules, useRuleThresholds, useToggleRule, useUpdateThresholds } from "@/hooks/useRules";
-import { Loader2 } from "lucide-react";
+import { useRuleAuditLogs } from "@/hooks/useAudit";
+import { Loader2, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
+import { format } from "date-fns";
 
 export default function ModelTuningPage() {
   const { data: rules, isLoading, error } = useRules();
@@ -88,6 +90,7 @@ export default function ModelTuningPage() {
   const { data: thresholds, isLoading: thresholdsLoading } = useRuleThresholds(selectedRuleId);
   const toggleMutation = useToggleRule();
   const updateMutation = useUpdateThresholds();
+  const { data: ruleLogs, isLoading: logsLoading } = useRuleAuditLogs({ rule_id: selectedRuleId, limit: 5 });
 
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [localThresholdValues, setLocalThresholdValues] = useState<Record<string, number>>({});
@@ -509,19 +512,71 @@ export default function ModelTuningPage() {
                 <CardDescription>View detailed change logs in the Audit Trail module</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="flex flex-col items-center justify-center py-8 text-center gap-3">
-                  <Activity className="h-8 w-8 text-muted-foreground/50" />
-                  <div>
-                    <p className="text-sm text-muted-foreground">Detailed history is maintained in the Audit Trail</p>
-                    <Button 
-                      variant="link" 
-                      size="sm" 
-                      onClick={() => (window.location.hash = '/admin/audit')}
-                      className="mt-1"
-                    >
-                      Go to Audit Trail
-                    </Button>
+                {logsLoading ? (
+                  <div className="flex justify-center py-8">
+                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
                   </div>
+                ) : ruleLogs && ruleLogs.length > 0 ? (
+                  <div className="rounded-md border">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="bg-muted/50">
+                          <TableHead className="w-[150px]">Date</TableHead>
+                          <TableHead>User</TableHead>
+                          <TableHead>Action</TableHead>
+                          <TableHead>Changes</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {ruleLogs.map((log) => (
+                          <TableRow key={log.id}>
+                            <TableCell className="text-xs">
+                              {format(log.performedAt, "MMM d, HH:mm")}
+                            </TableCell>
+                            <TableCell className="text-xs font-medium">
+                              {log.performedBy}
+                            </TableCell>
+                            <TableCell className="text-xs">
+                              {log.action}
+                            </TableCell>
+                            <TableCell>
+                              {log.previousValue !== undefined && log.newValue !== undefined ? (
+                                <div className="flex items-center gap-1.5 text-[10px]">
+                                  <span className="font-mono text-muted-foreground bg-muted px-1 rounded">
+                                    {log.previousValue}
+                                  </span>
+                                  <ArrowRight className="h-2.5 w-2.5 text-muted-foreground" />
+                                  <span className="font-mono text-foreground bg-primary/10 px-1 rounded">
+                                    {log.newValue}
+                                  </span>
+                                </div>
+                              ) : (
+                                <span className="text-[10px] text-muted-foreground">
+                                  {log.details}
+                                </span>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-8 text-center gap-2">
+                    <Activity className="h-8 w-8 text-muted-foreground/30" />
+                    <p className="text-xs text-muted-foreground">No recent tuning changes recorded for this rule</p>
+                  </div>
+                )}
+                
+                <div className="mt-4 flex justify-end">
+                  <Button 
+                    variant="link" 
+                    size="sm" 
+                    onClick={() => (window.location.hash = '/admin/audit')}
+                    className="text-xs h-auto p-0"
+                  >
+                    View All Platform Activity
+                  </Button>
                 </div>
               </CardContent>
             </Card>
