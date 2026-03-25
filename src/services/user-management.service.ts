@@ -8,7 +8,7 @@ export const userManagementService = {
     const data = response.data;
     console.log("userManagementService.listUsers raw data:", data);
     
-    const users = Array.isArray(data) ? data : (data.items || []);
+    const users = Array.isArray(data) ? data : (data.users || data.items || data.data || []);
     return users.map((u: any) => {
       const roles = Array.isArray(u.roles) 
         ? u.roles.map((r: any) => (typeof r === 'string' ? r : r.role_name)) 

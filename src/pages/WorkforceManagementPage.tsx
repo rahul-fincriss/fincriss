@@ -47,10 +47,10 @@ export default function WorkforceManagementPage() {
               <Shield className="h-4 w-4" />
               Roles & Permissions
             </TabsTrigger>
-            <TabsTrigger value="queues" className="flex items-center gap-2">
+            {/*<TabsTrigger value="queues" className="flex items-center gap-2">
               <Layers className="h-4 w-4" />
               Queues & Teams
-            </TabsTrigger>
+            </TabsTrigger>*/}
             <TabsTrigger value="audit" className="flex items-center gap-2">
               <History className="h-4 w-4" />
               Audit Log
