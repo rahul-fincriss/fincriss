@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Navigate } from 'react-router-dom';
-import { Users, Shield, History, Layers } from 'lucide-react';
+import { Users, Shield, History, Layers, Plus } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useAuth } from '@/contexts/AuthContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -8,10 +9,13 @@ import { UserTable } from '@/components/admin/UserTable';
 import { RolePermissionsTab } from '@/components/admin/RolePermissionsTab';
 import { AdminAuditLog } from '@/components/admin/AdminAuditLog';
 import { QueuesTeamsTab } from '@/components/admin/QueuesTeamsTab';
+import { CreateRoleDialog } from '@/components/admin/CreateRoleDialog';
 
 export default function WorkforceManagementPage() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('users');
+  const [isRoleDialogOpen, setIsRoleDialogOpen] = useState(false);
+  const [roleRefreshTrigger, setRoleRefreshTrigger] = useState(0);
 
   // Super Admin has full access, Compliance has read-only
   const isReadOnly = user?.role === 'compliance';
@@ -38,31 +42,40 @@ export default function WorkforceManagementPage() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full max-w-xl grid-cols-4">
-            <TabsTrigger value="users" className="flex items-center gap-2">
-              <Users className="h-4 w-4" />
-              Users
-            </TabsTrigger>
-            <TabsTrigger value="roles" className="flex items-center gap-2">
-              <Shield className="h-4 w-4" />
-              Roles & Permissions
-            </TabsTrigger>
-            {/*<TabsTrigger value="queues" className="flex items-center gap-2">
-              <Layers className="h-4 w-4" />
-              Queues & Teams
-            </TabsTrigger>*/}
-            <TabsTrigger value="audit" className="flex items-center gap-2">
-              <History className="h-4 w-4" />
-              Audit Log
-            </TabsTrigger>
-          </TabsList>
+          <div className="flex items-center justify-between">
+            <TabsList className="grid w-full max-w-xl grid-cols-4">
+              <TabsTrigger value="users" className="flex items-center gap-2">
+                <Users className="h-4 w-4" />
+                Users
+              </TabsTrigger>
+              <TabsTrigger value="roles" className="flex items-center gap-2">
+                <Shield className="h-4 w-4" />
+                Roles & Permissions
+              </TabsTrigger>
+              {/*<TabsTrigger value="queues" className="flex items-center gap-2">
+                <Layers className="h-4 w-4" />
+                Queues & Teams
+              </TabsTrigger>*/}
+              <TabsTrigger value="audit" className="flex items-center gap-2">
+                <History className="h-4 w-4" />
+                Audit Log
+              </TabsTrigger>
+            </TabsList>
+
+            {activeTab === 'roles' && !isReadOnly && (
+              <Button onClick={() => setIsRoleDialogOpen(true)} className="gap-2">
+                <Plus className="h-4 w-4" />
+                Create New Role
+              </Button>
+            )}
+          </div>
 
           <TabsContent value="users">
             <UserTable />
           </TabsContent>
 
           <TabsContent value="roles">
-            <RolePermissionsTab />
+            <RolePermissionsTab refreshTrigger={roleRefreshTrigger} />
           </TabsContent>
 
           <TabsContent value="queues">
@@ -74,6 +87,12 @@ export default function WorkforceManagementPage() {
           </TabsContent>
         </Tabs>
       </div>
+
+      <CreateRoleDialog
+        open={isRoleDialogOpen}
+        onOpenChange={setIsRoleDialogOpen}
+        onSuccess={() => setRoleRefreshTrigger(prev => prev + 1)}
+      />
     </AppLayout>
   );
 }

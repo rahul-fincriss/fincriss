@@ -22,7 +22,11 @@ import {
 import { rolesService, Role, Permission } from '@/services/roles.service';
 import { toast } from 'sonner';
 
-export function RolePermissionsTab() {
+interface RolePermissionsTabProps {
+  refreshTrigger?: number;
+}
+
+export function RolePermissionsTab({ refreshTrigger }: RolePermissionsTabProps) {
   const [roles, setRoles] = useState<Role[]>([]);
   const [allPermissions, setAllPermissions] = useState<Permission[]>([]);
   const [selectedRole, setSelectedRole] = useState<number | null>(null);
@@ -67,7 +71,7 @@ export function RolePermissionsTab() {
 
   useEffect(() => {
     fetchRolesAndPermissions();
-  }, []);
+  }, [refreshTrigger]);
 
   const handlePermissionToggle = async (
     role: Role,
