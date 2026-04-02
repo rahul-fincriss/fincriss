@@ -76,6 +76,12 @@ const navItems: NavItem[] = [
     roles: ['super_admin'],
   },
   {
+    title: 'Rules Engine',
+    url: '/rules-engine',
+    icon: Shield,
+    roles: ['super_admin'],
+  },
+  {
     title: 'Workforce Management',
     url: '/workforce',
     icon: UsersRound,
