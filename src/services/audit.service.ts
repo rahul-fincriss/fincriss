@@ -2,6 +2,25 @@ import api from '@/lib/api-client';
 import { AuditEntry } from '@/types';
 import { AdminAuditEntry } from '@/types/admin';
 
+const extractArray = <T>(data: any, keys: string[]): T[] => {
+  if (Array.isArray(data)) return data;
+
+  for (const key of keys) {
+    if (Array.isArray(data?.[key])) return data[key];
+  }
+
+  const nestedData = data?.data;
+  if (Array.isArray(nestedData)) return nestedData;
+
+  if (nestedData && typeof nestedData === 'object') {
+    for (const key of keys) {
+      if (Array.isArray(nestedData[key])) return nestedData[key];
+    }
+  }
+
+  return [];
+};
+
 export const auditService = {
   // General platform audit logs (alerts, cases, STRs)
   async listLogs(params: any = {}): Promise<AuditEntry[]> {
@@ -10,7 +29,7 @@ export const auditService = {
     const data = response.data;
     console.log("auditService.listLogs fallback raw data:", data);
     
-    const logs = Array.isArray(data) ? data : (data.items || data.audit_logs || []);
+    const logs = extractArray<any>(data, ['items', 'audit_logs', 'entries', 'logs']);
     return logs.map((log: any) => ({
       id: (log.id || log.audit_id || Math.random()).toString(),
       entityType: log.entity_type || 'alert',
@@ -29,7 +48,7 @@ export const auditService = {
     const data = response.data;
     console.log("auditService.listRuleAuditLogs raw data:", data);
     
-    const logs = Array.isArray(data) ? data : (data.items || data.audit_logs || []);
+    const logs = extractArray<any>(data, ['items', 'audit_logs', 'entries', 'logs']);
     return logs.map((log: any) => ({
       id: (log.id || log.audit_id || Math.random()).toString(),
       ruleId: log.rule_id,
@@ -48,7 +67,7 @@ export const auditService = {
     const response = await api.get('/api/rules/audit-log', { params });
     const data = response.data;
     
-    const logs = Array.isArray(data) ? data : (data.items || data.audit_logs || []);
+    const logs = extractArray<any>(data, ['items', 'audit_logs', 'entries', 'logs']);
     return logs.map((log: any) => ({
       id: (log.id || log.audit_id || Math.random()).toString(),
       actionType: log.action_type || log.action || 'user_updated',

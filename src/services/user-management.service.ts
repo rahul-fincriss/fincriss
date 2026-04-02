@@ -3,7 +3,7 @@ import { ManagedUser } from '@/types/admin';
 import { UserRole } from '@/types';
 
 export const userManagementService = {
-  async listUsers(): Promise<ManagedUser[]> {
+  async listUsers(_params?: Record<string, unknown>): Promise<ManagedUser[]> {
     const response = await api.get('/api/users');
     const data = response.data;
     console.log("userManagementService.listUsers raw data:", data);

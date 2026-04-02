@@ -1,5 +1,24 @@
 import api from '@/lib/api-client';
 
+const extractArray = <T>(data: any, keys: string[]): T[] => {
+  if (Array.isArray(data)) return data;
+
+  for (const key of keys) {
+    if (Array.isArray(data?.[key])) return data[key];
+  }
+
+  const nestedData = data?.data;
+  if (Array.isArray(nestedData)) return nestedData;
+
+  if (nestedData && typeof nestedData === 'object') {
+    for (const key of keys) {
+      if (Array.isArray(nestedData[key])) return nestedData[key];
+    }
+  }
+
+  return [];
+};
+
 export interface RuleConfig {
   rule_id: string;
   rule_name: string;
@@ -22,12 +41,12 @@ export interface RuleThreshold {
 export const rulesService = {
   async listRules(): Promise<RuleConfig[]> {
     const response = await api.get('/api/rules/configs');
-    return response.data;
+    return extractArray<RuleConfig>(response.data, ['rules', 'configs', 'items', 'entries']);
   },
 
   async getRuleThresholds(ruleId: string): Promise<RuleThreshold[]> {
     const response = await api.get(`/api/rules/thresholds/${ruleId}`);
-    return response.data;
+    return extractArray<RuleThreshold>(response.data, ['thresholds', 'items', 'entries']);
   },
 
   async toggleRule(ruleId: string): Promise<void> {
