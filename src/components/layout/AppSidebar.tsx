@@ -7,6 +7,7 @@ import {
   History,
   LayoutDashboard,
   Settings,
+  Shield,
   UsersRound,
   Zap,
 } from 'lucide-react';
