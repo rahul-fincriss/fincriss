@@ -15,6 +15,7 @@ import CaseWorkspacePage from "./pages/CaseWorkspacePage";
 import AuditTrailPage from "./pages/AuditTrailPage";
 import MLOpsPage from "./pages/MLOpsPage";
 import ModelTuningPage from "./pages/ModelTuningPage";
+import RulesEnginePage from "./pages/RulesEnginePage";
 import WorkforceManagementPage from "./pages/WorkforceManagementPage";
 import SettingsPage from "./pages/SettingsPage";
 import NotFound from "./pages/NotFound";
@@ -48,6 +49,7 @@ function AppRoutes() {
       <Route path="/audit" element={<ProtectedRoute><AuditTrailPage /></ProtectedRoute>} />
       <Route path="/mlops" element={<ProtectedRoute><MLOpsPage /></ProtectedRoute>} />
       <Route path="/model-tuning" element={<ProtectedRoute><ModelTuningPage /></ProtectedRoute>} />
+      <Route path="/rules-engine" element={<ProtectedRoute><RulesEnginePage /></ProtectedRoute>} />
       <Route path="/workforce" element={<ProtectedRoute><WorkforceManagementPage /></ProtectedRoute>} />
       <Route path="/users" element={<Navigate to="/workforce" replace />} />
       <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />

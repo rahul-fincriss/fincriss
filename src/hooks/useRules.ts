@@ -29,10 +29,45 @@ export function useToggleRule() {
 export function useUpdateThresholds() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ ruleId, thresholds }: { ruleId: string; thresholds: { threshold_id: string; parameter_value: number }[] }) => 
+    mutationFn: ({ ruleId, thresholds }: { ruleId: string; thresholds: { threshold_id: string; parameter_value: number }[] }) =>
       rulesService.updateThresholds(ruleId, thresholds),
     onSuccess: (_, { ruleId }) => {
       queryClient.invalidateQueries({ queryKey: ['rule-thresholds', ruleId] });
     },
+  });
+}
+
+export function useBulkUpdateThresholds() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ ruleId, thresholds, reason, changedBy }: {
+      ruleId: string;
+      thresholds: Record<string, number>;
+      reason: string;
+      changedBy: string;
+    }) => rulesService.bulkUpdateThresholds(ruleId, thresholds, reason, changedBy),
+    onSuccess: (_, { ruleId }) => {
+      queryClient.invalidateQueries({ queryKey: ['rule-thresholds', ruleId] });
+      queryClient.invalidateQueries({ queryKey: ['rule-audit-log'] });
+    },
+  });
+}
+
+export function useResetThresholds() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ ruleId, changedBy }: { ruleId: string; changedBy?: string }) =>
+      rulesService.resetThresholds(ruleId, changedBy),
+    onSuccess: (_, { ruleId }) => {
+      queryClient.invalidateQueries({ queryKey: ['rule-thresholds', ruleId] });
+      queryClient.invalidateQueries({ queryKey: ['rule-audit-log'] });
+    },
+  });
+}
+
+export function useRuleAuditLog(params: { rule_id?: string; changed_by?: string; limit?: number } = {}) {
+  return useQuery({
+    queryKey: ['rule-audit-log', params],
+    queryFn: () => rulesService.getAuditLog(params),
   });
 }

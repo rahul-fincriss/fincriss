@@ -7,6 +7,7 @@ import {
   History,
   LayoutDashboard,
   Settings,
+  Shield,
   UsersRound,
   Zap,
 } from 'lucide-react';
@@ -73,6 +74,12 @@ const navItems: NavItem[] = [
     title: 'Model Tuning',
     url: '/model-tuning',
     icon: Settings,
+    roles: ['super_admin'],
+  },
+  {
+    title: 'Rules Engine',
+    url: '/rules-engine',
+    icon: Shield,
     roles: ['super_admin'],
   },
   {
