@@ -15,6 +15,7 @@ import CaseWorkspacePage from "./pages/CaseWorkspacePage";
 import AuditTrailPage from "./pages/AuditTrailPage";
 import MLModelStatusPage from "./pages/MLModelStatusPage";
 import RulesEnginePage from "./pages/RulesEnginePage";
+import ReferenceDataPage from "./pages/ReferenceDataPage";
 import WorkforceManagementPage from "./pages/WorkforceManagementPage";
 import SettingsPage from "./pages/SettingsPage";
 import NotFound from "./pages/NotFound";
