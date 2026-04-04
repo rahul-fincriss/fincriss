@@ -80,6 +80,7 @@ import { useRuleAuditLogs } from "@/hooks/useAudit";
 import { Loader2, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import ModelStatusCard from "@/components/model/ModelStatusCard";
 
 export default function ModelTuningPage() {
   const { data: rules, isLoading, error } = useRules();
