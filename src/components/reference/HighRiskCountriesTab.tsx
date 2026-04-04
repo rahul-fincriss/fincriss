@@ -37,8 +37,6 @@ export default function HighRiskCountriesTab() {
 
   const params: any = {};
   if (riskFilter !== 'ALL') params.risk_level = riskFilter;
-  if (activeOnly) params.is_active = true;
-  else params.is_active = '';
   if (search) params.search = search;
 
   const { data: countries = [], isLoading } = useHighRiskCountries(params);
