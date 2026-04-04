@@ -42,6 +42,16 @@ export function RawAlertDrawer({
 
   if (!alert) return null;
 
+  const safeFormatDate = (date: any) => {
+    try {
+      const d = new Date(date);
+      if (isNaN(d.getTime())) return '—';
+      return format(d, 'PPpp');
+    } catch {
+      return '—';
+    }
+  };
+
   const rawPayload = JSON.stringify(alert.rawPayload, null, 2);
 
   const handleCopyPayload = async () => {
@@ -92,7 +102,7 @@ export function RawAlertDrawer({
                 <Clock className="h-3 w-3" />
                 Timestamp
               </p>
-              <p className="text-sm">{format(alert.timestamp, 'PPpp')}</p>
+              <p className="text-sm">{safeFormatDate(alert.timestamp)}</p>
             </div>
             <div className="space-y-1">
               <p className="text-xs text-muted-foreground flex items-center gap-1">
