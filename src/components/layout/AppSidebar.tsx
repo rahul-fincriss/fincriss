@@ -73,6 +73,12 @@ const navItems: NavItem[] = [
     roles: ['super_admin'],
   },
   {
+    title: 'Reference Data',
+    url: '/reference-data',
+    icon: Database,
+    roles: ['super_admin', 'compliance'],
+  },
+  {
     title: 'Rules Engine',
     url: '/rules-engine',
     icon: Shield,
