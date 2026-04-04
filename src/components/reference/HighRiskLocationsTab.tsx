@@ -35,7 +35,7 @@ const emptyForm: Partial<HighRiskLocation> = {
 export default function HighRiskLocationsTab() {
   const [typeFilter, setTypeFilter] = useState('ALL');
   const [riskFilter, setRiskFilter] = useState('ALL');
-  const [activeOnly, setActiveOnly] = useState(true);
+  const [showInactive, setShowInactive] = useState(false);
   const [search, setSearch] = useState('');
   const [sheetOpen, setSheetOpen] = useState(false);
   const [form, setForm] = useState<Partial<HighRiskLocation>>(emptyForm);
@@ -44,14 +44,12 @@ export default function HighRiskLocationsTab() {
   const params: any = {};
   if (typeFilter !== 'ALL') params.location_type = typeFilter;
   if (riskFilter !== 'ALL') params.risk_level = riskFilter;
-  if (activeOnly) params.is_active = true;
-  else params.is_active = '';
 
   const { data: locations = [], isLoading } = useHighRiskLocations(params);
   const { create, update, deactivate } = useMutateLocation();
 
   const filtered = (locations as HighRiskLocation[]).filter((l) => {
-    // active filtering handled server-side
+    if (!showInactive && l.is_active === false) return false;
     if (!search) return true;
     const s = search.toLowerCase();
     return l.location_name?.toLowerCase().includes(s) || l.state?.toLowerCase().includes(s);
@@ -100,8 +98,8 @@ export default function HighRiskLocationsTab() {
           </SelectContent>
         </Select>
         <div className="flex items-center gap-2">
-          <Switch checked={activeOnly} onCheckedChange={setActiveOnly} id="active-loc" />
-          <Label htmlFor="active-loc" className="text-xs text-muted-foreground">Active Only</Label>
+          <Switch checked={showInactive} onCheckedChange={setShowInactive} id="show-inactive-loc" />
+          <Label htmlFor="show-inactive-loc" className="text-xs text-muted-foreground">Show Inactive</Label>
         </div>
         <div className="relative flex-1 min-w-[200px] max-w-xs">
           <Search className="absolute left-2.5 top-2 h-3.5 w-3.5 text-muted-foreground" />

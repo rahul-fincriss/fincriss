@@ -41,7 +41,7 @@ const emptyForm: Partial<SanctionedCountry> & { effective_date_obj?: Date; expir
 export default function SanctionedCountriesTab() {
   const [programFilter, setProgramFilter] = useState('ALL');
   const [typeFilter, setTypeFilter] = useState('ALL');
-  const [activeOnly, setActiveOnly] = useState(true);
+  const [showInactive, setShowInactive] = useState(false);
   const [search, setSearch] = useState('');
   const [sheetOpen, setSheetOpen] = useState(false);
   const [form, setForm] = useState<any>(emptyForm);
@@ -50,14 +50,12 @@ export default function SanctionedCountriesTab() {
   const params: any = {};
   if (programFilter !== 'ALL') params.program = programFilter;
   if (typeFilter !== 'ALL') params.sanction_type = typeFilter;
-  if (activeOnly) params.is_active = true;
-  else params.is_active = '';
 
   const { data: countries = [], isLoading } = useSanctionedCountries(params);
   const { create, update, deactivate } = useMutateSanctioned();
 
   const filtered = (countries as SanctionedCountry[]).filter((c) => {
-    // active filtering handled server-side
+    if (!showInactive && c.is_active === false) return false;
     if (!search) return true;
     const s = search.toLowerCase();
     return c.country_name?.toLowerCase().includes(s) || c.country_code?.toLowerCase().includes(s);
@@ -129,8 +127,8 @@ export default function SanctionedCountriesTab() {
           </SelectContent>
         </Select>
         <div className="flex items-center gap-2">
-          <Switch checked={activeOnly} onCheckedChange={setActiveOnly} id="active-sanc" />
-          <Label htmlFor="active-sanc" className="text-xs text-muted-foreground">Active Only</Label>
+          <Switch checked={showInactive} onCheckedChange={setShowInactive} id="show-inactive-sanc" />
+          <Label htmlFor="show-inactive-sanc" className="text-xs text-muted-foreground">Show Inactive</Label>
         </div>
         <div className="relative flex-1 min-w-[200px] max-w-xs">
           <Search className="absolute left-2.5 top-2 h-3.5 w-3.5 text-muted-foreground" />
