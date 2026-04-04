@@ -6,6 +6,7 @@ import {
   FolderOpen,
   History,
   LayoutDashboard,
+  Server,
   Settings,
   Shield,
   UsersRound,
