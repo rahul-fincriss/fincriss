@@ -51,6 +51,7 @@ export default function SanctionedCountriesTab() {
   if (programFilter !== 'ALL') params.program = programFilter;
   if (typeFilter !== 'ALL') params.sanction_type = typeFilter;
   if (activeOnly) params.is_active = true;
+  else params.is_active = '';
 
   const { data: countries = [], isLoading } = useSanctionedCountries(params);
   const { create, update, deactivate } = useMutateSanctioned();

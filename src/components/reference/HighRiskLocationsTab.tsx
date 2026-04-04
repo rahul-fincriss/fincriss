@@ -45,6 +45,7 @@ export default function HighRiskLocationsTab() {
   if (typeFilter !== 'ALL') params.location_type = typeFilter;
   if (riskFilter !== 'ALL') params.risk_level = riskFilter;
   if (activeOnly) params.is_active = true;
+  else params.is_active = '';
 
   const { data: locations = [], isLoading } = useHighRiskLocations(params);
   const { create, update, deactivate } = useMutateLocation();
