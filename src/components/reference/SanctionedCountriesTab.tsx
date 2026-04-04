@@ -41,7 +41,7 @@ const emptyForm: Partial<SanctionedCountry> & { effective_date_obj?: Date; expir
 export default function SanctionedCountriesTab() {
   const [programFilter, setProgramFilter] = useState('ALL');
   const [typeFilter, setTypeFilter] = useState('ALL');
-  const [activeOnly, setActiveOnly] = useState(true);
+  const [showInactive, setShowInactive] = useState(false);
   const [search, setSearch] = useState('');
   const [sheetOpen, setSheetOpen] = useState(false);
   const [form, setForm] = useState<any>(emptyForm);
