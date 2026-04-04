@@ -195,12 +195,18 @@ export default function ModelTuningPage() {
           </div>
         )}
 
-        <Tabs defaultValue="models" className="space-y-6">
-          <TabsList className="grid w-full max-w-md grid-cols-3">
+        <Tabs defaultValue="status" className="space-y-6">
+          <TabsList className="grid w-full max-w-lg grid-cols-4">
+            <TabsTrigger value="status">ML Status</TabsTrigger>
             <TabsTrigger value="models">Model Selection</TabsTrigger>
             <TabsTrigger value="performance">Performance</TabsTrigger>
             <TabsTrigger value="tuning">Parameters</TabsTrigger>
           </TabsList>
+
+          {/* ML Model Status Tab */}
+          <TabsContent value="status">
+            <ModelStatusCard />
+          </TabsContent>
 
           {/* Model Selection Tab */}
           <TabsContent value="models" className="space-y-6">
