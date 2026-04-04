@@ -50,6 +50,7 @@ export default function HighRiskLocationsTab() {
   const { create, update, deactivate } = useMutateLocation();
 
   const filtered = (locations as HighRiskLocation[]).filter((l) => {
+    if (activeOnly && l.is_active === false) return false;
     if (!search) return true;
     const s = search.toLowerCase();
     return l.location_name?.toLowerCase().includes(s) || l.state?.toLowerCase().includes(s);
