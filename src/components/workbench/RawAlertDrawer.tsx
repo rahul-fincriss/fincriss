@@ -42,6 +42,16 @@ export function RawAlertDrawer({
 
   if (!alert) return null;
 
+  const safeFormatDate = (date: any) => {
+    try {
+      const d = new Date(date);
+      if (isNaN(d.getTime())) return '—';
+      return format(d, 'PPpp');
+    } catch {
+      return '—';
+    }
+  };
+
   const rawPayload = JSON.stringify(alert.rawPayload, null, 2);
 
   const handleCopyPayload = async () => {
