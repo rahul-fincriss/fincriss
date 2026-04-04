@@ -66,15 +66,9 @@ const navItems: NavItem[] = [
     roles: ['compliance', 'super_admin'],
   },
   {
-    title: 'ML Ops',
-    url: '/mlops',
-    icon: BarChart3,
-    roles: ['super_admin'],
-  },
-  {
-    title: 'Model Tuning',
-    url: '/model-tuning',
-    icon: Settings,
+    title: 'ML Model Status',
+    url: '/ml-status',
+    icon: Server,
     roles: ['super_admin'],
   },
   {
