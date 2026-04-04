@@ -35,7 +35,7 @@ const emptyForm: Partial<HighRiskLocation> = {
 export default function HighRiskLocationsTab() {
   const [typeFilter, setTypeFilter] = useState('ALL');
   const [riskFilter, setRiskFilter] = useState('ALL');
-  const [activeOnly, setActiveOnly] = useState(true);
+  const [showInactive, setShowInactive] = useState(false);
   const [search, setSearch] = useState('');
   const [sheetOpen, setSheetOpen] = useState(false);
   const [form, setForm] = useState<Partial<HighRiskLocation>>(emptyForm);
