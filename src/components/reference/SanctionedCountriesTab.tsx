@@ -55,7 +55,7 @@ export default function SanctionedCountriesTab() {
   const { create, update, deactivate } = useMutateSanctioned();
 
   const filtered = (countries as SanctionedCountry[]).filter((c) => {
-    // active filtering handled server-side
+    if (!showInactive && c.is_active === false) return false;
     if (!search) return true;
     const s = search.toLowerCase();
     return c.country_name?.toLowerCase().includes(s) || c.country_code?.toLowerCase().includes(s);
