@@ -90,8 +90,8 @@ export default function HighRiskCountriesTab() {
           </SelectContent>
         </Select>
         <div className="flex items-center gap-2">
-          <Switch checked={activeOnly} onCheckedChange={setActiveOnly} id="active-countries" />
-          <Label htmlFor="active-countries" className="text-xs text-muted-foreground">Active Only</Label>
+          <Switch checked={showInactive} onCheckedChange={setShowInactive} id="show-inactive-countries" />
+          <Label htmlFor="show-inactive-countries" className="text-xs text-muted-foreground">Show Inactive</Label>
         </div>
         <div className="relative flex-1 min-w-[200px] max-w-xs">
           <Search className="absolute left-2.5 top-2 h-3.5 w-3.5 text-muted-foreground" />
