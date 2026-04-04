@@ -150,17 +150,17 @@ export default function ModelStatusCard() {
         <CardContent className="space-y-8">
           {/* 2. Model Info Row */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="rounded-lg border bg-muted/30 p-4 space-y-1">
-              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Algorithm</p>
-              <p className="text-lg font-semibold">{status?.model_type ?? "Not trained"}</p>
+            <div className="rounded-lg border bg-muted/30 p-3 space-y-1">
+              <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">Algorithm</p>
+              <p className="text-sm font-semibold">{status?.model_type ?? "Not trained"}</p>
             </div>
-            <div className="rounded-lg border bg-muted/30 p-4 space-y-1">
-              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Last Trained</p>
-              <p className="text-lg font-semibold">{formatDateTime(status?.trained_at ?? null)}</p>
+            <div className="rounded-lg border bg-muted/30 p-3 space-y-1">
+              <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">Last Trained</p>
+              <p className="text-sm font-semibold">{formatDateTime(status?.trained_at ?? null)}</p>
             </div>
-            <div className="rounded-lg border bg-muted/30 p-4 space-y-1">
-              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Version</p>
-              <p className="text-lg font-semibold">{status?.version ?? "—"}</p>
+            <div className="rounded-lg border bg-muted/30 p-3 space-y-1">
+              <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">Version</p>
+              <p className="text-sm font-semibold">{status?.version ?? "—"}</p>
             </div>
           </div>
 
