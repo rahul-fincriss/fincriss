@@ -2,6 +2,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import {
   AlertTriangle,
   BarChart3,
+  Database,
   FileText,
   FolderOpen,
   History,
@@ -70,6 +71,12 @@ const navItems: NavItem[] = [
     url: '/ml-status',
     icon: Server,
     roles: ['super_admin'],
+  },
+  {
+    title: 'Reference Data',
+    url: '/reference-data',
+    icon: Database,
+    roles: ['super_admin', 'compliance'],
   },
   {
     title: 'Rules Engine',

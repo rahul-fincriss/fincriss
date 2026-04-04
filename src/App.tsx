@@ -15,6 +15,7 @@ import CaseWorkspacePage from "./pages/CaseWorkspacePage";
 import AuditTrailPage from "./pages/AuditTrailPage";
 import MLModelStatusPage from "./pages/MLModelStatusPage";
 import RulesEnginePage from "./pages/RulesEnginePage";
+import ReferenceDataPage from "./pages/ReferenceDataPage";
 import WorkforceManagementPage from "./pages/WorkforceManagementPage";
 import SettingsPage from "./pages/SettingsPage";
 import NotFound from "./pages/NotFound";
@@ -51,6 +52,7 @@ function AppRoutes() {
       <Route path="/mlops" element={<Navigate to="/ml-status" replace />} />
       <Route path="/model-tuning" element={<Navigate to="/ml-status" replace />} />
       <Route path="/rules-engine" element={<ProtectedRoute><RulesEnginePage /></ProtectedRoute>} />
+      <Route path="/reference-data" element={<ProtectedRoute><ReferenceDataPage /></ProtectedRoute>} />
       <Route path="/workforce" element={<ProtectedRoute><WorkforceManagementPage /></ProtectedRoute>} />
       <Route path="/users" element={<Navigate to="/workforce" replace />} />
       <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
