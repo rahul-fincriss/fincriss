@@ -2,6 +2,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import {
   AlertTriangle,
   BarChart3,
+  Database,
   FileText,
   FolderOpen,
   History,
