@@ -1,7 +1,7 @@
 import React from 'react';
 import { Database } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import AppLayout from '@/components/layout/AppLayout';
+import { AppLayout } from '@/components/layout/AppLayout';
 import HighRiskCountriesTab from '@/components/reference/HighRiskCountriesTab';
 import HighRiskLocationsTab from '@/components/reference/HighRiskLocationsTab';
 import IndustryRiskTab from '@/components/reference/IndustryRiskTab';
