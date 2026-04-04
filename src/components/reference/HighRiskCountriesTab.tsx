@@ -29,7 +29,7 @@ const emptyForm: Partial<HighRiskCountry> = {
 
 export default function HighRiskCountriesTab() {
   const [riskFilter, setRiskFilter] = useState('ALL');
-  const [activeOnly, setActiveOnly] = useState(true);
+  const [showInactive, setShowInactive] = useState(false);
   const [search, setSearch] = useState('');
   const [sheetOpen, setSheetOpen] = useState(false);
   const [form, setForm] = useState<Partial<HighRiskCountry>>(emptyForm);
