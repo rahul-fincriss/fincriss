@@ -13,8 +13,7 @@ import AlertDetailsPage from "./pages/AlertDetailsPage";
 import CasesPage from "./pages/CasesPage";
 import CaseWorkspacePage from "./pages/CaseWorkspacePage";
 import AuditTrailPage from "./pages/AuditTrailPage";
-import MLOpsPage from "./pages/MLOpsPage";
-import ModelTuningPage from "./pages/ModelTuningPage";
+import MLModelStatusPage from "./pages/MLModelStatusPage";
 import RulesEnginePage from "./pages/RulesEnginePage";
 import WorkforceManagementPage from "./pages/WorkforceManagementPage";
 import SettingsPage from "./pages/SettingsPage";
@@ -47,8 +46,10 @@ function AppRoutes() {
       <Route path="/str" element={<Navigate to="/cases" replace />} />
       <Route path="/str/*" element={<Navigate to="/cases" replace />} />
       <Route path="/audit" element={<ProtectedRoute><AuditTrailPage /></ProtectedRoute>} />
-      <Route path="/mlops" element={<ProtectedRoute><MLOpsPage /></ProtectedRoute>} />
-      <Route path="/model-tuning" element={<ProtectedRoute><ModelTuningPage /></ProtectedRoute>} />
+      <Route path="/ml-status" element={<ProtectedRoute><MLModelStatusPage /></ProtectedRoute>} />
+      {/* Redirect legacy routes */}
+      <Route path="/mlops" element={<Navigate to="/ml-status" replace />} />
+      <Route path="/model-tuning" element={<Navigate to="/ml-status" replace />} />
       <Route path="/rules-engine" element={<ProtectedRoute><RulesEnginePage /></ProtectedRoute>} />
       <Route path="/workforce" element={<ProtectedRoute><WorkforceManagementPage /></ProtectedRoute>} />
       <Route path="/users" element={<Navigate to="/workforce" replace />} />
