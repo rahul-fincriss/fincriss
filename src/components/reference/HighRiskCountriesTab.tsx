@@ -45,7 +45,7 @@ export default function HighRiskCountriesTab() {
   const { create, update, deactivate } = useMutateCountry();
 
   const filtered = (countries as HighRiskCountry[]).filter((c) => {
-    if (activeOnly && c.is_active === false) return false;
+    // active filtering handled server-side
     if (!search) return true;
     const s = search.toLowerCase();
     return c.country_name?.toLowerCase().includes(s) || c.country_code?.toLowerCase().includes(s);
