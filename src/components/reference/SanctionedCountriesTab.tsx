@@ -51,12 +51,13 @@ export default function SanctionedCountriesTab() {
   if (programFilter !== 'ALL') params.program = programFilter;
   if (typeFilter !== 'ALL') params.sanction_type = typeFilter;
   if (activeOnly) params.is_active = true;
+  else params.is_active = '';
 
   const { data: countries = [], isLoading } = useSanctionedCountries(params);
   const { create, update, deactivate } = useMutateSanctioned();
 
   const filtered = (countries as SanctionedCountry[]).filter((c) => {
-    if (activeOnly && c.is_active === false) return false;
+    // active filtering handled server-side
     if (!search) return true;
     const s = search.toLowerCase();
     return c.country_name?.toLowerCase().includes(s) || c.country_code?.toLowerCase().includes(s);

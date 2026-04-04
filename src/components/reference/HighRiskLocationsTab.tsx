@@ -45,12 +45,13 @@ export default function HighRiskLocationsTab() {
   if (typeFilter !== 'ALL') params.location_type = typeFilter;
   if (riskFilter !== 'ALL') params.risk_level = riskFilter;
   if (activeOnly) params.is_active = true;
+  else params.is_active = '';
 
   const { data: locations = [], isLoading } = useHighRiskLocations(params);
   const { create, update, deactivate } = useMutateLocation();
 
   const filtered = (locations as HighRiskLocation[]).filter((l) => {
-    if (activeOnly && l.is_active === false) return false;
+    // active filtering handled server-side
     if (!search) return true;
     const s = search.toLowerCase();
     return l.location_name?.toLowerCase().includes(s) || l.state?.toLowerCase().includes(s);

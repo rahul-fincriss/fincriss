@@ -38,13 +38,14 @@ export default function HighRiskCountriesTab() {
   const params: any = {};
   if (riskFilter !== 'ALL') params.risk_level = riskFilter;
   if (activeOnly) params.is_active = true;
+  else params.is_active = '';
   if (search) params.search = search;
 
   const { data: countries = [], isLoading } = useHighRiskCountries(params);
   const { create, update, deactivate } = useMutateCountry();
 
   const filtered = (countries as HighRiskCountry[]).filter((c) => {
-    if (activeOnly && c.is_active === false) return false;
+    // active filtering handled server-side
     if (!search) return true;
     const s = search.toLowerCase();
     return c.country_name?.toLowerCase().includes(s) || c.country_code?.toLowerCase().includes(s);
