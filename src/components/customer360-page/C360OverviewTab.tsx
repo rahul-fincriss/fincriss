@@ -72,8 +72,10 @@ export function C360OverviewTab({ profile }: Props) {
             <div>
               <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Aliases</p>
               <div className="flex flex-wrap gap-1 mt-0.5">
-                {profile.aliases.map((a, i) => (
-                  <span key={i} className="text-[10px] bg-muted px-1.5 py-0.5 rounded">{a}</span>
+                {profile.aliases.map((a: any, i: number) => (
+                  <span key={i} className="text-[10px] bg-muted px-1.5 py-0.5 rounded">
+                    {typeof a === 'string' ? a : a.alias_value || a.alias_type || JSON.stringify(a)}
+                  </span>
                 ))}
               </div>
             </div>
