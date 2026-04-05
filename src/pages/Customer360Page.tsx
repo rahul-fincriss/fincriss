@@ -194,27 +194,25 @@ export default function Customer360Page() {
             </div>
           ) : profile ? (
             <>
-              {/* Sticky Header */}
-              <div className="sticky top-0 z-10 -mt-2 bg-background border-b border-border px-5 py-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded bg-primary/10 flex items-center justify-center">
+              <div className="border-b border-border bg-card/70 px-5 py-4">
+                <div className="flex flex-wrap items-start justify-between gap-4">
+                  <div className="flex min-w-0 items-start gap-3">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded bg-primary/10 text-foreground">
                       {partyIcon(profile.party_type)}
                     </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <h1 className="text-base font-semibold">{profile.full_name}</h1>
-                        <code className="text-[10px] font-mono bg-muted px-1.5 py-0.5 rounded">{profile.customer_id}</code>
-                        <Badge variant="outline" className="text-[10px] capitalize h-5">{profile.party_type}</Badge>
+                    <div className="min-w-0 space-y-2">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h1 className="text-base font-semibold text-foreground">{profile.full_name}</h1>
+                        <code className="rounded bg-muted px-1.5 py-0.5 text-[10px] font-mono text-foreground">{profile.customer_id}</code>
+                        <Badge variant="outline" className="h-5 text-[10px] capitalize">{profile.party_type}</Badge>
                       </div>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className={cn('px-2 py-0.5 text-[10px] font-bold rounded', riskColor(profile.risk_rating))}>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className={cn('rounded px-2 py-0.5 text-[10px] font-bold', riskColor(profile.risk_rating))}>
                           {profile.risk_rating}
                         </span>
-                        <span className={cn('px-2 py-0.5 text-[10px] font-medium rounded border', kycStatusColor(profile.kyc_status))}>
+                        <span className={cn('rounded border px-2 py-0.5 text-[10px] font-medium', kycStatusColor(profile.kyc_status))}>
                           KYC: {profile.kyc_status}
                         </span>
-                        {/* Quick stat chips */}
                         {profile.open_alerts_count > 0 && (
                           <span className="text-[10px] text-muted-foreground">{profile.open_alerts_count} Open Alerts</span>
                         )}
@@ -222,64 +220,61 @@ export default function Customer360Page() {
                           <span className="text-[10px] text-muted-foreground">· {profile.active_cases_count} Active Cases</span>
                         )}
                         {profile.is_watchlisted && (
-                          <span className="text-[10px] text-risk-high font-medium">· Watchlisted</span>
+                          <span className="text-[10px] font-medium text-risk-high">· Watchlisted</span>
                         )}
                         {profile.is_pep && (
-                          <span className="text-[10px] text-status-info font-medium">· PEP Linked</span>
+                          <span className="text-[10px] font-medium text-status-info">· PEP Linked</span>
                         )}
                         {profile.sanctions_hits > 0 && (
-                          <span className="text-[10px] text-risk-high font-medium">· {profile.sanctions_hits} Sanctions Hits</span>
+                          <span className="text-[10px] font-medium text-risk-high">· {profile.sanctions_hits} Sanctions Hits</span>
                         )}
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-1.5">
-                    <Button size="sm" variant="outline" className="h-7 text-xs gap-1">
+
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <Button size="sm" variant="outline" className="h-7 gap-1 text-xs">
                       <FolderPlus className="h-3 w-3" /> Open Case
                     </Button>
-                    <Button size="sm" variant="outline" className="h-7 text-xs gap-1">
+                    <Button size="sm" variant="outline" className="h-7 gap-1 text-xs">
                       <Bookmark className="h-3 w-3" /> Watchlist
                     </Button>
-                    <Button size="sm" variant="outline" className="h-7 text-xs gap-1">
+                    <Button size="sm" variant="outline" className="h-7 gap-1 text-xs">
                       <FileDown className="h-3 w-3" /> Export PDF
                     </Button>
                   </div>
                 </div>
+
+                <nav
+                  aria-label="Customer 360 sections"
+                  className="mt-4 flex flex-wrap gap-2"
+                  role="tablist"
+                >
+                  {TABS.map(tab => {
+                    const isActive = activeTab === tab.value;
+                    return (
+                      <button
+                        aria-selected={isActive}
+                        key={tab.value}
+                        role="tab"
+                        tabIndex={isActive ? 0 : -1}
+                        type="button"
+                        onClick={() => setActiveTab(tab.value)}
+                        className={cn(
+                          'inline-flex min-h-9 items-center justify-center rounded-md border px-3 py-2 text-xs font-semibold tracking-wide outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+                          isActive
+                            ? 'border-primary bg-primary/10 text-foreground shadow-sm'
+                            : 'border-border bg-background text-foreground hover:bg-accent'
+                        )}
+                      >
+                        {tab.label}
+                      </button>
+                    );
+                  })}
+                </nav>
               </div>
 
-              {/* Tabs */}
-              <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0">
-                <div className="overflow-x-auto border-b border-border px-5">
-                  <nav
-                    aria-label="Customer 360 sections"
-                    className="flex min-w-max items-end gap-1"
-                    role="tablist"
-                  >
-                    {TABS.map(tab => {
-                      const isActive = activeTab === tab.value;
-                      return (
-                        <button
-                          aria-selected={isActive}
-                          key={tab.value}
-                          role="tab"
-                          tabIndex={isActive ? 0 : -1}
-                          type="button"
-                          onClick={() => setActiveTab(tab.value)}
-                          className={cn(
-                            'flex min-h-10 shrink-0 items-center justify-center whitespace-nowrap rounded-t-md border-b-2 bg-transparent px-3 py-2 text-xs font-semibold leading-none outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
-                            isActive
-                              ? 'border-primary'
-                              : 'border-transparent hover:border-border hover:bg-accent/40'
-                          )}
-                        >
-                          <span className={cn(isActive ? 'text-foreground' : 'text-muted-foreground')}>
-                            {tab.label}
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </nav>
-                </div>
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-1 flex-col min-h-0">
 
                 <ScrollArea className="flex-1">
                   <div className="p-5">
