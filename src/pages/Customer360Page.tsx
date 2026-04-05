@@ -83,11 +83,9 @@ export default function Customer360Page() {
   }, [navigate]);
 
   // Build list params
-  const listParams: any = { search, limit: 50 };
+  const listParams: ListCustomersParams = { search, limit: 50 };
   if (filterChip === 'HIGH' || filterChip === 'CRITICAL') listParams.risk_rating = filterChip;
-  else if (filterChip === 'watchlisted') listParams.filter = 'watchlisted';
-  else if (filterChip === 'pep') listParams.filter = 'pep';
-  else if (filterChip === 'open_cases') listParams.filter = 'open_cases';
+  else if (filterChip === 'pep') listParams.is_pep = true;
 
   const { data: customers = [], isLoading: listLoading } = useCustomerList(listParams);
   const { data: profile, isLoading: profileLoading } = useCustomer360(selectedId);
