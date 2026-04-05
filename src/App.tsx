@@ -16,6 +16,7 @@ import AuditTrailPage from "./pages/AuditTrailPage";
 import MLModelStatusPage from "./pages/MLModelStatusPage";
 import RulesEnginePage from "./pages/RulesEnginePage";
 import ReferenceDataPage from "./pages/ReferenceDataPage";
+import Customer360Page from "./pages/Customer360Page";
 import WorkforceManagementPage from "./pages/WorkforceManagementPage";
 import SettingsPage from "./pages/SettingsPage";
 import NotFound from "./pages/NotFound";
@@ -41,6 +42,7 @@ function AppRoutes() {
       
       <Route path="/alerts/workbench" element={<ProtectedRoute><AlertWorkbenchPage /></ProtectedRoute>} />
       <Route path="/alerts/:alertId" element={<ProtectedRoute><AlertDetailsPage /></ProtectedRoute>} />
+      <Route path="/customers" element={<ProtectedRoute><Customer360Page /></ProtectedRoute>} />
       <Route path="/cases" element={<ProtectedRoute><CasesPage /></ProtectedRoute>} />
       <Route path="/cases/:caseId" element={<ProtectedRoute><CaseWorkspacePage /></ProtectedRoute>} />
       {/* Redirect legacy STR routes to Cases */}

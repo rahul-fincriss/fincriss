@@ -6,6 +6,7 @@ const routeLabels: Record<string, string> = {
   dashboard: 'Dashboard',
   alerts: 'Alerts',
   workbench: 'Alert Workbench',
+  customers: 'Customer 360',
   cases: 'Cases',
   audit: 'Audit Trail',
   mlops: 'ML Ops',
