@@ -10,6 +10,7 @@ import {
   Server,
   Settings,
   Shield,
+  UserSearch,
   UsersRound,
   Zap,
 } from 'lucide-react';
@@ -52,6 +53,12 @@ const navItems: NavItem[] = [
     icon: Zap,
     roles: ['analyst', 'investigator', 'super_admin'],
     badge: '12',
+  },
+  {
+    title: 'Customer 360',
+    url: '/customers',
+    icon: UserSearch,
+    roles: ['analyst', 'investigator', 'principal_officer', 'compliance', 'super_admin'],
   },
   {
     title: 'Cases',
