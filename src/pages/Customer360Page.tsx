@@ -249,27 +249,36 @@ export default function Customer360Page() {
 
               {/* Tabs */}
               <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0">
-                <div className="px-5 border-b border-border overflow-x-auto">
-                  <div className="flex min-w-max items-stretch gap-0">
+                <div className="overflow-x-auto border-b border-border px-5">
+                  <nav
+                    aria-label="Customer 360 sections"
+                    className="flex min-w-max items-end gap-1"
+                    role="tablist"
+                  >
                     {TABS.map(tab => {
                       const isActive = activeTab === tab.value;
                       return (
                         <button
+                          aria-selected={isActive}
                           key={tab.value}
+                          role="tab"
+                          tabIndex={isActive ? 0 : -1}
                           type="button"
                           onClick={() => setActiveTab(tab.value)}
                           className={cn(
-                            'shrink-0 whitespace-nowrap border-b-2 px-3 py-2 text-xs font-medium transition-colors',
+                            'flex min-h-10 shrink-0 items-center justify-center whitespace-nowrap rounded-t-md border-b-2 bg-transparent px-3 py-2 text-xs font-semibold leading-none outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
                             isActive
-                              ? 'border-primary text-foreground'
-                              : 'border-transparent text-muted-foreground hover:text-foreground hover:bg-accent/40'
+                              ? 'border-primary'
+                              : 'border-transparent hover:border-border hover:bg-accent/40'
                           )}
                         >
-                          {tab.label}
+                          <span className={cn(isActive ? 'text-foreground' : 'text-muted-foreground')}>
+                            {tab.label}
+                          </span>
                         </button>
                       );
                     })}
-                  </div>
+                  </nav>
                 </div>
 
                 <ScrollArea className="flex-1">
