@@ -10,7 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useCustomerList, useCustomer360 } from '@/hooks/useCustomer360';
-import { Customer360Summary } from '@/services/customer360.service';
+import { Customer360Summary, ListCustomersParams } from '@/services/customer360.service';
 import { C360OverviewTab } from '@/components/customer360-page/C360OverviewTab';
 import { C360IdentityTab } from '@/components/customer360-page/C360IdentityTab';
 import { C360AccountsTab } from '@/components/customer360-page/C360AccountsTab';
@@ -83,11 +83,9 @@ export default function Customer360Page() {
   }, [navigate]);
 
   // Build list params
-  const listParams: any = { search, limit: 50 };
+  const listParams: ListCustomersParams = { search, limit: 50 };
   if (filterChip === 'HIGH' || filterChip === 'CRITICAL') listParams.risk_rating = filterChip;
-  else if (filterChip === 'watchlisted') listParams.filter = 'watchlisted';
-  else if (filterChip === 'pep') listParams.filter = 'pep';
-  else if (filterChip === 'open_cases') listParams.filter = 'open_cases';
+  else if (filterChip === 'pep') listParams.is_pep = true;
 
   const { data: customers = [], isLoading: listLoading } = useCustomerList(listParams);
   const { data: profile, isLoading: profileLoading } = useCustomer360(selectedId);

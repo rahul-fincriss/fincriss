@@ -43,7 +43,7 @@ export function C360AccountsTab({ profile, customerId }: Props) {
     cross_border_only: crossBorderOnly || undefined,
     suspicious_only: suspiciousOnly || undefined,
     account_id: selectedAccount || undefined,
-    transaction_type: txnType !== 'all' ? txnType : undefined,
+    
   };
 
   const { data: txnData, isLoading: txnLoading } = useCustomerTransactions(customerId, params);
