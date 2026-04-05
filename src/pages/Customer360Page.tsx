@@ -195,7 +195,7 @@ export default function Customer360Page() {
           ) : profile ? (
             <>
               {/* Sticky Header */}
-              <div className="sticky top-0 z-10 bg-background border-b border-border px-5 py-3">
+              <div className="sticky top-0 z-10 -mt-2 bg-background border-b border-border px-5 py-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="h-10 w-10 rounded bg-primary/10 flex items-center justify-center">
