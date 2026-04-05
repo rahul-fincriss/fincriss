@@ -249,13 +249,13 @@ export default function Customer360Page() {
 
               {/* Tabs */}
               <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col min-h-0">
-                <div className="px-5 border-b border-border">
-                  <TabsList className="h-9 bg-transparent p-0 gap-0">
+                <div className="px-5 border-b border-border overflow-x-auto">
+                  <TabsList className="h-9 bg-transparent p-0 gap-0 w-max min-w-full">
                     {TABS.map(tab => (
                       <TabsTrigger
                         key={tab.value}
                         value={tab.value}
-                        className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-3 text-xs h-9"
+                        className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-2.5 text-[11px] h-9 whitespace-nowrap shrink-0"
                       >
                         {tab.label}
                       </TabsTrigger>
