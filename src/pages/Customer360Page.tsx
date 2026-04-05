@@ -10,7 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useCustomerList, useCustomer360 } from '@/hooks/useCustomer360';
-import { Customer360Summary } from '@/services/customer360.service';
+import { Customer360Summary, ListCustomersParams } from '@/services/customer360.service';
 import { C360OverviewTab } from '@/components/customer360-page/C360OverviewTab';
 import { C360IdentityTab } from '@/components/customer360-page/C360IdentityTab';
 import { C360AccountsTab } from '@/components/customer360-page/C360AccountsTab';
