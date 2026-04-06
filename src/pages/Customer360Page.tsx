@@ -239,9 +239,6 @@ export default function Customer360Page() {
                     <Button size="sm" variant="outline" className="h-7 gap-1 text-xs">
                       <Bookmark className="h-3 w-3" /> Watchlist
                     </Button>
-                    <Button size="sm" variant="outline" className="h-7 gap-1 text-xs">
-                      <FileDown className="h-3 w-3" /> Export PDF
-                    </Button>
                   </div>
                 </div>
 
