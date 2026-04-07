@@ -40,7 +40,7 @@ import { AuditPanel } from '@/components/workbench/AuditPanel';
 import { AnalystAssignmentDropdown } from '@/components/workbench/AnalystAssignmentDropdown';
 import { RawAlertDrawer } from '@/components/workbench/RawAlertDrawer';
 import { QueueTypeDropdown, queueTypeShortLabels } from '@/components/workbench/QueueTypeDropdown';
-import { useAlerts, useUsers, useOpenCase } from '@/hooks/useAlerts';
+import { useAlerts, useUsers, useOpenCase, useAssignAlert } from '@/hooks/useAlerts';
 import { Loader2 } from 'lucide-react';
 
 const alertTypeLabels: Record<string, string> = {
@@ -129,6 +129,7 @@ export default function AlertWorkbenchPage() {
   const { data: alertsData, isLoading: alertsLoading, error: alertsError } = useAlerts();
   const { data: usersData, isLoading: usersLoading } = useUsers();
   const openCaseMutation = useOpenCase();
+  const assignAlertMutation = useAssignAlert();
   
   const alerts = alertsData || [];
   const analysts = usersData || [];
@@ -205,6 +206,12 @@ export default function AlertWorkbenchPage() {
     const existing = customerOverrides.get(customerId);
     const previousAssignee = existing?.assignedAnalystName;
     
+    // Find all alerts for this customer and assign via API
+    const customerAlerts = alerts.filter(a => a.customerId === customerId);
+    customerAlerts.forEach(alert => {
+      assignAlertMutation.mutate({ alertId: alert.id, assignedTo: analyst.id });
+    });
+
     setCustomerOverrides((prev) => {
       const newOverrides = new Map(prev);
       newOverrides.set(customerId, {
@@ -226,9 +233,7 @@ export default function AlertWorkbenchPage() {
       previousValue: previousAssignee,
       newValue: analyst.name,
     });
-
-    toast.success(`Assigned to ${analyst.name}`);
-  }, [customerOverrides, user?.name, addAuditEntry]);
+  }, [customerOverrides, user?.name, addAuditEntry, alerts, assignAlertMutation]);
 
   const handleAssignToMe = useCallback((customerId: string) => {
     if (!user) return;
@@ -249,14 +254,14 @@ export default function AlertWorkbenchPage() {
   }, []);
 
   const handleAlertAssignment = useCallback((alertId: string, analyst: User) => {
+    assignAlertMutation.mutate({ alertId, assignedTo: analyst.id });
     setAlertOverrides((prev) => {
       const newOverrides = new Map(prev);
       const existing = newOverrides.get(alertId) || {};
       newOverrides.set(alertId, { ...existing, assignedAnalyst: analyst });
       return newOverrides;
     });
-    toast.success(`Alert assigned to ${analyst.name}`);
-  }, []);
+  }, [assignAlertMutation]);
 
   const customerGroups = useMemo(() => {
     const filtered = alerts.filter((alert) => {

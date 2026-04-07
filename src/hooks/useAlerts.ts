@@ -52,6 +52,23 @@ export function useGenerateSummary() {
   });
 }
 
+export function useAssignAlert() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: ({ alertId, assignedTo }: { alertId: string; assignedTo: string }) =>
+      alertsService.assignAlert(alertId, assignedTo),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['alerts'] });
+      toast.success('Alert assigned successfully');
+    },
+    onError: (error: any) => {
+      console.error('Failed to assign alert:', error);
+      toast.error(error.response?.data?.detail || 'Failed to assign alert');
+    }
+  });
+}
+
 export function useUsers(params: any = {}) {
   return useQuery({
     queryKey: ['users', params],
