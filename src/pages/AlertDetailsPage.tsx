@@ -59,6 +59,7 @@ export default function AlertDetailsPage() {
 
   const { data: alert, isLoading, error } = useAlert(alertId || '');
   const openCaseMutation = useOpenCase();
+  const generateSummaryMutation = useGenerateSummary();
   
   const handleCreateCase = async () => {
     if (!alert) return;
