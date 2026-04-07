@@ -39,6 +39,7 @@ export default function AlertDetailsPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [rawAlertDrawerOpen, setRawAlertDrawerOpen] = useState(false);
+  const [customer360Open, setCustomer360Open] = useState(false);
 
   // Real API data
   const { data: alert, isLoading, error } = useAlert(alertId || '');
