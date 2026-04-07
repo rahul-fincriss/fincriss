@@ -3,6 +3,15 @@ import { alertsService, ListAlertsParams, OpenCaseRequest } from '@/services/ale
 import { userManagementService } from '@/services/user-management.service';
 import { toast } from 'sonner';
 
+function extractErrorMessage(error: any, fallback: string): string {
+  const detail = error?.response?.data?.detail;
+  if (!detail) return fallback;
+  if (typeof detail === 'string') return detail;
+  if (Array.isArray(detail)) return detail.map((d: any) => d.msg || JSON.stringify(d)).join('; ');
+  if (typeof detail === 'object') return detail.msg || JSON.stringify(detail);
+  return fallback;
+}
+
 export function useAlerts(params: ListAlertsParams = {}) {
   return useQuery({
     queryKey: ['alerts', params],
@@ -31,7 +40,7 @@ export function useOpenCase() {
     },
     onError: (error: any) => {
       console.error('Failed to open case:', error);
-      toast.error(error.response?.data?.detail || 'Failed to open case');
+      toast.error(extractErrorMessage(error, 'Failed to open case'));
     }
   });
 }
@@ -47,7 +56,7 @@ export function useGenerateSummary() {
     },
     onError: (error: any) => {
       console.error('Failed to generate summary:', error);
-      toast.error(error.response?.data?.detail || 'Failed to generate AI summary');
+      toast.error(extractErrorMessage(error, 'Failed to generate AI summary'));
     }
   });
 }
@@ -64,7 +73,7 @@ export function useAssignAlert() {
     },
     onError: (error: any) => {
       console.error('Failed to assign alert:', error);
-      toast.error(error.response?.data?.detail || 'Failed to assign alert');
+      toast.error(extractErrorMessage(error, 'Failed to assign alert'));
     }
   });
 }
