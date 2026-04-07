@@ -36,6 +36,22 @@ export function useOpenCase() {
   });
 }
 
+export function useGenerateSummary() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: (alertId: string) => alertsService.generateSummary(alertId),
+    onSuccess: (_, alertId) => {
+      queryClient.invalidateQueries({ queryKey: ['alert', alertId] });
+      toast.success('AI summary generated successfully');
+    },
+    onError: (error: any) => {
+      console.error('Failed to generate summary:', error);
+      toast.error(error.response?.data?.detail || 'Failed to generate AI summary');
+    }
+  });
+}
+
 export function useUsers(params: any = {}) {
   return useQuery({
     queryKey: ['users', params],
