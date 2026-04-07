@@ -308,8 +308,8 @@ function normalize360Response(data: any): Customer360Profile {
   const otherAddrs = addresses.filter((a: any) => a !== primaryAddr);
 
   // Contacts
-  const phones = contacts.filter((c: any) => ['MOBILE', 'LANDLINE', 'WORK_PHONE'].includes(c.contact_type));
-  const emails = contacts.filter((c: any) => ['EMAIL', 'WORK_EMAIL'].includes(c.contact_type));
+  const phones = contacts.filter((c: any) => ['mobile', 'landline', 'work_phone', 'MOBILE', 'LANDLINE', 'WORK_PHONE'].includes(c.contact_type));
+  const emails = contacts.filter((c: any) => ['email', 'work_email', 'EMAIL', 'WORK_EMAIL'].includes(c.contact_type));
 
   // Compute stats
   const openAlertCount = recentAlerts.filter((a: any) =>
