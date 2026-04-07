@@ -341,7 +341,7 @@ function normalize360Response(data: any): Customer360Profile {
     residency_country: p.residency_country,
     tax_residency: p.tax_residency,
     occupation: p.occupation || kyc.occupation_or_business,
-    industry: kyc.industry || p.industry_code,
+    industry: kyc.industry || p.industry_code || p.industry,
     industry_code: p.industry_code,
     customer_since: p.customer_since,
     customer_status: p.customer_status,
