@@ -183,53 +183,6 @@ export default function DashboardPage() {
           </Card>
         </div>
 
-        {/* Performance Summary */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Weekly Performance</CardTitle>
-            <CardDescription>Your team's AML compliance metrics</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-4 md:grid-cols-4">
-              <div className="flex items-center gap-3 rounded-lg border border-border p-4">
-                <div className="rounded-lg bg-risk-low/20 p-2">
-                  <CheckCircle className="h-5 w-5 text-risk-low" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{summary?.resolvedAlerts || 0}</p>
-                  <p className="text-sm text-muted-foreground">Alerts Resolved</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 rounded-lg border border-border p-4">
-                <div className="rounded-lg bg-primary/20 p-2">
-                  <Clock className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{summary?.avgResolutionTime || '0h'}</p>
-                  <p className="text-sm text-muted-foreground">Avg. Resolution Time</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 rounded-lg border border-border p-4">
-                <div className="rounded-lg bg-risk-medium/20 p-2">
-                  <TrendingDown className="h-5 w-5 text-risk-medium" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{summary?.falsePositiveRate || '0%'}</p>
-                  <p className="text-sm text-muted-foreground">False Positive Rate</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 rounded-lg border border-border p-4">
-                <div className="rounded-lg bg-risk-high/20 p-2">
-                  <FileText className="h-5 w-5 text-risk-high" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{summary?.strsFiled || 0}</p>
-                  <p className="text-sm text-muted-foreground">STRs Filed</p>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
       </div>
     </AppLayout>
   );
