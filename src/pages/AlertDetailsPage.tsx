@@ -209,9 +209,25 @@ export default function AlertDetailsPage() {
           {/* Panel 1: AI Summary & Risk Signals */}
           <Card className="card-interactive">
             <CardHeader className="pb-3">
-              <div className="flex items-center gap-2">
-                <Brain className="h-5 w-5 text-primary" />
-                <CardTitle className="text-lg">AI Analysis</CardTitle>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Brain className="h-5 w-5 text-primary" />
+                  <CardTitle className="text-lg">AI Analysis</CardTitle>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5"
+                  disabled={generateSummaryMutation.isPending}
+                  onClick={() => generateSummaryMutation.mutate(alert.id)}
+                >
+                  {generateSummaryMutation.isPending ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <Sparkles className="h-3.5 w-3.5" />
+                  )}
+                  {generateSummaryMutation.isPending ? 'Generating...' : 'Generate Summary'}
+                </Button>
               </div>
               {aiSummary?.model && (
                 <CardDescription className="font-mono text-xs">{aiSummary.model} • {safeDate(aiSummary.generatedAt)}</CardDescription>
