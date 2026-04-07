@@ -178,6 +178,9 @@ export interface Customer360Profile {
     added_by?: string;
   }[];
 
+  // Transactions (from /360 cap of 20)
+  transactions?: Customer360Transaction[];
+
   // Alerts & Cases
   alerts?: {
     alert_id: string;
@@ -527,6 +530,9 @@ function normalize360Response(data: any): Customer360Profile {
       total_value: n.total_value,
       suspicious_link_flag: n.suspicious_link_flag,
     })),
+
+    // Transactions (capped at 20 in /360 response)
+    transactions: recentTxns.map(normalizeTransaction),
 
     // Regulatory filings
     regulatory_filings: filings,
