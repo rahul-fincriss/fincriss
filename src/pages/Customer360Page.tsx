@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Search, User, Building2, Shield, AlertTriangle, Filter, Eye, FileDown, FolderPlus, Bookmark } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
