@@ -129,6 +129,7 @@ export default function AlertWorkbenchPage() {
   const { data: alertsData, isLoading: alertsLoading, error: alertsError } = useAlerts();
   const { data: usersData, isLoading: usersLoading } = useUsers();
   const openCaseMutation = useOpenCase();
+  const assignAlertMutation = useAssignAlert();
   
   const alerts = alertsData || [];
   const analysts = usersData || [];
