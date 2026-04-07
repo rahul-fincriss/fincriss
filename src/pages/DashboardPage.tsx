@@ -30,7 +30,7 @@ export default function DashboardPage() {
   const { data: alerts, isLoading: isAlertsLoading } = useAlerts({ limit: 3 });
   const { data: cases, isLoading: isCasesLoading } = useCases({ limit: 3 });
 
-  const isLoading = isSummaryLoading || isAlertsLoading || isCasesLoading;
+  const isLoading = isTilesLoading || isAlertsLoading || isCasesLoading;
 
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -66,29 +66,27 @@ export default function DashboardPage() {
         {/* Metrics */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <MetricCard
-            title="High Risk Alerts"
-            value={summary?.highRiskAlerts || 0}
-            subtitle="Require immediate attention"
+            title="High Priority Alerts"
+            value={tiles?.highAlertsOpen || 0}
+            subtitle="HIGH priority, not yet closed"
             icon={AlertTriangle}
             variant="risk-high"
-            trend={summary?.highRiskTrend ? { value: summary.highRiskTrend, isPositive: summary.highRiskTrend > 0 } : undefined}
           />
           <MetricCard
-            title="Alerts in Queue"
-            value={summary?.alertsInQueue || 0}
-            subtitle="Pending review"
+            title="Unassigned Alerts"
+            value={tiles?.unassignedAlertsOpen || 0}
+            subtitle="No assignee, not yet closed"
             icon={Zap}
-            trend={summary?.alertsTrend ? { value: summary.alertsTrend, isPositive: summary.alertsTrend > 0 } : undefined}
           />
           <MetricCard
             title="Open Cases"
-            value={summary?.openCases || 0}
+            value={tiles?.openCases || 0}
             subtitle="Under investigation"
             icon={FolderOpen}
           />
           <MetricCard
             title="Pending STRs"
-            value={summary?.pendingSTRs || 0}
+            value={tiles?.pendingStrs || 0}
             subtitle="Awaiting PO approval"
             icon={FileText}
             variant="risk-medium"
