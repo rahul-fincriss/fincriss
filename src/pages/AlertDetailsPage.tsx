@@ -239,7 +239,7 @@ export default function AlertDetailsPage() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => navigate(`/customers?id=${alert.customerId}`)}
+                  onClick={() => setCustomer360Open(true)}
                   className="gap-1.5"
                 >
                   <ExternalLink className="h-3.5 w-3.5" />
