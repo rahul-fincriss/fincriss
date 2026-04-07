@@ -19,6 +19,7 @@ import { Badge } from '@/components/ui/badge';
 import { RiskBadge } from '@/components/shared/RiskBadge';
 import { SLATimer } from '@/components/shared/SLATimer';
 import { RawAlertDrawer } from '@/components/workbench/RawAlertDrawer';
+import { Customer360Drawer } from '@/components/customer360/Customer360Drawer';
 import { 
   mockPrioritizedAlerts, 
   getExtendedCustomerProfile, 
