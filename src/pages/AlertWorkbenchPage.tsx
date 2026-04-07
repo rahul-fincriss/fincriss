@@ -240,10 +240,15 @@ export default function AlertWorkbenchPage() {
 
   const customerGroups = useMemo(() => {
     const filtered = alerts.filter((alert) => {
+      const query = searchQuery.toLowerCase();
       const matchesSearch =
-        alert.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        alert.customerName.toLowerCase().includes(searchQuery.toLowerCase());
-      return matchesSearch;
+        alert.id.toLowerCase().includes(query) ||
+        alert.customerName.toLowerCase().includes(query);
+      const matchesStatus = statusFilter === 'all' || alert.status === statusFilter;
+      const matchesAnalyst =
+        analystFilter === 'all' ||
+        (analystFilter === 'unassigned' ? !alert.assignedTo : alert.assignedTo === analystFilter);
+      return matchesSearch && matchesStatus && matchesAnalyst;
     });
 
     let groups = groupAlertsByCustomer(filtered);
@@ -261,7 +266,7 @@ export default function AlertWorkbenchPage() {
     });
 
     return groups;
-  }, [alerts, searchQuery, priorityFilter]);
+  }, [alerts, searchQuery, priorityFilter, statusFilter, analystFilter]);
 
   const totalAlerts = alerts.length;
   const totalCustomers = customerGroups.length;
