@@ -32,14 +32,14 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { RiskBadge } from '@/components/shared/RiskBadge';
 import { SLATimer } from '@/components/shared/SLATimer';
-import { PrioritizedAlert, RiskLevel, UserPriority, CustomerGroupOverrides, WorkbenchAuditEntry, User, QueueType } from '@/types';
+import { PrioritizedAlert, RiskLevel, UserPriority, CustomerGroupOverrides, WorkbenchAuditEntry, User } from '@/types';
 import { toast } from 'sonner';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useAuth } from '@/contexts/AuthContext';
 import { AuditPanel } from '@/components/workbench/AuditPanel';
 import { AnalystAssignmentDropdown } from '@/components/workbench/AnalystAssignmentDropdown';
 import { RawAlertDrawer } from '@/components/workbench/RawAlertDrawer';
-import { QueueTypeDropdown, queueTypeShortLabels } from '@/components/workbench/QueueTypeDropdown';
+import { StatusBadge } from '@/components/shared/StatusBadge';
 import { useAlerts, useUsers, useOpenCase, useAssignAlert } from '@/hooks/useAlerts';
 import { Loader2 } from 'lucide-react';
 
@@ -433,7 +433,7 @@ export default function AlertWorkbenchPage() {
                 <TableHead className="w-[80px]">Alerts</TableHead>
                 <TableHead className="w-[180px]">Priority Breakdown</TableHead>
                 <TableHead>FinCrisS Priority</TableHead>
-                <TableHead className="w-[180px]">Queue Type</TableHead>
+                <TableHead className="w-[140px]">Status</TableHead>
                 <TableHead className="w-[160px]">Assigned Analyst</TableHead>
                 <TableHead>SLA</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
@@ -526,17 +526,12 @@ export default function AlertWorkbenchPage() {
                             <TableCell>
                               <RiskBadge level={group.maxPriority} size="sm" />
                             </TableCell>
-                            <TableCell onClick={(e) => e.stopPropagation()}>
-                              {canEdit ? (
-                                <QueueTypeDropdown
-                                  currentQueue={override?.queueType}
-                                  onQueueChange={(queue) => handleQueueChange(group.customerId, queue)}
-                                />
-                              ) : (
-                                <Badge variant="outline" className="text-xs">
-                                  {queueTypeShortLabels[override?.queueType || 'default_aml']}
-                                </Badge>
-                              )}
+                            <TableCell>
+                              <div className="flex flex-wrap gap-1">
+                                {[...new Set(group.alerts.map(a => a.status))].map((status) => (
+                                  <StatusBadge key={status} status={status} size="sm" />
+                                ))}
+                              </div>
                             </TableCell>
                             <TableCell onClick={(e) => e.stopPropagation()}>
                               {canEdit ? (
@@ -643,10 +638,7 @@ export default function AlertWorkbenchPage() {
                                     <RiskBadge level={alert.riskLevel} size="sm" />
                                   </TableCell>
                                   <TableCell>
-                                    {/* Queue inherited from customer level */}
-                                    <span className="text-xs text-muted-foreground italic">
-                                      (inherited)
-                                    </span>
+                                    <StatusBadge status={alert.status} size="sm" />
                                   </TableCell>
                                   <TableCell onClick={(e) => e.stopPropagation()}>
                                     {canEdit ? (
