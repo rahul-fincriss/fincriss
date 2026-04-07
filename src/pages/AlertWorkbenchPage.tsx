@@ -40,7 +40,7 @@ import { AuditPanel } from '@/components/workbench/AuditPanel';
 import { AnalystAssignmentDropdown } from '@/components/workbench/AnalystAssignmentDropdown';
 import { RawAlertDrawer } from '@/components/workbench/RawAlertDrawer';
 import { QueueTypeDropdown, queueTypeShortLabels } from '@/components/workbench/QueueTypeDropdown';
-import { useAlerts, useUsers, useOpenCase } from '@/hooks/useAlerts';
+import { useAlerts, useUsers, useOpenCase, useAssignAlert } from '@/hooks/useAlerts';
 import { Loader2 } from 'lucide-react';
 
 const alertTypeLabels: Record<string, string> = {
