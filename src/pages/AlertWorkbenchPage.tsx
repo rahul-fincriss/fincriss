@@ -174,33 +174,6 @@ export default function AlertWorkbenchPage() {
     });
   }, []);
 
-  const handleQueueChange = useCallback((customerId: string, queue: QueueType) => {
-    const existing = customerOverrides.get(customerId);
-    const previousQueue = existing?.queueType || 'default_aml';
-    
-    setCustomerOverrides((prev) => {
-      const newOverrides = new Map(prev);
-      newOverrides.set(customerId, {
-        ...existing,
-        customerId,
-        userPriority: existing?.userPriority || 'none',
-        queueType: queue,
-        queueTypeChangedBy: user?.name,
-        queueTypeChangedAt: new Date(),
-      });
-      return newOverrides;
-    });
-
-    addAuditEntry(customerId, {
-      customerId,
-      action: 'queue_change',
-      performedBy: user?.name || 'Unknown',
-      previousValue: queueTypeShortLabels[previousQueue],
-      newValue: queueTypeShortLabels[queue],
-    });
-
-    toast.success(`Queue changed to ${queueTypeShortLabels[queue]}`);
-  }, [customerOverrides, user?.name, addAuditEntry]);
 
   const handleAssignAnalyst = useCallback((customerId: string, analyst: User, isReassignment: boolean = false) => {
     const existing = customerOverrides.get(customerId);
