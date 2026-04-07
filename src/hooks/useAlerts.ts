@@ -40,7 +40,7 @@ export function useOpenCase() {
     },
     onError: (error: any) => {
       console.error('Failed to open case:', error);
-      toast.error(error.response?.data?.detail || 'Failed to open case');
+      toast.error(extractErrorMessage(error, 'Failed to open case'));
     }
   });
 }
@@ -56,7 +56,7 @@ export function useGenerateSummary() {
     },
     onError: (error: any) => {
       console.error('Failed to generate summary:', error);
-      toast.error(error.response?.data?.detail || 'Failed to generate AI summary');
+      toast.error(extractErrorMessage(error, 'Failed to generate AI summary'));
     }
   });
 }
@@ -73,7 +73,7 @@ export function useAssignAlert() {
     },
     onError: (error: any) => {
       console.error('Failed to assign alert:', error);
-      toast.error(error.response?.data?.detail || 'Failed to assign alert');
+      toast.error(extractErrorMessage(error, 'Failed to assign alert'));
     }
   });
 }
