@@ -127,4 +127,9 @@ export const alertsService = {
     const response = await api.post(`/api/alerts/${alertId}/generate-summary`);
     return response.data;
   },
+
+  async assignAlert(alertId: string, assignedTo: string): Promise<any> {
+    const response = await api.post(`/api/alerts/${alertId}/assign`, { assigned_to: assignedTo });
+    return response.data;
+  },
 };
