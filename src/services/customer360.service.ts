@@ -308,8 +308,8 @@ function normalize360Response(data: any): Customer360Profile {
   const otherAddrs = addresses.filter((a: any) => a !== primaryAddr);
 
   // Contacts
-  const phones = contacts.filter((c: any) => ['MOBILE', 'LANDLINE', 'WORK_PHONE'].includes(c.contact_type));
-  const emails = contacts.filter((c: any) => ['EMAIL', 'WORK_EMAIL'].includes(c.contact_type));
+  const phones = contacts.filter((c: any) => ['mobile', 'landline', 'work_phone', 'MOBILE', 'LANDLINE', 'WORK_PHONE'].includes(c.contact_type));
+  const emails = contacts.filter((c: any) => ['email', 'work_email', 'EMAIL', 'WORK_EMAIL'].includes(c.contact_type));
 
   // Compute stats
   const openAlertCount = recentAlerts.filter((a: any) =>
@@ -341,7 +341,7 @@ function normalize360Response(data: any): Customer360Profile {
     residency_country: p.residency_country,
     tax_residency: p.tax_residency,
     occupation: p.occupation || kyc.occupation_or_business,
-    industry: kyc.industry || p.industry_code,
+    industry: kyc.industry || p.industry_code || p.industry,
     industry_code: p.industry_code,
     customer_since: p.customer_since,
     customer_status: p.customer_status,
