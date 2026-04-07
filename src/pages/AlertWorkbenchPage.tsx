@@ -206,6 +206,12 @@ export default function AlertWorkbenchPage() {
     const existing = customerOverrides.get(customerId);
     const previousAssignee = existing?.assignedAnalystName;
     
+    // Find all alerts for this customer and assign via API
+    const customerAlerts = alerts.filter(a => a.customerId === customerId);
+    customerAlerts.forEach(alert => {
+      assignAlertMutation.mutate({ alertId: alert.id, assignedTo: analyst.id });
+    });
+
     setCustomerOverrides((prev) => {
       const newOverrides = new Map(prev);
       newOverrides.set(customerId, {
@@ -227,9 +233,7 @@ export default function AlertWorkbenchPage() {
       previousValue: previousAssignee,
       newValue: analyst.name,
     });
-
-    toast.success(`Assigned to ${analyst.name}`);
-  }, [customerOverrides, user?.name, addAuditEntry]);
+  }, [customerOverrides, user?.name, addAuditEntry, alerts, assignAlertMutation]);
 
   const handleAssignToMe = useCallback((customerId: string) => {
     if (!user) return;
@@ -250,14 +254,14 @@ export default function AlertWorkbenchPage() {
   }, []);
 
   const handleAlertAssignment = useCallback((alertId: string, analyst: User) => {
+    assignAlertMutation.mutate({ alertId, assignedTo: analyst.id });
     setAlertOverrides((prev) => {
       const newOverrides = new Map(prev);
       const existing = newOverrides.get(alertId) || {};
       newOverrides.set(alertId, { ...existing, assignedAnalyst: analyst });
       return newOverrides;
     });
-    toast.success(`Alert assigned to ${analyst.name}`);
-  }, []);
+  }, [assignAlertMutation]);
 
   const customerGroups = useMemo(() => {
     const filtered = alerts.filter((alert) => {
