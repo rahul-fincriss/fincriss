@@ -94,13 +94,19 @@ export function Customer360Drawer({ open, onOpenChange, customerId, alert }: Cus
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="w-full sm:max-w-2xl lg:max-w-4xl overflow-y-auto p-0">
         {isLoading ? (
-          <DrawerSkeleton />
+          <>
+            <SheetHeader className="sr-only"><SheetTitle>Customer 360</SheetTitle></SheetHeader>
+            <DrawerSkeleton />
+          </>
         ) : error ? (
-          <div className="flex flex-col items-center justify-center h-64 gap-3 p-6">
-            <AlertTriangle className="h-8 w-8 text-destructive" />
-            <p className="text-sm text-muted-foreground">Failed to load customer data</p>
-            <Button variant="outline" size="sm" onClick={() => onOpenChange(false)}>Close</Button>
-          </div>
+          <>
+            <SheetHeader className="sr-only"><SheetTitle>Customer 360</SheetTitle></SheetHeader>
+            <div className="flex flex-col items-center justify-center h-64 gap-3 p-6">
+              <AlertTriangle className="h-8 w-8 text-destructive" />
+              <p className="text-sm text-muted-foreground">Failed to load customer data</p>
+              <Button variant="outline" size="sm" onClick={() => onOpenChange(false)}>Close</Button>
+            </div>
+          </>
         ) : profile ? (
           <>
             {/* Header */}
@@ -578,7 +584,9 @@ export function Customer360Drawer({ open, onOpenChange, customerId, alert }: Cus
               </Tabs>
             </div>
           </>
-        ) : null}
+        ) : (
+          <SheetHeader className="sr-only"><SheetTitle>Customer 360</SheetTitle></SheetHeader>
+        )}
       </SheetContent>
     </Sheet>
   );
