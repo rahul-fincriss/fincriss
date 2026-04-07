@@ -29,8 +29,8 @@ import { formatINRFull } from '@/lib/formatters';
 import { useAuth } from '@/contexts/AuthContext';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
-import { useAlert, useOpenCase } from '@/hooks/useAlerts';
-import { Loader2 } from 'lucide-react';
+import { useAlert, useOpenCase, useGenerateSummary } from '@/hooks/useAlerts';
+import { Loader2, Sparkles } from 'lucide-react';
 
 function safeDate(val: any): string {
   if (!val) return '—';
@@ -59,6 +59,7 @@ export default function AlertDetailsPage() {
 
   const { data: alert, isLoading, error } = useAlert(alertId || '');
   const openCaseMutation = useOpenCase();
+  const generateSummaryMutation = useGenerateSummary();
   
   const handleCreateCase = async () => {
     if (!alert) return;
@@ -208,9 +209,25 @@ export default function AlertDetailsPage() {
           {/* Panel 1: AI Summary & Risk Signals */}
           <Card className="card-interactive">
             <CardHeader className="pb-3">
-              <div className="flex items-center gap-2">
-                <Brain className="h-5 w-5 text-primary" />
-                <CardTitle className="text-lg">AI Analysis</CardTitle>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Brain className="h-5 w-5 text-primary" />
+                  <CardTitle className="text-lg">AI Analysis</CardTitle>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5"
+                  disabled={generateSummaryMutation.isPending}
+                  onClick={() => generateSummaryMutation.mutate(alert.id)}
+                >
+                  {generateSummaryMutation.isPending ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  ) : (
+                    <Sparkles className="h-3.5 w-3.5" />
+                  )}
+                  {generateSummaryMutation.isPending ? 'Generating...' : 'Generate Summary'}
+                </Button>
               </div>
               {aiSummary?.model && (
                 <CardDescription className="font-mono text-xs">{aiSummary.model} • {safeDate(aiSummary.generatedAt)}</CardDescription>
