@@ -353,6 +353,13 @@ export default function AlertDetailsPage() {
         alert={alert}
         onAuditLog={handleRawPayloadAuditLog}
       />
+      {/* Customer 360 Drawer */}
+      <Customer360Drawer
+        open={customer360Open}
+        onOpenChange={setCustomer360Open}
+        customerId={alert.customerId}
+        alert={alert}
+      />
 
     </AppLayout>
   );
