@@ -24,7 +24,7 @@ export default function DashboardPage() {
   const { user } = useAuth();
 
   // Metrics from summary API
-  const { data: summary, isLoading: isSummaryLoading } = useDashboardSummary();
+  const { data: tiles, isLoading: isTilesLoading } = useDashboardTiles();
   
   // Real alert and case data for quick actions
   const { data: alerts, isLoading: isAlertsLoading } = useAlerts({ limit: 3 });
