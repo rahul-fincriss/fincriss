@@ -122,4 +122,9 @@ export const alertsService = {
   async openCase(alertId: string, request: OpenCaseRequest): Promise<void> {
     await api.post(`/api/alerts/${alertId}/open-case`, request);
   },
+
+  async generateSummary(alertId: string): Promise<any> {
+    const response = await api.post(`/api/alerts/${alertId}/generate-summary`);
+    return response.data;
+  },
 };
