@@ -379,8 +379,8 @@ export default function AlertWorkbenchPage() {
         </div>
 
         {/* Filters */}
-        <div className="flex flex-col gap-4 md:flex-row md:items-center">
-          <div className="relative flex-1 max-w-sm">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center flex-wrap">
+          <div className="relative flex-1 min-w-[200px] max-w-sm">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               placeholder="Search customers or alert IDs..."
@@ -391,14 +391,43 @@ export default function AlertWorkbenchPage() {
           </div>
           
           <Select value={priorityFilter} onValueChange={setPriorityFilter}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Filter by priority" />
+            <SelectTrigger className="w-[160px]">
+              <SelectValue placeholder="Priority" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Priorities</SelectItem>
               <SelectItem value="high">High</SelectItem>
               <SelectItem value="medium">Medium</SelectItem>
               <SelectItem value="low">Low</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Statuses</SelectItem>
+              <SelectItem value="NEW">New</SelectItem>
+              <SelectItem value="IN_REVIEW">In Review</SelectItem>
+              <SelectItem value="CASE_CREATED">Case Created</SelectItem>
+              <SelectItem value="CLOSED_TRUE_POSITIVE">Closed - True Positive</SelectItem>
+              <SelectItem value="CLOSED_FALSE_POSITIVE">Closed - False Positive</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select value={analystFilter} onValueChange={setAnalystFilter}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Analyst" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Analysts</SelectItem>
+              <SelectItem value="unassigned">Unassigned</SelectItem>
+              {analysts.map((analyst: any) => (
+                <SelectItem key={analyst.id} value={analyst.id}>
+                  {analyst.name}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
