@@ -1,11 +1,8 @@
 import { useNavigate } from 'react-router-dom';
 import { 
   AlertTriangle, 
-  CheckCircle, 
-  Clock, 
   FileText, 
   FolderOpen, 
-  TrendingDown,
   Zap 
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
