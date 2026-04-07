@@ -29,8 +29,8 @@ import { formatINRFull } from '@/lib/formatters';
 import { useAuth } from '@/contexts/AuthContext';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
-import { useAlert, useOpenCase } from '@/hooks/useAlerts';
-import { Loader2 } from 'lucide-react';
+import { useAlert, useOpenCase, useGenerateSummary } from '@/hooks/useAlerts';
+import { Loader2, Sparkles } from 'lucide-react';
 
 function safeDate(val: any): string {
   if (!val) return '—';
