@@ -71,9 +71,19 @@ export default function Customer360Page() {
   const location = useLocation();
   const navigate = useNavigate();
 
+  // Read customer ID from query param (e.g. /customers?id=CUST123)
+  const queryId = new URLSearchParams(location.search).get('id');
+
   const [search, setSearch] = useState('');
   const [filterChip, setFilterChip] = useState('');
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(queryId);
+
+  // Auto-select customer from query param
+  useEffect(() => {
+    if (queryId && queryId !== selectedId) {
+      setSelectedId(queryId);
+    }
+  }, [queryId]);
 
   // Derive active tab from URL hash
   const hashTab = location.hash?.replace('#', '') || 'overview';
