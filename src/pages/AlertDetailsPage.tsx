@@ -19,7 +19,6 @@ import { Badge } from '@/components/ui/badge';
 import { RiskBadge } from '@/components/shared/RiskBadge';
 import { SLATimer } from '@/components/shared/SLATimer';
 import { RawAlertDrawer } from '@/components/workbench/RawAlertDrawer';
-import { Customer360Drawer } from '@/components/customer360/Customer360Drawer';
 import { 
   mockPrioritizedAlerts, 
   getExtendedCustomerProfile, 
@@ -39,7 +38,6 @@ export default function AlertDetailsPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [rawAlertDrawerOpen, setRawAlertDrawerOpen] = useState(false);
-  const [customer360Open, setCustomer360Open] = useState(false);
 
   // Real API data
   const { data: alert, isLoading, error } = useAlert(alertId || '');
@@ -236,10 +234,10 @@ export default function AlertDetailsPage() {
                     <Badge variant="secondary">No PEP/Sanctions</Badge>
                   )}
                 </div>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => setCustomer360Open(true)}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigate(`/customers?id=${alert.customerId}`)}
                   className="gap-1.5"
                 >
                   <ExternalLink className="h-3.5 w-3.5" />
@@ -354,13 +352,6 @@ export default function AlertDetailsPage() {
         onAuditLog={handleRawPayloadAuditLog}
       />
 
-      {/* Customer 360 Drawer */}
-      <Customer360Drawer
-        open={customer360Open}
-        onOpenChange={setCustomer360Open}
-        customerId={alert.customerId}
-        alert={alert}
-      />
     </AppLayout>
   );
 }
