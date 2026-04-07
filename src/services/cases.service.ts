@@ -63,8 +63,21 @@ export const casesService = {
       slaDeadline: new Date(c.sla_deadline || c.created_at || Date.now() + 86400000 * 3),
       totalAmount: c.total_amount || 0,
       currency: c.currency || 'INR',
-      notes: c.notes || [],
-      documents: c.documents || [],
+      notes: (c.notes || []).map((n: any) => ({
+        id: String(n.id || Math.random()),
+        authorId: n.user_id || '',
+        authorName: n.full_name || n.username || 'System',
+        content: n.note || n.content || '',
+        timestamp: new Date(n.created_at || Date.now()),
+      })),
+      documents: (c.documents || c.evidence || []).map((d: any) => ({
+        id: String(d.id || Math.random()),
+        name: d.name || d.filename || 'Document',
+        type: d.type || d.file_type || 'file',
+        uploadedBy: d.uploaded_by || d.uploadedBy || 'Unknown',
+        uploadedAt: new Date(d.uploaded_at || d.created_at || Date.now()),
+        url: d.url || d.file_url || '#',
+      })),
     };
   },
 
