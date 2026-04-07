@@ -408,9 +408,8 @@ export default function AlertWorkbenchPage() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Statuses</SelectItem>
-              <SelectItem value="NEW">New</SelectItem>
-              <SelectItem value="IN_REVIEW">In Review</SelectItem>
-              <SelectItem value="CASE_CREATED">Case Created</SelectItem>
+              <SelectItem value="PENDING">Pending</SelectItem>
+              <SelectItem value="IN_PROGRESS">In Progress</SelectItem>
               <SelectItem value="CLOSED_TRUE_POSITIVE">Closed - True Positive</SelectItem>
               <SelectItem value="CLOSED_FALSE_POSITIVE">Closed - False Positive</SelectItem>
             </SelectContent>
