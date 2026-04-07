@@ -14,7 +14,7 @@ import { RiskBadge } from '@/components/shared/RiskBadge';
 import { SLATimer } from '@/components/shared/SLATimer';
 import { StatusBadge } from '@/components/shared/StatusBadge';
 
-import { useDashboardSummary } from '@/hooks/useDashboard';
+import { useDashboardTiles } from '@/hooks/useDashboard';
 import { useAlerts } from '@/hooks/useAlerts';
 import { useCases } from '@/hooks/useCases';
 import { Loader2 } from 'lucide-react';
