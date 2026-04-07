@@ -43,27 +43,79 @@ export const alertsService = {
     }));
   },
 
-  async getAlert(alertId: string): Promise<PrioritizedAlert> {
+  async getAlert(alertId: string): Promise<any> {
     const response = await api.get(`/api/alerts/${alertId}`);
     const alert = response.data;
     console.log("alertsService.getAlert raw data:", alert);
     
+    // Return full API response with normalized base fields
     return {
+      // Base PrioritizedAlert fields
       id: alert.alert_id || alert.id,
       sourceSystem: alert.source_system || alert.sourceSystem || 'Legacy',
       alertType: alert.alert_type || alert.alertType || 'behavior_deviation',
-      customerId: alert.customer_id || alert.customerId,
-      customerName: alert.customer_name || alert.customerName,
+      customerId: alert.customer?.customer_id || alert.customer_id || alert.customerId,
+      customerName: alert.customer?.full_name || alert.customer_name || alert.customerName,
       amount: alert.amount || 0,
       currency: alert.currency || 'INR',
-      timestamp: new Date(alert.timestamp || alert.created_at),
+      timestamp: new Date(alert.alert_date || alert.timestamp || alert.created_at || Date.now()),
       status: (alert.status?.toLowerCase() as AlertStatus) || 'new',
       mapsScore: alert.priority_score || alert.mapsScore || 0,
       riskLevel: (alert.priority_level?.toLowerCase() as RiskLevel) || 'medium',
       riskDrivers: alert.risk_drivers || alert.riskDrivers || [],
       slaDeadline: new Date(alert.sla_deadline || Date.now() + 86400000),
-      rawPayload: alert.raw_payload || {},
+      rawPayload: alert.raw_payload || alert,
       assignedTo: alert.assigned_to,
+      // Extended fields from full API response
+      priorityScore: alert.priority_score,
+      ruleScore: alert.rule_score,
+      mlScore: alert.ml_score,
+      ruleReasons: alert.rule_reasons || {},
+      explanation: alert.explanation,
+      modelVersion: alert.model_version,
+      severity: alert.severity,
+      scenarioCode: alert.scenario_code,
+      scoredAt: alert.scored_at,
+      investigatedAt: alert.investigated_at,
+      alertDate: alert.alert_date,
+      // Nested customer object
+      customer: alert.customer ? {
+        customerId: alert.customer.customer_id,
+        fullName: alert.customer.full_name,
+        type: alert.customer.type,
+        riskRating: alert.customer.risk_rating,
+        isPep: alert.customer.is_pep,
+        nationality: alert.customer.nationality,
+        industryCode: alert.customer.industry_code,
+        occupation: alert.customer.occupation,
+        customerSince: alert.customer.customer_since,
+        kycLastUpdated: alert.customer.kyc_last_updated,
+      } : null,
+      // Transaction features
+      features: alert.features ? {
+        txnCount7d: alert.features.txn_count_7d,
+        txnCount30d: alert.features.txn_count_30d,
+        txnCount90d: alert.features.txn_count_90d,
+        avgAmount30d: alert.features.avg_amount_30d,
+        maxAmount30d: alert.features.max_amount_30d,
+        uniqueCounterparties30d: alert.features.unique_counterparties_30d,
+        countriesCount30d: alert.features.countries_count_30d,
+        highRiskCountryTxns30d: alert.features.high_risk_country_txns_30d,
+        cashIntensiveRatio: alert.features.cash_intensive_ratio,
+        alertCount30d: alert.features.alert_count_30d,
+        alertCount90d: alert.features.alert_count_90d,
+        featuresComputedAt: alert.features.features_computed_at,
+      } : null,
+      // Case info
+      caseInfo: alert.case || null,
+      // AI summary
+      aiSummary: alert.ai_summary ? {
+        alertSummary: alert.ai_summary.alert_summary,
+        riskSignals: alert.ai_summary.risk_signals || [],
+        profileAnalysis: alert.ai_summary.profile_analysis,
+        model: alert.ai_summary.model,
+        generatedAt: alert.ai_summary.generated_at,
+      } : null,
     };
   },
 

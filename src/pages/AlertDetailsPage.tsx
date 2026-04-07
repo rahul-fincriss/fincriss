@@ -10,7 +10,12 @@ import {
   User, 
   XCircle,
   FileCode,
-  ExternalLink
+  ExternalLink,
+  Shield,
+  Activity,
+  Calendar,
+  Hash,
+  AlertTriangle
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
@@ -20,19 +25,30 @@ import { RiskBadge } from '@/components/shared/RiskBadge';
 import { SLATimer } from '@/components/shared/SLATimer';
 import { RawAlertDrawer } from '@/components/workbench/RawAlertDrawer';
 import { Customer360Drawer } from '@/components/customer360/Customer360Drawer';
-import { 
-  mockPrioritizedAlerts, 
-  getExtendedCustomerProfile, 
-  getTransactionsByCustomerId,
-  mockExtendedCustomerProfiles,
-  formatINRFull
-} from '@/data/mockData';
+import { formatINRFull } from '@/lib/formatters';
 import { useAuth } from '@/contexts/AuthContext';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
-
 import { useAlert, useOpenCase } from '@/hooks/useAlerts';
 import { Loader2 } from 'lucide-react';
+
+function safeDate(val: any): string {
+  if (!val) return '—';
+  try {
+    const d = new Date(val);
+    if (isNaN(d.getTime())) return '—';
+    return format(d, 'dd MMM yyyy, HH:mm');
+  } catch { return '—'; }
+}
+
+function safeDateShort(val: any): string {
+  if (!val) return '—';
+  try {
+    const d = new Date(val);
+    if (isNaN(d.getTime())) return '—';
+    return format(d, 'dd MMM yyyy');
+  } catch { return '—'; }
+}
 
 export default function AlertDetailsPage() {
   const { alertId } = useParams();
@@ -41,14 +57,11 @@ export default function AlertDetailsPage() {
   const [rawAlertDrawerOpen, setRawAlertDrawerOpen] = useState(false);
   const [customer360Open, setCustomer360Open] = useState(false);
 
-  // Real API data
   const { data: alert, isLoading, error } = useAlert(alertId || '');
   const openCaseMutation = useOpenCase();
   
-  // Handlers
   const handleCreateCase = async () => {
     if (!alert) return;
-    
     toast.promise(
       openCaseMutation.mutateAsync({ 
         alertId: alert.id, 
@@ -56,10 +69,7 @@ export default function AlertDetailsPage() {
       }),
       {
         loading: 'Opening case...',
-        success: () => {
-          navigate('/cases');
-          return 'Case created successfully';
-        },
+        success: () => { navigate('/cases'); return 'Case created successfully'; },
         error: 'Failed to create case',
       }
     );
@@ -72,7 +82,6 @@ export default function AlertDetailsPage() {
 
   const handleRawPayloadAuditLog = (alertId: string, userId: string, userName: string) => {
     toast.info(`Raw payload view logged for ${alertId}`);
-    console.log(`[AUDIT] User ${userName} (${userId}) viewed raw payload for alert ${alertId} at ${new Date().toISOString()}`);
   };
 
   if (isLoading) {
@@ -104,10 +113,10 @@ export default function AlertDetailsPage() {
     );
   }
 
-  // Look up customer and transactions (keeping mock for these for now as they are Phase 2/3)
-  const customerProfile = getExtendedCustomerProfile(alert.customerId) || mockExtendedCustomerProfiles[0];
-  const transactions = getTransactionsByCustomerId(alert.customerId);
-  const customer = customerProfile.kyc;
+  const customer = alert.customer;
+  const features = alert.features;
+  const aiSummary = alert.aiSummary;
+  const ruleReasons = alert.ruleReasons || {};
 
   return (
     <AppLayout>
@@ -122,19 +131,32 @@ export default function AlertDetailsPage() {
               <div className="flex items-center gap-3">
                 <h1 className="text-2xl font-bold font-mono">{alert.id}</h1>
                 <RiskBadge level={alert.riskLevel} />
+                <Badge variant="outline" className="font-mono text-xs">{alert.status?.toUpperCase()}</Badge>
               </div>
-              <p className="text-muted-foreground">{alert.customerName}</p>
+              <div className="flex items-center gap-3 text-muted-foreground text-sm">
+                <span>{alert.customerName}</span>
+                <span>•</span>
+                <span>{alert.alertType?.toUpperCase()}</span>
+                <span>•</span>
+                <span>{alert.sourceSystem}</span>
+                {alert.scenarioCode && (
+                  <>
+                    <span>•</span>
+                    <span className="font-mono">{alert.scenarioCode}</span>
+                  </>
+                )}
+              </div>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <SLATimer deadline={alert.slaDeadline} />
             <Button variant="outline" onClick={() => setRawAlertDrawerOpen(true)}>
               <FileCode className="mr-2 h-4 w-4" />
-              View Raw Payload
+              Raw Payload
             </Button>
             <Button variant="outline" onClick={handleDropAlert}>
               <XCircle className="mr-2 h-4 w-4" />
-              Drop as False Positive
+              Drop
             </Button>
             <Button onClick={handleCreateCase}>
               <FolderPlus className="mr-2 h-4 w-4" />
@@ -143,45 +165,107 @@ export default function AlertDetailsPage() {
           </div>
         </div>
 
-        {/* Four Panel View */}
+        {/* Score Banner */}
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+          <Card className="p-3">
+            <p className="text-xs text-muted-foreground">Priority Score</p>
+            <p className="text-2xl font-bold text-primary font-mono">{alert.priorityScore ?? alert.mapsScore}</p>
+          </Card>
+          <Card className="p-3">
+            <p className="text-xs text-muted-foreground">Rule Score</p>
+            <p className="text-2xl font-bold font-mono">{alert.ruleScore ?? '—'}</p>
+          </Card>
+          <Card className="p-3">
+            <p className="text-xs text-muted-foreground">ML Score</p>
+            <p className="text-2xl font-bold font-mono">{alert.mlScore != null ? alert.mlScore.toFixed(2) : '—'}</p>
+          </Card>
+          <Card className="p-3">
+            <p className="text-xs text-muted-foreground">Alert Amount</p>
+            <p className="text-xl font-bold font-mono">{formatINRFull(alert.amount)}</p>
+          </Card>
+          <Card className="p-3">
+            <p className="text-xs text-muted-foreground">Alert Date</p>
+            <p className="text-sm font-medium">{safeDateShort(alert.alertDate || alert.timestamp)}</p>
+          </Card>
+        </div>
+
+        {/* Explanation bar */}
+        {alert.explanation && (
+          <Card className="p-4 border-primary/30 bg-primary/5">
+            <div className="flex items-start gap-2">
+              <Brain className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+              <div>
+                <p className="text-xs font-medium text-primary mb-1">Scoring Explanation</p>
+                <p className="text-sm">{alert.explanation}</p>
+              </div>
+            </div>
+          </Card>
+        )}
+
+        {/* Main 2x2 Grid */}
         <div className="grid gap-6 lg:grid-cols-2">
-          {/* Panel 1: Alert Summary */}
+          
+          {/* Panel 1: AI Summary & Risk Signals */}
           <Card className="card-interactive">
             <CardHeader className="pb-3">
               <div className="flex items-center gap-2">
                 <Brain className="h-5 w-5 text-primary" />
-                <CardTitle className="text-lg">Alert Summary & Trigger</CardTitle>
+                <CardTitle className="text-lg">AI Analysis</CardTitle>
               </div>
-              <CardDescription>Why FinCrisS flagged this alert</CardDescription>
+              {aiSummary?.model && (
+                <CardDescription className="font-mono text-xs">{aiSummary.model} • {safeDate(aiSummary.generatedAt)}</CardDescription>
+              )}
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">FinCrisS Score</span>
-                <span className="text-2xl font-bold text-primary">{alert.mapsScore}</span>
-              </div>
-              <div className="space-y-2">
-                <span className="text-sm font-medium">Risk Drivers</span>
+              {aiSummary?.alertSummary && (
+                <div className="rounded-lg bg-muted p-3">
+                  <p className="text-xs text-muted-foreground mb-1">Alert Summary</p>
+                  <p className="text-sm leading-relaxed">{aiSummary.alertSummary}</p>
+                </div>
+              )}
+              
+              {aiSummary?.riskSignals && aiSummary.riskSignals.length > 0 && (
                 <div className="space-y-2">
-                  {alert.riskDrivers.map((driver, i) => (
-                    <div
-                      key={i}
-                      className="ai-generated rounded-lg p-3"
-                    >
-                      <div className="flex items-start gap-2">
-                        <Brain className="h-4 w-4 text-primary mt-0.5" />
-                        <span className="text-sm">{driver}</span>
+                  <span className="text-sm font-medium">Risk Signals</span>
+                  {aiSummary.riskSignals.map((signal: any, i: number) => (
+                    <div key={i} className="ai-generated rounded-lg p-3">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-sm font-medium">{signal.signal}</span>
+                        <Badge className="badge-risk-high text-xs">Detected</Badge>
                       </div>
+                      <p className="text-xs text-muted-foreground">{signal.description}</p>
                     </div>
                   ))}
                 </div>
-              </div>
-              <div className="rounded-lg bg-muted p-3">
-                <p className="text-xs text-muted-foreground mb-1">AI Explanation</p>
-                <p className="text-sm">
-                  This transaction pattern indicates potential trade-based money laundering. 
-                  The entity shows characteristics of a shell company with mismatched business profile.
-                </p>
-              </div>
+              )}
+
+              {aiSummary?.profileAnalysis && (
+                <div className="rounded-lg border border-accent/30 bg-accent/5 p-3">
+                  <p className="text-xs font-medium text-accent-foreground mb-1">Profile Analysis</p>
+                  <p className="text-xs leading-relaxed text-muted-foreground">{aiSummary.profileAnalysis}</p>
+                </div>
+              )}
+
+              {/* Rule reasons */}
+              {Object.keys(ruleReasons).length > 0 && (
+                <div className="space-y-2">
+                  <span className="text-sm font-medium">Rule Triggers</span>
+                  <div className="flex flex-wrap gap-2">
+                    {Object.entries(ruleReasons).map(([rule, score]) => (
+                      <Badge key={rule} variant="outline" className="font-mono">
+                        {rule}: {String(score)}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {alert.modelVersion && (
+                <div className="rounded-lg bg-primary/10 border border-primary/20 p-3">
+                  <p className="text-xs font-medium text-primary mb-1">Model Version</p>
+                  <p className="text-sm font-mono">{alert.modelVersion}</p>
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -192,155 +276,222 @@ export default function AlertDetailsPage() {
                 <User className="h-5 w-5 text-primary" />
                 <CardTitle className="text-lg">Customer KYC Snapshot</CardTitle>
               </div>
-              <CardDescription>Profile vs. behavioral analysis</CardDescription>
+              <CardDescription>From alert payload</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {customer ? (
+                <>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-xs text-muted-foreground">Customer ID</p>
+                      <p className="font-mono text-sm">{customer.customerId}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Full Name</p>
+                      <p className="font-medium">{customer.fullName}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Customer Type</p>
+                      <p className="font-medium capitalize">{customer.type}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Risk Rating</p>
+                      <RiskBadge level={customer.riskRating?.toLowerCase()} size="sm" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Nationality</p>
+                      <p className="font-medium">{customer.nationality}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Industry</p>
+                      <p className="font-medium capitalize">{customer.industryCode?.toLowerCase()?.replace(/_/g, ' ')}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Occupation</p>
+                      <p className="font-medium">{customer.occupation}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Customer Since</p>
+                      <p className="font-medium">{safeDateShort(customer.customerSince)}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <div className="flex gap-2">
+                      {customer.isPep ? <Badge variant="destructive">PEP</Badge> : null}
+                      {!customer.isPep && <Badge variant="secondary">No PEP/Sanctions</Badge>}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      KYC updated: {safeDate(customer.kycLastUpdated)}
+                    </div>
+                  </div>
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCustomer360Open(true)}
+                    className="gap-1.5 w-full"
+                  >
+                    <ExternalLink className="h-3.5 w-3.5" />
+                    Open Customer 360
+                  </Button>
+                </>
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-4">No customer data in alert</p>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Panel 3: Transaction Features / Aggregates */}
+          <Card className="card-interactive">
+            <CardHeader className="pb-3">
+              <div className="flex items-center gap-2">
+                <Activity className="h-5 w-5 text-primary" />
+                <CardTitle className="text-lg">Transaction Features</CardTitle>
+              </div>
+              <CardDescription>
+                Computed behavioral features
+                {features?.featuresComputedAt && (
+                  <span className="ml-2 font-mono text-xs">as of {safeDate(features.featuresComputedAt)}</span>
+                )}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {features ? (
+                <div className="space-y-4">
+                  {/* Transaction counts */}
+                  <div>
+                    <p className="text-xs font-medium text-muted-foreground mb-2">Transaction Counts</p>
+                    <div className="grid grid-cols-3 gap-3">
+                      <div className="rounded-lg border border-border p-3 text-center">
+                        <p className="text-2xl font-bold font-mono">{features.txnCount7d}</p>
+                        <p className="text-xs text-muted-foreground">7 Days</p>
+                      </div>
+                      <div className="rounded-lg border border-border p-3 text-center">
+                        <p className="text-2xl font-bold font-mono">{features.txnCount30d}</p>
+                        <p className="text-xs text-muted-foreground">30 Days</p>
+                      </div>
+                      <div className="rounded-lg border border-border p-3 text-center">
+                        <p className="text-2xl font-bold font-mono">{features.txnCount90d}</p>
+                        <p className="text-xs text-muted-foreground">90 Days</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Amounts */}
+                  <div>
+                    <p className="text-xs font-medium text-muted-foreground mb-2">Amount Analysis (30d)</p>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="rounded-lg border border-border p-3">
+                        <p className="text-xs text-muted-foreground">Average</p>
+                        <p className="font-mono font-medium">{formatINRFull(features.avgAmount30d)}</p>
+                      </div>
+                      <div className="rounded-lg border border-border p-3">
+                        <p className="text-xs text-muted-foreground">Maximum</p>
+                        <p className="font-mono font-medium text-risk-high">{formatINRFull(features.maxAmount30d)}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Risk indicators */}
+                  <div>
+                    <p className="text-xs font-medium text-muted-foreground mb-2">Risk Indicators (30d)</p>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="flex items-center justify-between rounded-lg border border-border p-3">
+                        <span className="text-xs text-muted-foreground">Unique Counterparties</span>
+                        <span className="font-mono font-bold">{features.uniqueCounterparties30d}</span>
+                      </div>
+                      <div className="flex items-center justify-between rounded-lg border border-border p-3">
+                        <span className="text-xs text-muted-foreground">Countries</span>
+                        <span className="font-mono font-bold">{features.countriesCount30d}</span>
+                      </div>
+                      <div className="flex items-center justify-between rounded-lg border border-border p-3">
+                        <span className="text-xs text-muted-foreground">High-Risk Country Txns</span>
+                        <span className="font-mono font-bold text-risk-high">{features.highRiskCountryTxns30d}</span>
+                      </div>
+                      <div className="flex items-center justify-between rounded-lg border border-border p-3">
+                        <span className="text-xs text-muted-foreground">Cash Intensive Ratio</span>
+                        <span className="font-mono font-bold">{(features.cashIntensiveRatio * 100).toFixed(1)}%</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Past alerts */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="flex items-center justify-between rounded-lg bg-muted p-3">
+                      <span className="text-xs text-muted-foreground">Alerts (30d)</span>
+                      <span className="font-mono font-bold">{features.alertCount30d}</span>
+                    </div>
+                    <div className="flex items-center justify-between rounded-lg bg-muted p-3">
+                      <span className="text-xs text-muted-foreground">Alerts (90d)</span>
+                      <span className="font-mono font-bold">{features.alertCount90d}</span>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-4">No feature data available</p>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Panel 4: Metadata & Case Info */}
+          <Card className="card-interactive">
+            <CardHeader className="pb-3">
+              <div className="flex items-center gap-2">
+                <Shield className="h-5 w-5 text-primary" />
+                <CardTitle className="text-lg">Alert Metadata</CardTitle>
+              </div>
+              <CardDescription>Processing & investigation details</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-xs text-muted-foreground">Customer Type</p>
-                  <p className="font-medium capitalize">{customer.type}</p>
+                  <p className="text-xs text-muted-foreground">Source System</p>
+                  <p className="font-medium capitalize">{alert.sourceSystem}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground">Risk Rating</p>
-                  <RiskBadge level={customer.riskRating} size="sm" />
+                  <p className="text-xs text-muted-foreground">Alert Type</p>
+                  <p className="font-medium">{alert.alertType?.toUpperCase()}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground">Industry</p>
-                  <p className="font-medium">{customer.industry}</p>
+                  <p className="text-xs text-muted-foreground">Scenario Code</p>
+                  <p className="font-mono text-sm">{alert.scenarioCode || '—'}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground">Account Age</p>
-                  <p className="font-medium">{customer.accountAge} months</p>
+                  <p className="text-xs text-muted-foreground">Severity</p>
+                  <Badge variant={alert.severity === 'HIGH' ? 'destructive' : 'secondary'}>
+                    {alert.severity || '—'}
+                  </Badge>
                 </div>
-              </div>
-              
-              <div className="rounded-lg border border-risk-high/30 bg-risk-high/10 p-3">
-                <p className="text-xs font-medium text-risk-high mb-2">⚠️ Income vs. Behavior Mismatch</p>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-xs text-muted-foreground">Declared Income</p>
-                    <p className="font-mono font-medium">{formatINRFull(customer.declaredIncome)}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Actual Turnover</p>
-                    <p className="font-mono font-medium text-risk-high">{formatINRFull(customer.actualTurnover)}</p>
-                  </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Scored At</p>
+                  <p className="text-sm">{safeDate(alert.scoredAt)}</p>
                 </div>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="flex gap-2">
-                  {customer.pep && <Badge variant="destructive">PEP</Badge>}
-                  {customer.sanctions && <Badge variant="destructive">Sanctions Hit</Badge>}
-                  {!customer.pep && !customer.sanctions && (
-                    <Badge variant="secondary">No PEP/Sanctions</Badge>
-                  )}
+                <div>
+                  <p className="text-xs text-muted-foreground">Investigated At</p>
+                  <p className="text-sm">{safeDate(alert.investigatedAt)}</p>
                 </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCustomer360Open(true)}
-                  className="gap-1.5"
-                >
-                  <ExternalLink className="h-3.5 w-3.5" />
-                  Open Customer 360
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Panel 3: Transaction Aggregates */}
-          <Card className="card-interactive">
-            <CardHeader className="pb-3">
-              <div className="flex items-center gap-2">
-                <DollarSign className="h-5 w-5 text-primary" />
-                <CardTitle className="text-lg">Transaction Aggregates</CardTitle>
-              </div>
-              <CardDescription>Recent transaction patterns</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {transactions.length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-4">No transactions found for this customer</p>
-                ) : (
-                  transactions.slice(0, 5).map((txn) => (
-                    <div
-                      key={txn.id}
-                      className="flex items-center justify-between rounded-lg border border-border p-3"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className={`rounded-full p-1.5 ${txn.type === 'credit' ? 'bg-risk-low/20' : 'bg-risk-high/20'}`}>
-                          <TrendingUp className={`h-4 w-4 ${txn.type === 'credit' ? 'text-risk-low' : 'text-risk-high rotate-180'}`} />
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium">{txn.counterparty}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {format(txn.date, 'MMM dd')} • {txn.channel}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className={`font-mono font-medium ${txn.type === 'credit' ? 'text-risk-low' : 'text-risk-high'}`}>
-                          {txn.type === 'credit' ? '+' : '-'}{formatINRFull(txn.amount)}
-                        </p>
-                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                          <Globe className="h-3 w-3" />
-                          {txn.country}
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Panel 4: Risk Signals */}
-          <Card className="card-interactive">
-            <CardHeader className="pb-3">
-              <div className="flex items-center gap-2">
-                <Brain className="h-5 w-5 text-primary" />
-                <CardTitle className="text-lg">Risk Signals</CardTitle>
-              </div>
-              <CardDescription>AI-detected risk patterns</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-3">
-                <div className="ai-generated rounded-lg p-3">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium">Smurfing Pattern</span>
-                    <Badge className="badge-risk-high">Detected</Badge>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Multiple transactions just below ₹10,00,000 CTR threshold within 48-hour window
-                  </p>
+                <div>
+                  <p className="text-xs text-muted-foreground">Assigned To</p>
+                  <p className="text-sm">{alert.assignedTo || 'Unassigned'}</p>
                 </div>
-
-                <div className="ai-generated rounded-lg p-3">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium">Geo Anomaly</span>
-                    <Badge className="badge-risk-medium">Flagged</Badge>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Transactions originating from 3 high-risk jurisdictions: UAE, SG, HK
-                  </p>
-                </div>
-
-                <div className="ai-generated rounded-lg p-3">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium">Behavior Deviation</span>
-                    <Badge className="badge-risk-high">Score: 0.87</Badge>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Transaction volume 280% above historical average for this customer segment
-                  </p>
+                <div>
+                  <p className="text-xs text-muted-foreground">Status</p>
+                  <Badge variant="outline">{alert.status?.toUpperCase()}</Badge>
                 </div>
               </div>
 
-              <div className="rounded-lg bg-primary/10 border border-primary/20 p-3">
-                <p className="text-xs font-medium text-primary mb-1">Model Version</p>
-                <p className="text-sm font-mono">FinCrisS-v2.3.1</p>
-              </div>
+              {/* Case info */}
+              {alert.caseInfo ? (
+                <div className="rounded-lg border border-primary/30 bg-primary/5 p-3">
+                  <p className="text-xs font-medium text-primary mb-2">Linked Case</p>
+                  <p className="font-mono text-sm">{alert.caseInfo.case_id || alert.caseInfo.id}</p>
+                </div>
+              ) : (
+                <div className="rounded-lg bg-muted p-3">
+                  <p className="text-xs text-muted-foreground">No case linked to this alert</p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -353,6 +504,7 @@ export default function AlertDetailsPage() {
         alert={alert}
         onAuditLog={handleRawPayloadAuditLog}
       />
+
       {/* Customer 360 Drawer */}
       <Customer360Drawer
         open={customer360Open}
@@ -360,7 +512,6 @@ export default function AlertDetailsPage() {
         customerId={alert.customerId}
         alert={alert}
       />
-
     </AppLayout>
   );
 }
