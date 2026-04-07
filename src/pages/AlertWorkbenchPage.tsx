@@ -137,6 +137,8 @@ export default function AlertWorkbenchPage() {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [analystFilter, setAnalystFilter] = useState<string>('all');
   const [expandedCustomers, setExpandedCustomers] = useState<Set<string>>(new Set());
   
   // Customer-level overrides
