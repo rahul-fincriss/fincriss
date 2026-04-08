@@ -8,8 +8,14 @@ interface StatusBadgeProps {
   size?: 'sm' | 'md';
 }
 
-const statusConfig: Record<Status, { label: string; className: string }> = {
-  // Alert statuses
+const statusConfig: Record<string, { label: string; className: string }> = {
+  // Alert workflow statuses (from API)
+  PENDING: { label: 'Pending', className: 'badge-status-pending' },
+  IN_PROGRESS: { label: 'In Progress', className: 'badge-status-in-progress' },
+  CLOSED_TRUE_POSITIVE: { label: 'True Positive', className: 'bg-destructive/20 text-destructive border border-destructive/30' },
+  CLOSED_FALSE_POSITIVE: { label: 'False Positive', className: 'badge-status-completed' },
+
+  // Legacy alert statuses
   new: { label: 'New', className: 'badge-status-pending' },
   in_review: { label: 'In Review', className: 'badge-status-in-progress' },
   sent_to_maps: { label: 'Processing', className: 'badge-status-in-progress' },
