@@ -16,7 +16,7 @@ export interface OpenCaseRequest {
 
 export const alertsService = {
   async listAlerts(params: ListAlertsParams = {}): Promise<PrioritizedAlert[]> {
-    const response = await api.get('/api/alerts', { params });
+    const response = await api.get('/api/alerts/open', { params });
     // Note: We might need to map the API response to our internal PrioritizedAlert type
     // if the field names differ (e.g., camelCase vs snake_case)
     const data = response.data;
