@@ -438,13 +438,13 @@ export default function AlertWorkbenchPage() {
               <TableRow>
                 <TableHead className="w-[40px]"></TableHead>
                 <TableHead>Customer</TableHead>
-                <TableHead className="w-[80px]">Alerts</TableHead>
-                <TableHead className="w-[180px]">Priority Breakdown</TableHead>
+                {/*<TableHead className="w-[80px]">Alerts</TableHead>*/}
+                <TableHead className="w-[180px]">Inbound Priority</TableHead>
                 <TableHead>FinCrisS Priority</TableHead>
                 <TableHead className="w-[140px]">Status</TableHead>
-                <TableHead className="w-[160px]">Assigned Analyst</TableHead>
+                <TableHead className="w-[160px]">Owner</TableHead>
                 <TableHead>SLA</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+               {/*} <TableHead className="text-right">Actions</TableHead>*/}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -507,11 +507,13 @@ export default function AlertWorkbenchPage() {
                                 </p>
                               </div>
                             </TableCell>
+                            {/*}
                             <TableCell>
                               <Badge variant="secondary" className="font-mono">
                                 {group.totalAlerts}
                               </Badge>
                             </TableCell>
+                            */}
                             <TableCell>
                               <div className="flex flex-col gap-0.5">
                                 {group.priorityBreakdown.high > 0 && (
@@ -564,6 +566,7 @@ export default function AlertWorkbenchPage() {
                             <TableCell>
                               <SLATimer deadline={group.earliestSLA} />
                             </TableCell>
+                            {/*}
                             <TableCell>
                               <div
                                 className="flex items-center justify-end gap-1"
@@ -598,6 +601,7 @@ export default function AlertWorkbenchPage() {
                                 </Button>
                               </div>
                             </TableCell>
+                            */}
                           </TableRow>
                         </CollapsibleTrigger>
 
@@ -617,18 +621,24 @@ export default function AlertWorkbenchPage() {
                                   <TableCell colSpan={1}>
                                     <div className="pl-4 flex items-center gap-2">
                                       <div className="w-1.5 h-1.5 rounded-full bg-primary/50" />
-                                      <span className="font-mono text-sm">{alert.id}</span>
+                                      <span className="font-mono text-sm"> Id:{alert.id};</span>
                                       <Badge variant="secondary" className="text-xs">
-                                        {alertTypeLabels[alert.alertType] || alert.alertType}
+                                         Type: {alertTypeLabels[alert.alertType] || alert.alertType};
                                       </Badge>
+                                      <span className="text-sm text-muted-foreground">
+                                      Amount: {alert.amount.toLocaleString()} {alert.currency}
+                                    </span>
                                     </div>
                                   </TableCell>
+                                  {/*}
                                   <TableCell>
                                     <span className="text-sm text-muted-foreground">
                                       {alert.amount.toLocaleString()} {alert.currency}
                                     </span>
                                   </TableCell>
-                                  <TableCell>
+                                  */}
+                                  <TableCell> 
+                                  
                                     <div className="flex flex-wrap gap-1">
                                       {alert.riskDrivers.slice(0, 2).map((driver, i) => (
                                         <Badge key={i} variant="outline" className="text-xs">
@@ -668,6 +678,7 @@ export default function AlertWorkbenchPage() {
                                   <TableCell>
                                     <SLATimer deadline={alert.slaDeadline} />
                                   </TableCell>
+                                  {/*}
                                   <TableCell>
                                     <div
                                       className="flex items-center justify-end gap-1"
@@ -711,6 +722,7 @@ export default function AlertWorkbenchPage() {
                                       </Button>
                                     </div>
                                   </TableCell>
+                                  */}
                                 </TableRow>
                               );
                             })}
