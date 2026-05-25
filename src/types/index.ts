@@ -12,6 +12,7 @@ export interface User {
 // Alert types
 export type AlertType = 'large_cash' | 'structuring' | 'rapid_movement' | 'geo_anomaly' | 'behavior_deviation' | 'smurfing';
 export type AlertStatus = 'new' | 'in_review' | 'sent_to_maps' | 'dropped' | 'case_created';
+export type WorkflowStatus = 'NEW' | 'ASSIGNED' | 'IN_REVIEW' | 'ESCALATED' | 'DISMISSED';
 export type RiskLevel = 'high' | 'medium' | 'low';
 export type UserPriority = 'urgent' | 'high' | 'medium' | 'low' | 'none';
 
@@ -43,6 +44,7 @@ export interface PrioritizedAlert extends RawAlert {
   riskDrivers: string[];
   slaDeadline: Date;
   assignedTo?: string;
+  workflowStatus?: WorkflowStatus;
   userPriority?: UserPriority;
   userPriorityReason?: string;
 }

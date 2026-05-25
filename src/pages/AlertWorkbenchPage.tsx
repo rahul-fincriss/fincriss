@@ -32,7 +32,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { RiskBadge } from '@/components/shared/RiskBadge';
 import { SLATimer } from '@/components/shared/SLATimer';
-import { PrioritizedAlert, RiskLevel, UserPriority, CustomerGroupOverrides, WorkbenchAuditEntry, User } from '@/types';
+import { PrioritizedAlert, RiskLevel, UserPriority, CustomerGroupOverrides, WorkbenchAuditEntry, User, WorkflowStatus } from '@/types';
 import { toast } from 'sonner';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useAuth } from '@/contexts/AuthContext';
@@ -184,7 +184,7 @@ export default function AlertWorkbenchPage() {
     // Find all alerts for this customer and assign via API
     const customerAlerts = alerts.filter(a => a.customerId === customerId);
     customerAlerts.forEach(alert => {
-      assignAlertMutation.mutate({ alertId: alert.id, assignedTo: analyst.id });
+      assignAlertMutation.mutate({ alertId: alert.id, assignedTo: analyst.id, workflowStatus: alert.workflowStatus });
     });
 
     setCustomerOverrides((prev) => {
@@ -228,8 +228,8 @@ export default function AlertWorkbenchPage() {
     toast.success(`Alert priority set to ${priority}`);
   }, []);
 
-  const handleAlertAssignment = useCallback((alertId: string, analyst: User) => {
-    assignAlertMutation.mutate({ alertId, assignedTo: analyst.id });
+  const handleAlertAssignment = useCallback((alertId: string, analyst: User, workflowStatus?: WorkflowStatus) => {
+    assignAlertMutation.mutate({ alertId, assignedTo: analyst.id, workflowStatus });
     setAlertOverrides((prev) => {
       const newOverrides = new Map(prev);
       const existing = newOverrides.get(alertId) || {};
@@ -544,7 +544,11 @@ export default function AlertWorkbenchPage() {
                               </div>
                             </TableCell>
                             <TableCell onClick={(e) => e.stopPropagation()}>
-                              {canEdit ? (
+                              {group.alerts.every(a => a.workflowStatus === 'DISMISSED') ? (
+                                <Badge variant="outline" className="text-muted-foreground border-dashed">
+                                  Closed
+                                </Badge>
+                              ) : canEdit ? (
                                 <AnalystAssignmentDropdown
                                   analysts={analysts}
                                   currentAssignee={assignee}
@@ -659,12 +663,14 @@ export default function AlertWorkbenchPage() {
                                     <StatusBadge status={alert.status} size="sm" />
                                   </TableCell>
                                   <TableCell onClick={(e) => e.stopPropagation()}>
-                                    {canEdit ? (
+                                    {alert.workflowStatus === 'DISMISSED' ? (
+                                      <span className="text-xs text-muted-foreground">—</span>
+                                    ) : canEdit ? (
                                       <AnalystAssignmentDropdown
                                         analysts={analysts}
                                         currentAssignee={effectiveAssignee}
-                                        onAssign={(analyst) => handleAlertAssignment(alert.id, analyst)}
-                                        onAssignToMe={() => user && handleAlertAssignment(alert.id, user)}
+                                        onAssign={(analyst) => handleAlertAssignment(alert.id, analyst, alert.workflowStatus)}
+                                        onAssignToMe={() => user && handleAlertAssignment(alert.id, user, alert.workflowStatus)}
                                         compact
                                       />
                                     ) : (

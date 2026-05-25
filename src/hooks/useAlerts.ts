@@ -63,18 +63,21 @@ export function useGenerateSummary() {
 
 export function useAssignAlert() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: ({ alertId, assignedTo }: { alertId: string; assignedTo: string }) =>
-      alertsService.assignAlert(alertId, assignedTo),
-    onSuccess: () => {
+    mutationFn: ({ alertId, assignedTo, workflowStatus }: { alertId: string; assignedTo: string; workflowStatus?: string }) => {
+      return workflowStatus === 'NEW'
+        ? alertsService.assignAlert(alertId, assignedTo)
+        : alertsService.reassignAlert(alertId, assignedTo);
+    },
+    onSuccess: (_, { workflowStatus }) => {
       queryClient.invalidateQueries({ queryKey: ['alerts'] });
-      toast.success('Alert assigned successfully');
+      toast.success(workflowStatus === 'NEW' ? 'Alert assigned successfully' : 'Alert reassigned successfully');
     },
     onError: (error: any) => {
       console.error('Failed to assign alert:', error);
       toast.error(extractErrorMessage(error, 'Failed to assign alert'));
-    }
+    },
   });
 }
 

@@ -40,6 +40,7 @@ export const alertsService = {
       slaDeadline: new Date(alert.sla_deadline || Date.now() + 86400000),
       rawPayload: alert.raw_payload || {},
       assignedTo: alert.assigned_to,
+      workflowStatus: alert.workflow_status || alert.workflowStatus,
     }));
   },
 
@@ -66,6 +67,7 @@ export const alertsService = {
       slaDeadline: new Date(alert.sla_deadline || Date.now() + 86400000),
       rawPayload: alert.raw_payload || alert,
       assignedTo: alert.assigned_to,
+      workflowStatus: alert.workflow_status || alert.workflowStatus,
       // Extended fields from full API response
       priorityScore: alert.priority_score,
       ruleScore: alert.rule_score,
@@ -130,6 +132,11 @@ export const alertsService = {
 
   async assignAlert(alertId: string, assignedTo: string): Promise<any> {
     const response = await api.post(`/api/alerts/${alertId}/assign`, { assigned_to: assignedTo });
+    return response.data;
+  },
+
+  async reassignAlert(alertId: string, assignedTo: string): Promise<any> {
+    const response = await api.post(`/api/alerts/${alertId}/reassign`, { assigned_to: assignedTo });
     return response.data;
   },
 };
