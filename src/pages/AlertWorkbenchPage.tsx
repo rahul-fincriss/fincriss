@@ -386,6 +386,10 @@ export default function AlertWorkbenchPage() {
     if (customerOverride?.assignedAnalystId && customerOverride?.assignedAnalystName) {
       return { id: customerOverride.assignedAnalystId, name: customerOverride.assignedAnalystName };
     }
+    if (alert.assignedTo) {
+      const analyst = analysts.find((a: any) => a.id === alert.assignedTo);
+      if (analyst) return { id: analyst.id, name: analyst.name };
+    }
     return undefined;
   };
 
@@ -516,9 +520,15 @@ export default function AlertWorkbenchPage() {
                 customerGroups.map((group) => {
                   const override = customerOverrides.get(group.customerId);
                   const hasOverride = override?.userPriority && override.userPriority !== 'none';
-                  const assignee = override?.assignedAnalystId 
+                  const apiAssignee = (() => {
+                    const firstAssignedAlert = group.alerts.find(a => a.assignedTo);
+                    if (!firstAssignedAlert?.assignedTo) return undefined;
+                    const analyst = analysts.find((a: any) => a.id === firstAssignedAlert.assignedTo);
+                    return analyst ? { id: analyst.id, name: analyst.name } : undefined;
+                  })();
+                  const assignee = override?.assignedAnalystId
                     ? { id: override.assignedAnalystId, name: override.assignedAnalystName! }
-                    : undefined;
+                    : apiAssignee;
                   const auditEntries = auditLog.get(group.customerId) || [];
 
                   return (
