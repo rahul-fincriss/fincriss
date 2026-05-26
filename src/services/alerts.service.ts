@@ -24,6 +24,7 @@ export const alertsService = {
     
     // Preliminary mapping based on common patterns
     const alerts = Array.isArray(data) ? data : (data.alerts || data.items || []);
+    console.log('[alerts] sample assignedTo values:', alerts.slice(0, 3).map((a: any) => ({ id: a.alert_id || a.id, assignedTo: a.assigned_to, type: typeof a.assigned_to })));
     return alerts.map((alert: any) => ({
       id: alert.alert_id || alert.id,
       sourceSystem: alert.source_system || alert.sourceSystem || 'Legacy',
