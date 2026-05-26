@@ -131,7 +131,7 @@ export const alertsService = {
   },
 
   async assignAlert(alertId: string, assignedTo: string): Promise<any> {
-    const response = await api.post(`/api/alerts/${alertId}/assign`, { assigned_to: assignedTo });
+    const response = await api.post(`/api/alerts/${alertId}/assign`, { user_id: Number(assignedTo) });
     return response.data;
   },
 
