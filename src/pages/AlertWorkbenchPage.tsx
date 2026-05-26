@@ -387,9 +387,7 @@ export default function AlertWorkbenchPage() {
       return { id: customerOverride.assignedAnalystId, name: customerOverride.assignedAnalystName };
     }
     if (alert.assignedTo) {
-      const assigned = String(alert.assignedTo);
-      const analyst = analysts.find((a: any) => String(a.id) === assigned || a.username === assigned);
-      if (analyst) return { id: analyst.id, name: analyst.name };
+      return { id: alert.assignedTo, name: alert.assignedTo };
     }
     return undefined;
   };
@@ -524,9 +522,7 @@ export default function AlertWorkbenchPage() {
                   const apiAssignee = (() => {
                     const firstAssignedAlert = group.alerts.find(a => a.assignedTo);
                     if (!firstAssignedAlert?.assignedTo) return undefined;
-                    const assigned = String(firstAssignedAlert.assignedTo);
-                    const analyst = analysts.find((a: any) => String(a.id) === assigned || a.username === assigned);
-                    return analyst ? { id: analyst.id, name: analyst.name } : undefined;
+                    return { id: firstAssignedAlert.assignedTo, name: firstAssignedAlert.assignedTo };
                   })();
                   const assignee = override?.assignedAnalystId
                     ? { id: override.assignedAnalystId, name: override.assignedAnalystName! }

@@ -24,7 +24,6 @@ export const alertsService = {
     
     // Preliminary mapping based on common patterns
     const alerts = Array.isArray(data) ? data : (data.alerts || data.items || []);
-    console.log('[alerts] sample assignedTo values:', alerts.slice(0, 3).map((a: any) => ({ id: a.alert_id || a.id, assignedTo: a.assigned_to, type: typeof a.assigned_to })));
     return alerts.map((alert: any) => ({
       id: alert.alert_id || alert.id,
       sourceSystem: alert.source_system || alert.sourceSystem || 'Legacy',
@@ -40,8 +39,8 @@ export const alertsService = {
       riskDrivers: alert.risk_drivers || alert.riskDrivers || [],
       slaDeadline: new Date(alert.sla_deadline || Date.now() + 86400000),
       rawPayload: alert.raw_payload || {},
-      assignedTo: alert.assigned_to,
-      workflowStatus: alert.workflow_status || alert.workflowStatus,
+      assignedTo: alert.assigned_to_username || alert.assigned_to,
+      workflowStatus: alert.workflow_status,
     }));
   },
 
