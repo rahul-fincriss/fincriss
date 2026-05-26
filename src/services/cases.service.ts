@@ -90,4 +90,33 @@ export const casesService = {
   async closeCase(caseId: string, notes: string): Promise<void> {
     await api.post(`/api/cases/${caseId}/close`, { notes });
   },
+
+  async getCasesByCustomer(customerId: string): Promise<Case[]> {
+    const response = await api.get(`/api/customers/${customerId}/cases`);
+    const data = response.data;
+    const cases = Array.isArray(data) ? data : (data.cases || data.items || []);
+    return cases.map((c: any) => ({
+      id: (c.case_id || c.id).toString(),
+      title: c.title || c.case_number || `Investigation: ${c.customer_name || 'Customer'}`,
+      customerId: (c.customer_id || '').toString(),
+      customerName: c.customer_name || 'Unknown Customer',
+      status: (c.status?.toLowerCase() as CaseStatus) || 'open',
+      priority: ((c.priority_level || c.priority || 'medium').toLowerCase() as RiskLevel),
+      createdAt: new Date(c.created_at || Date.now()),
+      updatedAt: new Date(c.updated_at || c.created_at || Date.now()),
+      assignedTo: c.assigned_to_username || c.assigned_to,
+      description: c.summary || c.description || '',
+      alertsCount: c.alerts_count || 0,
+      linkedAlerts: c.linked_alerts || [],
+      slaDeadline: new Date(c.sla_deadline || new Date(c.created_at || Date.now()).getTime() + 86400000 * 3),
+      totalAmount: c.total_amount || c.amount || 0,
+      currency: c.currency || 'INR',
+      notes: [],
+      documents: [],
+    }));
+  },
+
+  async attachAlertToCase(caseId: string, alertId: string): Promise<void> {
+    await api.post(`/api/cases/${caseId}/attach-alert`, { alert_id: alertId });
+  },
 };

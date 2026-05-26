@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { 
-  ArrowLeft, 
-  Brain, 
-  DollarSign, 
-  FolderPlus, 
-  Globe, 
-  TrendingUp, 
-  User, 
+import {
+  ArrowLeft,
+  Brain,
+  DollarSign,
+  FolderPlus,
+  Globe,
+  TrendingUp,
+  User,
   XCircle,
   FileCode,
   ExternalLink,
@@ -15,7 +15,9 @@ import {
   Activity,
   Calendar,
   Hash,
-  AlertTriangle
+  AlertTriangle,
+  Link2,
+  FolderOpen
 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
@@ -30,6 +32,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { useAlert, useOpenCase, useGenerateSummary } from '@/hooks/useAlerts';
+import { useCasesByCustomer, useAttachAlertToCase } from '@/hooks/useCases';
 import { Loader2, Sparkles } from 'lucide-react';
 
 function safeDate(val: any): string {
@@ -60,6 +63,15 @@ export default function AlertDetailsPage() {
   const { data: alert, isLoading, error } = useAlert(alertId || '');
   const openCaseMutation = useOpenCase();
   const generateSummaryMutation = useGenerateSummary();
+  const attachAlertMutation = useAttachAlertToCase();
+
+  const hasOwnCase = !!alert?.caseInfo;
+  const { data: customerCases = [] } = useCasesByCustomer(
+    !hasOwnCase && alert?.customerId ? alert.customerId : undefined
+  );
+  const CLOSED_STATUSES = ['closed', 'closed_false_positive'];
+  const openCustomerCases = customerCases.filter(c => !CLOSED_STATUSES.includes(c.status));
+  const canAttachCase = user?.role === 'investigator' || user?.role === 'principal_officer' || user?.role === 'super_admin';
   
   const handleCreateCase = async () => {
     if (!alert) return;
@@ -159,12 +171,79 @@ export default function AlertDetailsPage() {
               <XCircle className="mr-2 h-4 w-4" />
               Drop
             </Button>
-            <Button onClick={handleCreateCase}>
+            <Button onClick={handleCreateCase} disabled={hasOwnCase} title={hasOwnCase ? 'A case already exists for this alert' : undefined}>
               <FolderPlus className="mr-2 h-4 w-4" />
               Create Case
             </Button>
           </div>
         </div>
+
+        {/* Case Banner — Scenario 1: alert has its own case */}
+        {hasOwnCase && (
+          <div className="flex items-center justify-between rounded-lg border border-primary/40 bg-primary/5 px-4 py-3">
+            <div className="flex items-center gap-2 text-sm">
+              <Link2 className="h-4 w-4 text-primary shrink-0" />
+              <span className="text-muted-foreground">This alert is linked to</span>
+              <span className="font-semibold text-primary font-mono">Case #{alert.caseInfo.case_id}</span>
+              <Badge variant="outline" className="text-xs">{alert.caseInfo.status?.toUpperCase()}</Badge>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-1.5 text-primary border-primary/40 hover:bg-primary/10"
+              onClick={() => navigate(`/cases/${alert.caseInfo.case_id}`)}
+            >
+              <ExternalLink className="h-3.5 w-3.5" />
+              View Case
+            </Button>
+          </div>
+        )}
+
+        {/* Case Banner — Scenario 2: customer has other open cases */}
+        {!hasOwnCase && openCustomerCases.length > 0 && (
+          <div className="rounded-lg border border-amber-400/40 bg-amber-50/50 dark:bg-amber-900/10 px-4 py-3 space-y-2">
+            <div className="flex items-center gap-2 text-sm">
+              <FolderOpen className="h-4 w-4 text-amber-600 shrink-0" />
+              <span className="font-medium text-amber-800 dark:text-amber-400">
+                This customer has {openCustomerCases.length} open case{openCustomerCases.length > 1 ? 's' : ''} for other alerts
+              </span>
+            </div>
+            <div className="space-y-1.5">
+              {openCustomerCases.map((c) => (
+                <div key={c.id} className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-sm">
+                    <span className="font-mono font-semibold">Case #{c.id}</span>
+                    <Badge variant="outline" className="text-xs">{c.status?.toUpperCase()}</Badge>
+                    {c.assignedTo && <span className="text-xs text-muted-foreground">Assigned to {c.assignedTo}</span>}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {canAttachCase && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="gap-1.5 text-amber-700 border-amber-400/60 hover:bg-amber-100 dark:hover:bg-amber-900/20"
+                        disabled={attachAlertMutation.isPending}
+                        onClick={() => attachAlertMutation.mutate({ caseId: c.id, alertId: alert.id })}
+                      >
+                        <FolderPlus className="h-3.5 w-3.5" />
+                        Add to this Case
+                      </Button>
+                    )}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="gap-1.5"
+                      onClick={() => navigate(`/cases/${c.id}`)}
+                    >
+                      <ExternalLink className="h-3.5 w-3.5" />
+                      View
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Score Banner */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3">

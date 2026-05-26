@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { casesService, ListCasesParams, UpdateCaseRequest } from '@/services/cases.service';
+import { Case } from '@/types';
 import { toast } from 'sonner';
 
 export function useCases(params: ListCasesParams = {}) {
@@ -32,6 +33,32 @@ export function useUpdateCase() {
       console.error('Failed to update case:', error);
       toast.error(error.response?.data?.detail || 'Failed to update case');
     }
+  });
+}
+
+export function useCasesByCustomer(customerId?: string) {
+  return useQuery({
+    queryKey: ['cases', 'customer', customerId],
+    queryFn: () => casesService.getCasesByCustomer(customerId!),
+    enabled: !!customerId,
+  });
+}
+
+export function useAttachAlertToCase() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ caseId, alertId }: { caseId: string; alertId: string }) =>
+      casesService.attachAlertToCase(caseId, alertId),
+    onSuccess: (_, { alertId }) => {
+      queryClient.invalidateQueries({ queryKey: ['alert', alertId] });
+      queryClient.invalidateQueries({ queryKey: ['cases'] });
+      toast.success('Alert added to case successfully');
+    },
+    onError: (error: any) => {
+      console.error('Failed to attach alert to case:', error);
+      toast.error(error.response?.data?.detail || 'Failed to add alert to case');
+    },
   });
 }
 
