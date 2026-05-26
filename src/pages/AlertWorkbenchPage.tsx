@@ -284,7 +284,7 @@ export default function AlertWorkbenchPage() {
       const matchesSearch =
         alert.id.toLowerCase().includes(query) ||
         alert.customerName.toLowerCase().includes(query);
-      const matchesStatus = statusFilter === 'all' || alert.status === statusFilter;
+      const matchesStatus = statusFilter === 'all' || alert.workflowStatus === statusFilter;
       const matchesAnalyst =
         analystFilter === 'all' ||
         (analystFilter === 'unassigned' ? !alert.assignedTo : alert.assignedTo === analystFilter);
@@ -451,10 +451,11 @@ export default function AlertWorkbenchPage() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Statuses</SelectItem>
-              <SelectItem value="PENDING">Pending</SelectItem>
-              <SelectItem value="IN_PROGRESS">In Progress</SelectItem>
-              <SelectItem value="CLOSED_TRUE_POSITIVE">Closed - True Positive</SelectItem>
-              <SelectItem value="CLOSED_FALSE_POSITIVE">Closed - False Positive</SelectItem>
+              <SelectItem value="NEW">New</SelectItem>
+              <SelectItem value="ASSIGNED">Assigned</SelectItem>
+              <SelectItem value="IN_REVIEW">In Review</SelectItem>
+              <SelectItem value="ESCALATED">Escalated</SelectItem>
+              <SelectItem value="DISMISSED">Dismissed</SelectItem>
             </SelectContent>
           </Select>
 
@@ -466,7 +467,7 @@ export default function AlertWorkbenchPage() {
               <SelectItem value="all">All Analysts</SelectItem>
               <SelectItem value="unassigned">Unassigned</SelectItem>
               {analysts.map((analyst: any) => (
-                <SelectItem key={analyst.id} value={analyst.id}>
+                <SelectItem key={analyst.id} value={analyst.name}>
                   {analyst.name}
                 </SelectItem>
               ))}
