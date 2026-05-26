@@ -310,6 +310,9 @@ export default function AlertWorkbenchPage() {
 
   const totalAlerts = alerts.length;
   const totalCustomers = customerGroups.length;
+  const filteredHighCount = customerGroups.reduce((sum, g) => sum + g.priorityBreakdown.high, 0);
+  const filteredMediumCount = customerGroups.reduce((sum, g) => sum + g.priorityBreakdown.medium, 0);
+  const filteredLowCount = customerGroups.reduce((sum, g) => sum + g.priorityBreakdown.low, 0);
 
   const toggleCustomerExpand = (customerId: string) => {
     setExpandedCustomers((prev) => {
@@ -410,13 +413,13 @@ export default function AlertWorkbenchPage() {
             </Badge>
             <div className="h-4 w-px bg-border" />
             <Badge variant="outline" className="badge-risk-high">
-              {alerts.filter((a) => a.riskLevel === 'high').length} High
+              {filteredHighCount} High
             </Badge>
             <Badge variant="outline" className="badge-risk-medium">
-              {alerts.filter((a) => a.riskLevel === 'medium').length} Medium
+              {filteredMediumCount} Medium
             </Badge>
             <Badge variant="outline" className="badge-risk-low">
-              {alerts.filter((a) => a.riskLevel === 'low').length} Low
+              {filteredLowCount} Low
             </Badge>
           </div>
         </div>
