@@ -136,7 +136,7 @@ export const alertsService = {
   },
 
   async reassignAlert(alertId: string, assignedTo: string): Promise<any> {
-    const response = await api.post(`/api/alerts/${alertId}/reassign`, { assigned_to: assignedTo });
+    const response = await api.post(`/api/alerts/${alertId}/reassign`, { user_id: Number(assignedTo) });
     return response.data;
   },
 };

@@ -66,9 +66,11 @@ export function useAssignAlert() {
 
   return useMutation({
     mutationFn: ({ alertId, assignedTo, workflowStatus }: { alertId: string; assignedTo: string; workflowStatus?: string }) => {
-      return workflowStatus === 'NEW'
-        ? alertsService.assignAlert(alertId, assignedTo)
-        : alertsService.reassignAlert(alertId, assignedTo);
+      const shouldReassign = workflowStatus === 'ASSIGNED' || workflowStatus === 'IN_REVIEW' || workflowStatus === 'ESCALATED';
+      console.log(`[assign] alert=${alertId} workflowStatus=${workflowStatus} → ${shouldReassign ? 'reassign' : 'assign'}`);
+      return shouldReassign
+        ? alertsService.reassignAlert(alertId, assignedTo)
+        : alertsService.assignAlert(alertId, assignedTo);
     },
     onSuccess: (_, { workflowStatus }) => {
       queryClient.invalidateQueries({ queryKey: ['alerts'] });

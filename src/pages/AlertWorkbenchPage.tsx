@@ -30,6 +30,16 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { RiskBadge } from '@/components/shared/RiskBadge';
 import { SLATimer } from '@/components/shared/SLATimer';
 import { PrioritizedAlert, RiskLevel, UserPriority, CustomerGroupOverrides, WorkbenchAuditEntry, User, WorkflowStatus } from '@/types';
@@ -158,6 +168,16 @@ export default function AlertWorkbenchPage() {
   const [rawAlertDrawerOpen, setRawAlertDrawerOpen] = useState(false);
   const [selectedAlertForRawView, setSelectedAlertForRawView] = useState<PrioritizedAlert | null>(null);
 
+  // Pending assignment awaiting confirmation
+  const [pendingAssignment, setPendingAssignment] = useState<{
+    type: 'customer' | 'alert';
+    analyst: User;
+    alerts: Array<{ id: string; customerName: string; workflowStatus?: WorkflowStatus }>;
+    customerId?: string;
+    alertId?: string;
+    isReassignment?: boolean;
+  } | null>(null);
+
   const canEdit = user?.role === 'analyst' || user?.role === 'super_admin';
 
   const addAuditEntry = useCallback((customerId: string, entry: Omit<WorkbenchAuditEntry, 'id' | 'performedAt'>) => {
@@ -178,37 +198,15 @@ export default function AlertWorkbenchPage() {
 
 
   const handleAssignAnalyst = useCallback((customerId: string, analyst: User, isReassignment: boolean = false) => {
-    const existing = customerOverrides.get(customerId);
-    const previousAssignee = existing?.assignedAnalystName;
-    
-    // Find all alerts for this customer and assign via API
     const customerAlerts = alerts.filter(a => a.customerId === customerId);
-    customerAlerts.forEach(alert => {
-      assignAlertMutation.mutate({ alertId: alert.id, assignedTo: analyst.id, workflowStatus: alert.workflowStatus });
-    });
-
-    setCustomerOverrides((prev) => {
-      const newOverrides = new Map(prev);
-      newOverrides.set(customerId, {
-        ...existing,
-        customerId,
-        userPriority: existing?.userPriority || 'none',
-        assignedAnalystId: analyst.id,
-        assignedAnalystName: analyst.name,
-        assignedAt: new Date(),
-        assignedBy: user?.name,
-      });
-      return newOverrides;
-    });
-
-    addAuditEntry(customerId, {
+    setPendingAssignment({
+      type: 'customer',
+      analyst,
+      alerts: customerAlerts.map(a => ({ id: a.id, customerName: a.customerName, workflowStatus: a.workflowStatus })),
       customerId,
-      action: isReassignment ? 'analyst_reassignment' : 'analyst_assignment',
-      performedBy: user?.name || 'Unknown',
-      previousValue: previousAssignee,
-      newValue: analyst.name,
+      isReassignment,
     });
-  }, [customerOverrides, user?.name, addAuditEntry, alerts, assignAlertMutation]);
+  }, [alerts]);
 
   const handleAssignToMe = useCallback((customerId: string) => {
     if (!user) return;
@@ -229,14 +227,56 @@ export default function AlertWorkbenchPage() {
   }, []);
 
   const handleAlertAssignment = useCallback((alertId: string, analyst: User, workflowStatus?: WorkflowStatus) => {
-    assignAlertMutation.mutate({ alertId, assignedTo: analyst.id, workflowStatus });
-    setAlertOverrides((prev) => {
-      const newOverrides = new Map(prev);
-      const existing = newOverrides.get(alertId) || {};
-      newOverrides.set(alertId, { ...existing, assignedAnalyst: analyst });
-      return newOverrides;
+    const alert = alerts.find(a => a.id === alertId);
+    setPendingAssignment({
+      type: 'alert',
+      alertId,
+      analyst,
+      alerts: [{ id: alertId, customerName: alert?.customerName || '', workflowStatus }],
     });
-  }, [assignAlertMutation]);
+  }, [alerts]);
+
+  const handleConfirmAssignment = useCallback(() => {
+    if (!pendingAssignment) return;
+    const { type, analyst, alerts: pendingAlerts, customerId, alertId, isReassignment } = pendingAssignment;
+
+    if (type === 'customer' && customerId) {
+      const existing = customerOverrides.get(customerId);
+      pendingAlerts.forEach(a => {
+        assignAlertMutation.mutate({ alertId: a.id, assignedTo: analyst.id, workflowStatus: a.workflowStatus });
+      });
+      setCustomerOverrides((prev) => {
+        const newOverrides = new Map(prev);
+        newOverrides.set(customerId, {
+          ...existing,
+          customerId,
+          userPriority: existing?.userPriority || 'none',
+          assignedAnalystId: analyst.id,
+          assignedAnalystName: analyst.name,
+          assignedAt: new Date(),
+          assignedBy: user?.name,
+        });
+        return newOverrides;
+      });
+      addAuditEntry(customerId, {
+        customerId,
+        action: isReassignment ? 'analyst_reassignment' : 'analyst_assignment',
+        performedBy: user?.name || 'Unknown',
+        previousValue: customerOverrides.get(customerId)?.assignedAnalystName,
+        newValue: analyst.name,
+      });
+    } else if (type === 'alert' && alertId) {
+      assignAlertMutation.mutate({ alertId, assignedTo: analyst.id, workflowStatus: pendingAlerts[0]?.workflowStatus });
+      setAlertOverrides((prev) => {
+        const newOverrides = new Map(prev);
+        const existing = newOverrides.get(alertId) || {};
+        newOverrides.set(alertId, { ...existing, assignedAnalyst: analyst });
+        return newOverrides;
+      });
+    }
+
+    setPendingAssignment(null);
+  }, [pendingAssignment, customerOverrides, user?.name, addAuditEntry, assignAlertMutation]);
 
   const customerGroups = useMemo(() => {
     const filtered = alerts.filter((alert) => {
@@ -762,6 +802,35 @@ export default function AlertWorkbenchPage() {
         alert={selectedAlertForRawView}
         onAuditLog={handleRawAlertAuditLog}
       />
+
+      {/* Assignment Confirmation Dialog */}
+      <AlertDialog open={!!pendingAssignment} onOpenChange={(open) => !open && setPendingAssignment(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm Assignment</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div>
+                <p>
+                  The following alert(s) will be assigned to{' '}
+                  <span className="font-semibold text-foreground">{pendingAssignment?.analyst.name}</span>:
+                </p>
+                <ul className="mt-3 space-y-1.5">
+                  {pendingAssignment?.alerts.map((a) => (
+                    <li key={a.id} className="flex items-center gap-2 text-sm">
+                      <span className="font-mono text-xs bg-muted px-1.5 py-0.5 rounded">{a.id}</span>
+                      <span className="text-foreground">{a.customerName}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmAssignment}>Confirm</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AppLayout>
   );
 }
